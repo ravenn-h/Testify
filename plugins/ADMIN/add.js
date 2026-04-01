@@ -1,7 +1,7 @@
 import mess from "../../strings.js";
 import { getGroupMetadata } from "../../lib/cache.js";
 
-const FITUR = false; // jadikan true jika ingin maksa di aktifkan
+const FITUR = false; // set to true to force enable
 
 async function handle(sock, messageInfo) {
   const { remoteJid, isGroup, message, sender, content, prefix, command } =
@@ -19,7 +19,7 @@ async function handle(sock, messageInfo) {
   }
 
   if (!isGroup) {
-    // Khusus Grub
+    // Groups only
     await sock.sendMessage(
       remoteJid,
       { text: mess.general.isGroup },
@@ -28,7 +28,7 @@ async function handle(sock, messageInfo) {
     return;
   }
 
-  // Mendapatkan metadata grup
+  // Get group metadata
   const groupMetadata = await getGroupMetadata(sock, remoteJid);
   const participants = groupMetadata.participants;
   const isAdmin = participants.some(
@@ -43,13 +43,13 @@ async function handle(sock, messageInfo) {
     return;
   }
 
-  // Validasi input nomor telepon
+  // Validate phone number input
   const nomor = content.replace(/[^0-9]/g, "");
   const whatsappJid = `${nomor}@s.whatsapp.net`;
 
-  // Validasi format nomor telepon
+  // Validate phone number format
   if (!/^\d{10,15}$/.test(nomor)) {
-    // Panjang nomor telepon minimal 10 dan maksimal 15 digit
+    // Phone number length must be 10 to 15 digits
     await sock.sendMessage(
       remoteJid,
       {
@@ -63,7 +63,7 @@ async function handle(sock, messageInfo) {
   }
 
   try {
-    // Menambahkan user ke grup
+    // Add user to group
     const response = await sock.groupParticipantsUpdate(
       remoteJid,
       [whatsappJid],
@@ -72,14 +72,14 @@ async function handle(sock, messageInfo) {
     const status = response[0]?.status;
 
     if (status == 409) {
-      // Jika nomor already exists di grup
+      // If number already exists in group
       await sock.sendMessage(
         remoteJid,
         { text: `⚠️ _Number *${nomor}* is already in the group._` },
         { quoted: message }
       );
     } else if (status == 403) {
-      // Jika pengaturan privasi tidak memungkinkan penambahan
+      // If privacy settings prevent adding
       await sock.sendMessage(
         remoteJid,
         {
@@ -95,7 +95,7 @@ async function handle(sock, messageInfo) {
       );
     }
   } catch (error) {
-    // Jika terjadi error yang tidak terduga
+    // If an unexpected error occurs
     await sock.sendMessage(
       remoteJid,
       {

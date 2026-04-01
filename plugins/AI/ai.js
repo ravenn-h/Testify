@@ -27,7 +27,7 @@ async function handle(sock, messageInfo) {
       react: { text: "⏰", key: message.key },
     });
 
-    // Memanggil API dengan penanganan kesalahan dan pengecekan respons
+    // Call API with error handling and response checking
     const response = await api.get("/api/gemini", { text: content });
 
     if (response && response.data) {
@@ -62,7 +62,7 @@ export default {
   OnlyPremium: false,
   OnlyOwner: false,
   
-  OnlyAdmin: false, // default false
-  OnlyGroup: false, // default false
-  OnlyPrivate: false // default false
+  OnlyAdmin: false,
+  OnlyGroup: false,
+  OnlyPrivate: false
 };

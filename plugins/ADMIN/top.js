@@ -5,10 +5,10 @@ import mess from "../../strings.js";
 
 async function handle(sock, messageInfo) {
   const { remoteJid, isGroup, message, sender, senderType } = messageInfo;
-  if (!isGroup) return; // Hanya untuk grup
+  if (!isGroup) return; // Groups only
 
   try {
-    // Mendapatkan metadata grup
+    // Get group metadata
     const groupMetadata = await getGroupMetadata(sock, remoteJid);
     const participants = groupMetadata.participants;
     const isAdmin = participants.some(
@@ -23,13 +23,13 @@ async function handle(sock, messageInfo) {
       return;
     }
 
-    // Baca data user dari database atau file
+    // Read user data from database or file
     const dataUsers = await readUsers();
 
-    // Sortir berdasarkan money (paling besar di atas)
+    // Sort by money (highest first)
     const sortedUsers = Object.entries(dataUsers)
       .sort((a, b) => (b[1]?.money || 0) - (a[1]?.money || 0))
-      .slice(0, 10); // Ambil top 10
+      .slice(0, 10); // Get top 10
 
     const aliasList = sortedUsers
       .map(([id, user]) => {
@@ -58,7 +58,7 @@ async function handle(sock, messageInfo) {
 
     const textNotif = `┏━『 *TOP 10 MEMBER* 』\n┣\n${aliasList}\n┗━━━━━━━━━━━━━━━`;
 
-    // Kirim pesan dengan mention
+    // Send message with mention
     await sendMessageWithMention(
       sock,
       remoteJid,

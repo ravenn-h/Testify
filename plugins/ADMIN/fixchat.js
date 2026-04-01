@@ -5,7 +5,7 @@ async function handle(sock, messageInfo) {
   const { remoteJid, isGroup, message, sender } = messageInfo;
 
   if (!isGroup) {
-    // Hanya untuk grup
+    // Groups only
     await sock.sendMessage(
       remoteJid,
       { text: mess.general.isGroup },
@@ -14,7 +14,7 @@ async function handle(sock, messageInfo) {
     return;
   }
 
-  // Mendapatkan metadata grup
+  // Get group metadata
   const groupMetadata = await getGroupMetadata(sock, remoteJid);
   const participants = groupMetadata.participants;
   const isAdmin = participants.some(
@@ -38,7 +38,7 @@ async function handle(sock, messageInfo) {
       mentions: participantIds,
     });
 
-    // Jika ingin deleting pesan tertentu dari chat (clear), make sure `message` memiliki `key`
+    // To delete specific messages from chat (clear), make sure `message` has a `key`
     if (message && message.key && message.key.id) {
       await sock.chatModify(
         {

@@ -4,10 +4,10 @@ import { getGroupMetadata } from "../../lib/cache.js";
 
 async function handle(sock, messageInfo) {
   const { remoteJid, isGroup, message, sender, senderType } = messageInfo;
-  if (!isGroup) return; // Only Grub
+  if (!isGroup) return; // Groups only
 
   try {
-    // Mendapatkan metadata grup
+    // Get group metadata
     const groupMetadata = await getGroupMetadata(sock, remoteJid);
     const participants = groupMetadata.participants;
     const isAdmin = participants.some(
@@ -22,12 +22,12 @@ async function handle(sock, messageInfo) {
       return;
     }
 
-    // Daftar semua member grup
+    // List all group members
     const memberList = participants
       .map((member, index) => `◧ @${member.id.split("@")[0]}`)
       .join("\n");
 
-    // Cek jika tidak ada member
+    // Check if there are no members
     if (!memberList) {
       return await sock.sendMessage(
         remoteJid,
@@ -36,10 +36,10 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Teks notifikasi daftar member
-    const textNotif = `📋 *Daftar Semua Anggota Grup: ${participants.length}*\n\n${memberList}`;
+    // All group members notification text
+    const textNotif = `📋 *All Group Members: ${participants.length}*\n\n${memberList}`;
 
-    // Kirim pesan dengan mention
+    // Send message with mention
     await sendMessageWithMention(
       sock,
       remoteJid,

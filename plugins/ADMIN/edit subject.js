@@ -1,4 +1,4 @@
-// Edit Subject: Mengganti Judul Grup
+// Edit Subject: Change Group Title
 
 import mess from "../../strings.js";
 import { getGroupMetadata } from "../../lib/cache.js";
@@ -6,10 +6,10 @@ import { getGroupMetadata } from "../../lib/cache.js";
 async function handle(sock, messageInfo) {
   const { remoteJid, isGroup, message, sender, content, prefix, command } =
     messageInfo;
-  if (!isGroup) return; // Only Grub
+  if (!isGroup) return; // Groups only
 
   try {
-    // Mendapatkan metadata grup
+    // Get group metadata
     const groupMetadata = await getGroupMetadata(sock, remoteJid);
     const participants = groupMetadata.participants;
     const isAdmin = participants.some(
@@ -24,23 +24,23 @@ async function handle(sock, messageInfo) {
       return;
     }
 
-    // Validasi input
+    // Validate input
     if (!content.trim() || content.trim() == "") {
       return await sock.sendMessage(
         remoteJid,
         {
           text: `_⚠️ Usage format:_ \n\n_💬 Example:_ _*${
             prefix + command
-          } judul baru*_`,
+          } new title*_`,
         },
         { quoted: message }
       );
     }
 
-    // Perbarui judul grup
+    // Update group title
     await sock.groupUpdateSubject(remoteJid, content);
 
-    // Kirim pesan keberhasilan
+    // Send success message
     await sock.sendMessage(
       remoteJid,
       {
@@ -51,7 +51,7 @@ async function handle(sock, messageInfo) {
   } catch (error) {
     console.error("Error in edit subject command:", error);
 
-    // Kirim pesan kesalahan
+    // Send error message
     await sock.sendMessage(
       remoteJid,
       {

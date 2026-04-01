@@ -4,7 +4,7 @@ import mess from "../../strings.js";
 import { getGroupMetadata } from "../../lib/cache.js";
 import { sendMessageWithMention, determineUser } from "../../lib/utils.js";
 
-// Warning list disimpan di memori (RAM)
+// Warning list stored in memory (RAM)
 const warningList = {};
 
 async function handle(sock, messageInfo) {
@@ -50,7 +50,7 @@ async function handle(sock, messageInfo) {
     );
   }
 
-  // Menampilkan daftar warning
+  // Display warning list
   if (command === "listwarning" || command === "listwarn") {
     let warningText = "⚠️ *Warning List:*\n\n";
     let mentions = [];
@@ -79,7 +79,7 @@ async function handle(sock, messageInfo) {
     return;
   }
 
-  // Menghapus warning user
+  // Remove user warning
   if (command === "deletewarning" || command === "delwarning") {
     const userToDelete = determineUser(mentionedJid, isQuoted, content);
     if (!userToDelete) {
@@ -115,7 +115,7 @@ async function handle(sock, messageInfo) {
     return;
   }
 
-  // Jika command warn
+  // If command is warn
   if (command === "warn" || command === "warning") {
     const userToWarn = determineUser(mentionedJid, isQuoted, content);
     if (!userToWarn) {
@@ -163,7 +163,7 @@ async function handle(sock, messageInfo) {
       await sendMessageWithMention(
         sock,
         remoteJid,
-        `❌ _Tidak dapat memberikan warning ke nomor_ @${
+        `❌ _Cannot give warning to number_ @${
           whatsappJid.split("@")[0]
         }`,
         message,

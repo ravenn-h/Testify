@@ -1,4 +1,4 @@
-// DEMOTE: Menurunkan admin ke user biasa
+// DEMOTE: Demote admin to regular user
 import mess from "../../strings.js";
 import { sendMessageWithMention, determineUser } from "../../lib/utils.js";
 import { getGroupMetadata } from "../../lib/cache.js";
@@ -16,10 +16,10 @@ async function handle(sock, messageInfo) {
     command,
     senderType,
   } = messageInfo;
-  if (!isGroup) return; // Only Grub
+  if (!isGroup) return; // Groups only
 
   try {
-    // Mendapatkan metadata grup
+    // Get group metadata
     const groupMetadata = await getGroupMetadata(sock, remoteJid);
     const participants = groupMetadata.participants;
     const isAdmin = participants.some(
@@ -47,24 +47,24 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Proses demote
+    // Process demote
     await sock.groupParticipantsUpdate(remoteJid, [userToDemote], "demote");
 
-    // Kirim pesan dengan mention
+    // Send message with mention
     await sendMessageWithMention(
       sock,
       remoteJid,
-      `@${userToDemote.split("@")[0]} _telah diturunkan dari admin._`,
+      `@${userToDemote.split("@")[0]} _has been demoted from admin._`,
       message,
       senderType
     );
   } catch (error) {
     console.error("Error in demote command:", error);
 
-    // Kirim pesan kesalahan
+    // Send error message
     await sock.sendMessage(
       remoteJid,
-      { text: "⚠️ An error occurred while mencoba demoting admin." },
+      { text: "⚠️ An error occurred while trying to demote the admin." },
       { quoted: message }
     );
   }

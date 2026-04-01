@@ -4,10 +4,10 @@ import { getGroupMetadata } from "../../lib/cache.js";
 async function handle(sock, messageInfo) {
   const { remoteJid, message, sender, isGroup, content, prefix, command } =
     messageInfo;
-  if (!isGroup) return; // Only Grub
+  if (!isGroup) return; // Groups only
 
   try {
-    // Mendapatkan metadata grup
+    // Get group metadata
     const groupMetadata = await getGroupMetadata(sock, remoteJid);
     const participants = groupMetadata.participants;
     const isAdmin = participants.some(

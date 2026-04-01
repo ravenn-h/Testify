@@ -6,9 +6,9 @@ import { sendMessageWithMention } from "../../lib/utils.js";
 async function handle(sock, messageInfo) {
   const { remoteJid, isGroup, message, sender, senderType } = messageInfo;
 
-  if (!isGroup) return; // Only Grub
+  if (!isGroup) return; // Groups only
 
-  // Mendapatkan metadata grup
+  // Get group metadata
   const groupMetadata = await getGroupMetadata(sock, remoteJid);
   const participants = groupMetadata.participants;
   const isAdmin = participants.some(
@@ -27,7 +27,7 @@ async function handle(sock, messageInfo) {
     const listBaned = await getUserBlockList(remoteJid);
 
     if (listBaned.length > 0) {
-      // Membuat daftar member yang di-ban dalam format yang diinginkan
+      // Create a list of banned members in the desired format
       const memberList = listBaned
         .map((member) => `◧ @${member.split("@")[0]}`)
         .join("\n");

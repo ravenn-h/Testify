@@ -8,10 +8,10 @@ async function handle(sock, messageInfo) {
   const { remoteJid, message, content, prefix, command, isQuoted } =
     messageInfo;
 
-  // Ambil teks yang dikirim atau teks dari the message that dikutip
+  // Get the sent text or text from the quoted message
   const text = content?.trim() || isQuoted?.text?.trim() || null;
 
-  // Validasi input
+  // Validate input
   if (!text || text.length < 1) {
     return sock.sendMessage(
       remoteJid,
@@ -28,15 +28,15 @@ async function handle(sock, messageInfo) {
       react: { text: "⏰", key: message.key },
     });
 
-    // Panggil API
+    // Call API
     const api = new ApiAutoresbot(config.APIKEY);
     const response = await api.get("/api/sound/textanime", { text });
 
     if (response?.data) {
-      // Download hasil API ke buffer
+      // Download API result to buffer
       const audioBuffer = await downloadToBuffer(response.data, "mp4");
 
-      // Kirim sebagai audio PTT
+      // Send as PTT audio
       await sock.sendMessage(
         remoteJid,
         {
@@ -49,7 +49,7 @@ async function handle(sock, messageInfo) {
       throw new Error("API response is empty or invalid.");
     }
   } catch (error) {
-    // Log error ke file
+    // Log error to file
     logCustom("error", text, `ERROR-COMMAND-${command}.txt`);
     console.error("⚠️ An error occurred:", error);
 

@@ -47,7 +47,7 @@ async function handle(sock, messageInfo) {
     const inputPath = path.join(process.cwd(), generateUniqueFilename());
     await fs.writeFile(inputPath, bufferOriginal);
 
-    let bufferFinal = bufferOriginal; // Default menggunakan bufferOriginal
+    let bufferFinal = bufferOriginal; // Default to using bufferOriginal
 
     try {
       const convertedPath = await convertAudioToOpus(inputPath);

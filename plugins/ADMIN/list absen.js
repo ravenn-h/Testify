@@ -5,10 +5,10 @@ import { getGroupMetadata } from "../../lib/cache.js";
 
 async function handle(sock, messageInfo) {
   const { remoteJid, isGroup, message, sender, senderType } = messageInfo;
-  if (!isGroup) return; // Only Grub
+  if (!isGroup) return; // Groups only
 
   try {
-    // Mendapatkan metadata grup
+    // Get group metadata
     const groupMetadata = await getGroupMetadata(sock, remoteJid);
     const participants = groupMetadata.participants;
     const totalMembers = participants.length;
@@ -25,31 +25,31 @@ async function handle(sock, messageInfo) {
       return;
     }
 
-    // Ambil data absen untuk grup yang sesuai
+    // Get attendance data for the group
     const data = await findAbsen(remoteJid);
 
     let textNotif;
 
     if (data && data.member.length > 0) {
       const absenteesCount = data?.member?.length || 0;
-      const remainingCount = totalMembers - absenteesCount; // Jumlah yang belum absen
+      const remainingCount = totalMembers - absenteesCount; // Count of members who have not checked in
 
-      // Jika ada data absen dan member
+      // If there is attendance data and members
       const memberList = data.member
         .map((member, index) => `${index + 1}. @${member.split("@")[0]}`)
         .join("\n");
       textNotif =
-        `📋 *Daftar Absen Hari Ini:*\n\n${memberList}\n\n` +
-        `✔️ *${absenteesCount} orang telah absen.*\n` +
-        `⏳ *Tersisa ${remainingCount} orang yang belum absen.*`;
+        `📋 *Today's Attendance List:*\n\n${memberList}\n\n` +
+        `✔️ *${absenteesCount} member(s) have checked in.*\n` +
+        `⏳ *${remainingCount} member(s) have not checked in yet.*`;
     } else {
-      // Jika belum ada member yang absen
+      // If no members have checked in yet
       textNotif =
         "⚠️ No one has checked in today.\n" +
-        `⏳ *Tersisa ${totalMembers} orang yang belum absen.*`;
+        `⏳ *${totalMembers} member(s) have not checked in yet.*`;
     }
 
-    // Kirim pesan dengan mention
+    // Send message with mention
     await sendMessageWithMention(
       sock,
       remoteJid,
@@ -61,7 +61,7 @@ async function handle(sock, messageInfo) {
     console.error("Error handling listabsen:", error);
     await sock.sendMessage(
       remoteJid,
-      { text: "⚠️ An error occurred while displaying daftar absen." },
+      { text: "⚠️ An error occurred while displaying the attendance list." },
       { quoted: message }
     );
   }

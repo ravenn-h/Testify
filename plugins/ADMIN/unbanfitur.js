@@ -15,9 +15,9 @@ async function handle(sock, messageInfo) {
     senderType,
   } = messageInfo;
 
-  if (!isGroup) return; // Only Grub
+  if (!isGroup) return; // Groups only
 
-  // Mendapatkan metadata grup
+  // Get group metadata
   const groupMetadata = await getGroupMetadata(sock, remoteJid);
   const participants = groupMetadata.participants;
   const isAdmin = participants.some(
@@ -58,7 +58,7 @@ async function handle(sock, messageInfo) {
       await sendMessageWithMention(
         sock,
         remoteJid,
-        `⚠️ _*${content}* tidak di temukan di banfitur_`,
+        `⚠️ _*${content}* was not found in the ban list_`,
         message,
         senderType
       );
@@ -68,7 +68,7 @@ async function handle(sock, messageInfo) {
     await sendMessageWithMention(
       sock,
       remoteJid,
-      `❌ _Ada masalah_`,
+      `❌ _An error occurred_`,
       message,
       senderType
     );

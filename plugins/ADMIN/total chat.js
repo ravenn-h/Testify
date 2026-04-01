@@ -5,14 +5,14 @@ import { getGroupMetadata } from "../../lib/cache.js";
 
 async function handle(sock, messageInfo) {
   const { remoteJid, message, sender, isGroup, senderType } = messageInfo;
-  if (!isGroup) return; // Hanya untuk grup
+  if (!isGroup) return; // Groups only
 
   try {
-    // ✅ Ambil metadata grup
+    // ✅ Get group metadata
     const groupMetadata = await getGroupMetadata(sock, remoteJid);
     const participants = groupMetadata?.participants || [];
 
-    // ✅ Cek apakah pengirim admin (pakai phoneNumber atau id)
+    // ✅ Check if sender is admin (using phoneNumber or id)
     const isAdmin = participants.some(
       (p) => (p.phoneNumber === sender || p.id === sender) && p.admin
     );
@@ -26,12 +26,12 @@ async function handle(sock, messageInfo) {
       return;
     }
 
-    // ✅ Ambil total chat per grup
+    // ✅ Get total chat per group
     const totalChatData = await getTotalChatPerGroup(remoteJid);
 
-    // ✅ Gabungkan data peserta dengan total chat mereka
+    // ✅ Combine participant data with their total chat count
     const chatWithParticipants = participants.map((participant) => {
-      const jid = participant.phoneNumber || participant.id; // ambil yang valid
+      const jid = participant.phoneNumber || participant.id;
       const totalChat = totalChatData[jid] || 0;
       return { jid, totalChat };
     });
@@ -44,18 +44,18 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // ✅ Hitung total semua chat
+    // ✅ Calculate total chat count
     const totalChatCount = chatWithParticipants.reduce(
       (sum, p) => sum + p.totalChat,
       0
     );
 
-    // ✅ Urutkan berdasarkan jumlah chat
+    // ✅ Sort by chat count
     const sortedMembers = chatWithParticipants.sort(
       (a, b) => b.totalChat - a.totalChat
     );
 
-    // ✅ Format hasil
+    // ✅ Format result
     let response = `══✪〘 *👥 Total Chat* 〙✪══\n\n`;
     sortedMembers.forEach(({ jid, totalChat }) => {
       const clean = typeof jid === "string" ? jid.split("@")[0] : "unknown";
@@ -64,7 +64,7 @@ async function handle(sock, messageInfo) {
 
     response += `\n\n📊 _Total chat in this group:_ *${totalChatCount}*`;
 
-    // ✅ Kirim pesan dengan mention
+    // ✅ Send message with mention
     const mentionList = sortedMembers
       .map((m) => m.jid)
       .filter((j) => typeof j === "string");

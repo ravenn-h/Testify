@@ -4,10 +4,10 @@ import mess from "../../strings.js";
 
 async function handle(sock, messageInfo) {
   const { remoteJid, isGroup, message, sender, senderType } = messageInfo;
-  if (!isGroup) return; // Only Grub
+  if (!isGroup) return; // Groups only
 
   try {
-    // Mendapatkan metadata grup
+    // Get group metadata
     const groupMetadata = await getGroupMetadata(sock, remoteJid);
     const participants = groupMetadata.participants;
     const isAdmin = participants.some(
@@ -22,11 +22,11 @@ async function handle(sock, messageInfo) {
       return;
     }
 
-    // Filter peserta dengan status admin
+    // Filter participants with admin status
     const adminList = participants
       .filter((p) => p.admin !== null)
       .map((admin) => {
-        // Ambil nomor dengan prioritas phoneNumber dulu
+        // Get number with priority to phoneNumber first
         const jid = admin.phoneNumber || admin.id;
         const cleanNumber =
           typeof jid === "string" ? jid.split("@")[0] : "unknown";
@@ -34,7 +34,7 @@ async function handle(sock, messageInfo) {
       })
       .join("\n");
 
-    // Cek jika tidak ada admin
+    // Check if there are no admins
     if (!adminList || adminList.trim() === "") {
       return await sock.sendMessage(
         remoteJid,
@@ -43,10 +43,10 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Teks notifikasi daftar admin
-    const textNotif = `📋 *Daftar Admin Grup:*\n\n${adminList}`;
+    // Group admin list notification text
+    const textNotif = `📋 *Group Admin List:*\n\n${adminList}`;
 
-    // Kirim pesan dengan mention
+    // Send message with mention
     await sendMessageWithMention(
       sock,
       remoteJid,
@@ -58,7 +58,7 @@ async function handle(sock, messageInfo) {
     console.error("Error handling listadmin:", error);
     await sock.sendMessage(
       remoteJid,
-      { text: "⚠️ An error occurred while displaying daftar admin." },
+      { text: "⚠️ An error occurred while displaying the admin list." },
       { quoted: message }
     );
   }

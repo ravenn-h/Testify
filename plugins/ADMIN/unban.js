@@ -17,9 +17,9 @@ async function handle(sock, messageInfo) {
     senderType,
   } = messageInfo;
 
-  if (!isGroup) return; // Only Grub
+  if (!isGroup) return; // Groups only
 
-  // Mendapatkan metadata grup
+  // Get group metadata
   const groupMetadata = await getGroupMetadata(sock, remoteJid);
   const participants = groupMetadata.participants;
   const isAdmin = participants.some(
@@ -34,7 +34,7 @@ async function handle(sock, messageInfo) {
     return;
   }
 
-  // Menentukan user yang akan dikeluarkan
+  // Determine the user to unban
   const userToBan = determineUser(mentionedJid, isQuoted, content);
   if (!userToBan) {
     return await sock.sendMessage(
@@ -73,7 +73,7 @@ async function handle(sock, messageInfo) {
     await sendMessageWithMention(
       sock,
       remoteJid,
-      `❌ _Tidak dapat unban nomor_ @${whatsappJid.split("@")[0]}`,
+      `❌ _Cannot unban number_ @${whatsappJid.split("@")[0]}`,
       message,
       senderType
     );

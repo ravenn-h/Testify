@@ -6,7 +6,7 @@ async function handle(sock, messageInfo) {
 
   try {
     if (!isGroup) {
-      // Khusus Grup
+      // Groups only
       await sock.sendMessage(remoteJid, { text: mess.general.isGroup }, { quoted: message });
       return;
     }
@@ -48,7 +48,7 @@ async function handle(sock, messageInfo) {
     await sock.sendMessage(
       remoteJid,
       {
-        text: "⚠️ An error occurred while mencoba menyetujui permintaan bergabung. Make sure bot has permission.",
+        text: "⚠️ An error occurred while trying to approve join requests. Make sure the bot has permission.",
       },
       { quoted: message }
     );

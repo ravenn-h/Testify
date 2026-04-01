@@ -25,21 +25,21 @@ async function handle(sock, messageInfo) {
       react: { text: "⏰", key: message.key },
     });
 
-    // Memanggil API dengan penanganan kesalahan dan pengecekan respons
+    // Call API with error handling and response checking
     const response = await api.get("/api/simi", {
       text: content,
       language: "id",
     });
 
     if (response && response.data) {
-      // Mengirim pesan jika data dari respons tersedia
+      // Send message if response data is available
       await sock.sendMessage(
         remoteJid,
         { text: response.data },
         { quoted: message }
       );
     } else {
-      // Mengirim pesan default jika respons data kosong atau tidak ada
+      // Send default message if response data is empty or unavailable
       await sock.sendMessage(
         remoteJid,
         { text: "Sorry, no response from the server." },

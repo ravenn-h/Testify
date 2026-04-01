@@ -3,14 +3,14 @@ import mess from "../../strings.js";
 import { getActiveUsers } from "../../lib/users.js";
 import { getGroupMetadata } from "../../lib/cache.js";
 
-const TOTAL_HARI_SIDER = 30; // total sider maksimum tidak aktif 30 hari
+const TOTAL_HARI_SIDER = 30; // maximum inactivity days before considered a side account
 
 async function handle(sock, messageInfo) {
   const { remoteJid, isGroup, message, sender, senderType } = messageInfo;
-  if (!isGroup) return; // Only Grub
+  if (!isGroup) return; // Groups only
 
   try {
-    // Mendapatkan metadata grup
+    // Get group metadata
     const groupMetadata = await getGroupMetadata(sock, remoteJid);
     const participants = groupMetadata.participants;
     const isAdmin = participants.some(
@@ -27,7 +27,7 @@ async function handle(sock, messageInfo) {
 
     const listNotSider = await getActiveUsers(TOTAL_HARI_SIDER);
 
-    // Cek apakah tidak ada side account member(s) di grup
+    // Check if there are no side account members in the group
     if (listNotSider.length === 0) {
       return await sock.sendMessage(
         remoteJid,
@@ -36,31 +36,31 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Daftar side account member(s) yang ada di grup (semua member grup kecuali yang ada di listNotSider)
+    // List of side account members in the group (all group members except those in listNotSider)
     const memberList = participants
       .filter(
         (participant) =>
           !listNotSider.some((active) => active.id === participant.id)
-      ) // Ambil member yang tidak ada di listNotSider
-      .map((participant) => `◧ @${participant.id.split("@")[0]}`) // Format output untuk member grup
+      ) // Get members not in listNotSider
+      .map((participant) => `◧ @${participant.id.split("@")[0]}`) // Format output for group members
       .join("\n");
 
-    // Hitung jumlah side account member(s) yang ada di grup
+    // Count side account members in the group
     const countSider = participants.filter(
       (participant) =>
         !listNotSider.some((active) => active.id === participant.id)
     ).length;
 
-    // Teks the message that akan dikirim
-    const teks_sider = `_*${countSider} Dari ${participants.length}* Anggota Grup ${groupMetadata.subject} Adalah Sider_
+    // Text of the message to be sent
+    const teks_sider = `_*${countSider} of ${participants.length}* Group Members in ${groupMetadata.subject} Are Side Accounts_
         
-_*Dengan Alasan :*_
-➊ _Tidak Aktif Selama lebih dari ${TOTAL_HARI_SIDER} hari_
-➋ _Join Tapi Tidak Pernah Nimbrung_
+_*Reasons:*_
+➊ _Inactive for more than ${TOTAL_HARI_SIDER} days_
+➋ _Joined but Never Participated_
 
-_Harap Aktif Di Grup Karena Akan Ada Pembersihan Member Setiap Saat_
+_Please be active in the group as member cleanup may happen at any time_
 
-_*List Member Sider*_
+_*Side Account Member List*_
 ${memberList}`;
 
     await sendMessageWithMention(

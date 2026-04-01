@@ -1,14 +1,14 @@
-// DEMOTE ALL: Menjadikan semua admin menjadi user biasa
+// DEMOTE ALL: Demote all admins to regular users
 import mess from "../../strings.js";
 import { sendMessageWithMention } from "../../lib/utils.js";
 import { getGroupMetadata } from "../../lib/cache.js";
 
 async function handle(sock, messageInfo) {
   const { remoteJid, isGroup, message, sender, senderType } = messageInfo;
-  if (!isGroup) return; // Only Grub
+  if (!isGroup) return; // Groups only
 
   try {
-    // Mendapatkan metadata grup
+    // Get group metadata
     const groupMetadata = await getGroupMetadata(sock, remoteJid);
     const participants = groupMetadata.participants;
     const isAdmin = participants.some(
@@ -24,7 +24,7 @@ async function handle(sock, messageInfo) {
     }
     const members = participants;
 
-    // Filter hanya member yang merupakan admin
+    // Filter only members who are admins
     const admins = members
       .filter((participant) => participant.admin)
       .map((participant) => participant.id);
@@ -37,25 +37,25 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Turunkan semua admin menjadi user biasa
+    // Demote all admins to regular users
     await sock.groupParticipantsUpdate(remoteJid, admins, "demote");
 
-    // Kirim pesan keberhasilan dengan jumlah admin yang diturunkan
+    // Send success message with number of demoted admins
     await sendMessageWithMention(
       sock,
       remoteJid,
-      `*${admins.length}* _admin telah diturunkan menjadi user biasa._`,
+      `*${admins.length}* _admin(s) have been demoted to regular users._`,
       message,
       senderType
     );
   } catch (error) {
     console.error("Error in demoteall command:", error);
 
-    // Kirim pesan kesalahan
+    // Send error message
     await sock.sendMessage(
       remoteJid,
       {
-        text: "⚠️ An error occurred while mencoba demoting admin menjadi user biasa.",
+        text: "⚠️ An error occurred while trying to demote admins to regular users.",
       },
       { quoted: message }
     );

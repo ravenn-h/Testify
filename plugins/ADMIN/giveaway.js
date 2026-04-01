@@ -8,7 +8,7 @@ async function handle(sock, messageInfo) {
     messageInfo;
   if (!isGroup) return;
 
-  // Mendapatkan metadata grup
+  // Get group metadata
   const groupMetadata = await getGroupMetadata(sock, remoteJid);
   const participants = groupMetadata.participants;
   const isAdmin = participants.some(
@@ -24,7 +24,7 @@ async function handle(sock, messageInfo) {
     return;
   }
 
-  // Mulai Giveaway
+  // Start Giveaway
   if (command === "giveaway") {
     if (!global.giveawayParticipants[remoteJid]) {
       global.giveawayParticipants[remoteJid] = new Set();
@@ -32,14 +32,14 @@ async function handle(sock, messageInfo) {
     await sock.sendMessage(
       remoteJid,
       {
-        text: `🎉 *GIVEAWAY DIMULAI!* 🎉\n\nKetik *.ikut* untuk bergabung.\n\nGunakan *.mulaigiveaway <jumlah_pemenang>* untuk mengacak pemenang.`,
+        text: `🎉 *GIVEAWAY STARTED!* 🎉\n\nType *.ikut* to join.\n\nUse *.mulaigiveaway <number_of_winners>* to draw winners.`,
       },
       { quoted: message }
     );
     return;
   }
 
-  // Mulai Pengacakan Giveaway
+  // Start Giveaway Draw
   if (command === "mulaigiveaway") {
     if (!global.giveawayParticipants[remoteJid]) {
       await sock.sendMessage(
@@ -96,7 +96,7 @@ async function startGiveaway(sock, remoteJid, message, jumlahPemenang) {
     return;
   }
 
-  // Mengacak pemenang secara acak
+  // Randomly select winners
   const shuffled = participantsArray.sort(() => 0.5 - Math.random());
   const winners = shuffled.slice(0, jumlahPemenang);
 
@@ -112,7 +112,7 @@ async function startGiveaway(sock, remoteJid, message, jumlahPemenang) {
     { quoted: message }
   );
 
-  // Reset peserta setelah giveaway selesai
+  // Reset participants after giveaway ends
   delete global.giveawayParticipants[remoteJid];
 }
 

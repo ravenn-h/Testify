@@ -15,9 +15,9 @@ async function handle(sock, messageInfo) {
     mentionedJid,
   } = messageInfo;
 
-  if (!isGroup) return; // Only Grub
+  if (!isGroup) return; // Groups only
 
-  // Mendapatkan metadata grup
+  // Get group metadata
   const groupMetadata = await getGroupMetadata(sock, remoteJid);
   const participants = groupMetadata.participants;
   const isAdmin = participants.some(

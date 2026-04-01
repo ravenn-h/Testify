@@ -7,7 +7,7 @@ async function handle(sock, messageInfo) {
     messageInfo;
 
   try {
-    // Mendapatkan metadata grup
+    // Get group metadata
     const groupMetadata = await getGroupMetadata(sock, remoteJid);
     const participants = groupMetadata.participants;
     const isAdmin = participants.some(
@@ -38,19 +38,19 @@ async function handle(sock, messageInfo) {
     const dataGrub = await ensureGroupData(remoteJid);
     const responseMessage = await addBadwordToList(remoteJid, dataGrub, args);
 
-    // Kirim respons ke grup
+    // Send response to group
     await sendResponse(sock, remoteJid, responseMessage, message);
   } catch (error) {
     await sendResponse(
       sock,
       remoteJid,
-      "An error occurred while processing perintah.",
+      "An error occurred while processing the command.",
       message
     );
   }
 }
 
-// Fungsi tambahan untuk memastikan data grup tersedia
+// Helper function to ensure group data is available
 async function ensureGroupData(remoteJid) {
   let dataGrub = await findBadword(remoteJid);
   if (!dataGrub) {
@@ -60,7 +60,7 @@ async function ensureGroupData(remoteJid) {
   return dataGrub;
 }
 
-// Fungsi untuk adding kata ke daftar badword
+// Function for adding words to the badword list
 async function addBadwordToList(remoteJid, dataGrub, words) {
   if (words.length === 0) {
     return "⚠️ _Please provide the word you want to add. Example: .addbadword badword_";
@@ -68,15 +68,15 @@ async function addBadwordToList(remoteJid, dataGrub, words) {
 
   const newWords = words.filter((word) => !dataGrub.listBadword.includes(word));
   if (newWords.length === 0) {
-    return "⚠️ _Semua kata already exists dalam daftar badword._";
+    return "⚠️ _All words already exist in the badword list._";
   }
 
   dataGrub.listBadword.push(...newWords);
   await updateBadword(remoteJid, { listBadword: dataGrub.listBadword });
-  return `✅ _Successfully added kata:_ ${newWords.join(", ")}`;
+  return `✅ _Successfully added words:_ ${newWords.join(", ")}`;
 }
 
-// Fungsi untuk sending respons ke grup
+// Function for sending response to group
 async function sendResponse(sock, remoteJid, text, quotedMessage) {
   await sock.sendMessage(remoteJid, { text }, { quoted: quotedMessage });
 }

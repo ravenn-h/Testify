@@ -1,4 +1,4 @@
-// PROMOTE: Menjadikan users ke admin
+// PROMOTE: Promote users to admin
 
 import mess from "../../strings.js";
 import { sendMessageWithMention, determineUser } from "../../lib/utils.js";
@@ -17,10 +17,10 @@ async function handle(sock, messageInfo) {
     command,
     senderType,
   } = messageInfo;
-  if (!isGroup) return; // Only Grub
+  if (!isGroup) return; // Groups only
 
   try {
-    // Mendapatkan metadata grup
+    // Get group metadata
     const groupMetadata = await getGroupMetadata(sock, remoteJid);
     const participants = groupMetadata.participants;
     const isAdmin = participants.some(
@@ -35,7 +35,7 @@ async function handle(sock, messageInfo) {
       return;
     }
 
-    // Menentukan user
+    // Determine user
     const userToAction = determineUser(mentionedJid, isQuoted, content);
     if (!userToAction) {
       return await sock.sendMessage(
@@ -49,10 +49,10 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Proses demote
+    // Process promote
     await sock.groupParticipantsUpdate(remoteJid, [userToAction], "promote");
 
-    // Kirim pesan dengan mention
+    // Send message with mention
     await sendMessageWithMention(
       sock,
       remoteJid,
@@ -63,7 +63,7 @@ async function handle(sock, messageInfo) {
   } catch (error) {
     console.error("Error in promote command:", error);
 
-    // Kirim pesan kesalahan
+    // Send error message
     await sock.sendMessage(
       remoteJid,
       { text: "⚠️ An error occurred while trying to promote to admin." },

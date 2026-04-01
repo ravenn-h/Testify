@@ -4,7 +4,7 @@ import path from "path";
 import mess from "../../strings.js";
 import { fileURLToPath } from "url";
 
-// Gantikan require.main.filename dengan cara ESM
+// Replace require.main.filename with ESM approach
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const mainDir = path.resolve(__dirname, "../../");
@@ -21,10 +21,10 @@ async function handle(sock, messageInfo) {
     sender,
   } = messageInfo;
 
-  if (!isGroup) return; // Hanya untuk grup
+  if (!isGroup) return; // Groups only
 
   try {
-    // Ambil metadata grup
+    // Get group metadata
     const groupMetadata = await getGroupMetadata(sock, remoteJid);
     const participants = groupMetadata.participants;
     const isAdmin = participants.some(
@@ -44,7 +44,7 @@ async function handle(sock, messageInfo) {
       react: { text: "⏰", key: message.key },
     });
 
-    // Unduh media (gambar)
+    // Download media (image)
     const media = isQuoted
       ? await downloadQuotedMedia(message)
       : await downloadMedia(message);
@@ -55,7 +55,7 @@ async function handle(sock, messageInfo) {
       const groupId = groupMetadata.id;
       const mediaPath = path.join(mainDir, "tmp", media);
 
-      // Update foto profil grup
+      // Update group profile photo
       await sock.updateProfilePicture(groupId, { url: mediaPath });
 
       return await sock.sendMessage(
@@ -65,7 +65,7 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Jika media not valid
+    // If media is not valid
     return await sock.sendMessage(
       remoteJid,
       {

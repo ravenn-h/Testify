@@ -4,10 +4,10 @@ import { getGroupMetadata } from "../../lib/cache.js";
 
 async function handle(sock, messageInfo) {
   const { remoteJid, isGroup, message, sender, senderType } = messageInfo;
-  if (!isGroup) return; // Only Grub
+  if (!isGroup) return; // Groups only
 
   try {
-    // Mendapatkan metadata grup
+    // Get group metadata
     const groupMetadata = await getGroupMetadata(sock, remoteJid);
     const participants = groupMetadata.participants;
     const isAdmin = participants.some(
@@ -22,13 +22,13 @@ async function handle(sock, messageInfo) {
       return;
     }
 
-    // Filter peserta bukan admin
+    // Filter non-admin participants
     const memberList = participants
       .filter((participant) => participant.admin === null)
       .map((member, index) => `◧ @${member.id.split("@")[0]}`)
       .join("\n");
 
-    // Cek jika tidak ada member non-admin
+    // Check if there are no non-admin members
     if (!memberList) {
       return await sock.sendMessage(
         remoteJid,
@@ -37,10 +37,10 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Teks notifikasi daftar member non-admin
-    const textNotif = `📋 *Daftar Member Non-Admin:*\n\n${memberList}`;
+    // Non-admin member list notification text
+    const textNotif = `📋 *Non-Admin Member List:*\n\n${memberList}`;
 
-    // Kirim pesan dengan mention
+    // Send message with mention
     await sendMessageWithMention(
       sock,
       remoteJid,
@@ -53,7 +53,7 @@ async function handle(sock, messageInfo) {
     await sock.sendMessage(
       remoteJid,
       {
-        text: "⚠️ An error occurred while displaying daftar member non-admin.",
+        text: "⚠️ An error occurred while displaying the non-admin member list.",
       },
       { quoted: message }
     );

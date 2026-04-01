@@ -3,10 +3,10 @@ import mess from "../../strings.js";
 
 async function handle(sock, messageInfo) {
   const { remoteJid, isGroup, message, sender } = messageInfo;
-  if (!isGroup) return; // Only Grub
+  if (!isGroup) return; // Groups only
 
   try {
-    // Mendapatkan metadata grup
+    // Get group metadata
     const groupMetadata = await getGroupMetadata(sock, remoteJid);
     const participants = groupMetadata.participants;
     const isAdmin = participants.some(
@@ -30,7 +30,7 @@ async function handle(sock, messageInfo) {
   } catch (error) {
     console.error("Error in resetlinkgc command:");
 
-    // Kirim pesan kesalahan
+    // Send error message
     await sock.sendMessage(
       remoteJid,
       {

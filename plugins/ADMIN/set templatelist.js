@@ -6,10 +6,10 @@ async function handle(sock, messageInfo) {
   const { remoteJid, isGroup, message, content, sender, command, prefix } =
     messageInfo;
 
-  // Periksa apakah pesan berasal dari grup
+  // Check if message comes from a group
   if (!isGroup) return;
 
-  // Mendapatkan metadata grup
+  // Get group metadata
   const groupMetadata = await getGroupMetadata(sock, remoteJid);
   const participants = groupMetadata.participants;
   const isAdmin = participants.some(
@@ -24,14 +24,14 @@ async function handle(sock, messageInfo) {
     return;
   }
 
-  // Validasi input kosong
+  // Validate empty input
   if (!content || !content.trim()) {
-    const usageMessage = `⚠️ *Format Penggunaan:*
+    const usageMessage = `⚠️ *Usage Format:*
 
-💬 *Contoh:* 
+💬 *Example:* 
 _${prefix}${command} 1_
 
-_Hanya tersedia *1 sampai 9*_`;
+_Only *1 to 9* is available_`;
 
     await sock.sendMessage(
       remoteJid,
@@ -41,12 +41,12 @@ _Hanya tersedia *1 sampai 9*_`;
     return;
   }
 
-  // Validasi input harus angka 1 sampai 8
-  const validNumbers = /^[1-9]$/; // Regex untuk angka 1-8
+  // Validate input must be a number from 1 to 9
+  const validNumbers = /^[1-9]$/;
   if (!validNumbers.test(content.trim())) {
     const invalidMessage = `⚠️ _Input not valid!_
 
-_Hanya diperbolehkan angka dari *1* sampai *9*._`;
+_Only numbers from *1* to *9* are allowed._`;
     await sock.sendMessage(
       remoteJid,
       { text: invalidMessage },
@@ -55,11 +55,11 @@ _Hanya diperbolehkan angka dari *1* sampai *9*._`;
     return;
   }
 
-  // Atur template list
+  // Set list template
   await setTemplateList(remoteJid, content);
 
-  // Kirim pesan sukses
-  const successMessage = `✅ _Template List Berhasil Diatur_
+  // Send success message
+  const successMessage = `✅ _List Template Successfully Set_
 
 _Type *.list* to view the list_`;
 

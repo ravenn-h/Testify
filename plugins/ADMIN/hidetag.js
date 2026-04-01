@@ -16,10 +16,10 @@ function getMediaContent(media) {
 async function handle(sock, messageInfo) {
   const { remoteJid, isGroup, message, sender, content, isQuoted, type } =
     messageInfo;
-  if (!isGroup) return; // Only Grub
+  if (!isGroup) return; // Groups only
 
   try {
-    // Mendapatkan metadata grup
+    // Get group metadata
     const groupMetadata = await getGroupMetadata(sock, remoteJid);
     const participants = groupMetadata.participants;
     const isAdmin = participants.some(
@@ -37,7 +37,7 @@ async function handle(sock, messageInfo) {
       return;
     }
 
-    // Unduh media
+    // Download media
     const media = isQuoted
       ? await downloadQuotedMedia(message)
       : await downloadMedia(message);
@@ -53,10 +53,10 @@ async function handle(sock, messageInfo) {
       mediaContent = content.trim();
     }
 
-    // Kirim media atau pesan teks
+    // Send media or text message
     if (media) {
       const mediaPath = `tmp/${media}`;
-      await checkFileExists(mediaPath); // Validasi file
+      await checkFileExists(mediaPath); // Validate file
       await sendMedia(
         sock,
         remoteJid,
@@ -87,7 +87,7 @@ async function handle(sock, messageInfo) {
   }
 }
 
-// Fungsi untuk validasi keberadaan file
+// Function to validate file existence
 async function checkFileExists(path) {
   try {
     await fs.access(path);
@@ -96,7 +96,7 @@ async function checkFileExists(path) {
   }
 }
 
-// Fungsi untuk sending pesan teks
+// Function for sending text message
 async function sendTextMessage(sock, remoteJid, text, quoted, participants) {
   text = typeof text === "string" ? text : "";
   await sock.sendMessage(
@@ -106,7 +106,7 @@ async function sendTextMessage(sock, remoteJid, text, quoted, participants) {
   );
 }
 
-// Fungsi untuk sending media
+// Function for sending media
 async function sendMedia(
   sock,
   remoteJid,
@@ -142,7 +142,7 @@ async function sendMedia(
 
   const options = mediaOptions[type];
   if (!options) {
-    throw new Error(`Tipe media tidak didukung: ${type}`);
+    throw new Error(`Unsupported media type: ${type}`);
   }
 
   if (type == "stickerMessage") {
@@ -152,7 +152,7 @@ async function sendMedia(
       mentions: options.mentions,
     };
     const buffer = options.stickerMessage;
-    // Kirim stiker
+    // Send sticker
     await sendImageAsSticker(sock, remoteJid, buffer, options2, message);
     return;
   }

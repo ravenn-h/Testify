@@ -16,7 +16,7 @@ async function handle(sock, messageInfo) {
         {
           text: `_⚠️ Usage format:_ \n\n_💬 Example:_ _*${
             prefix + command
-          } penemu facebook*_`,
+          } who invented facebook*_`,
         },
         { quoted: message }
       );
@@ -27,13 +27,11 @@ async function handle(sock, messageInfo) {
       react: { text: "⏰", key: message.key },
     });
 
-    // Memanggil API dengan penanganan kesalahan dan pengecekan respons
+    // Call API with error handling and response checking
     const contentShort = `${content} and write as concisely as possible`;
     const response = await api.get("/api/gemini", { text: contentShort });
 
     if (response && response.data) {
-      //await sock.sendMessage(remoteJid, { text:response.data }, { quoted: message });
-
       let bufferAudioResult;
       try {
         const bufferAudio = await textToAudio(response.data);
@@ -51,7 +49,7 @@ async function handle(sock, messageInfo) {
         { quoted: message }
       );
     } else {
-      // Mengirim pesan default jika respons data kosong atau tidak ada
+      // Send default message if response data is empty or unavailable
       return await sock.sendMessage(
         remoteJid,
         { text: "Sorry, no response from the server." },

@@ -1,14 +1,14 @@
-// PROMOTE: Menjadikan semua member menjadi admin
+// PROMOTE ALL: Promote all members to admin
 import mess from "../../strings.js";
 import { sendMessageWithMention } from "../../lib/utils.js";
 import { getGroupMetadata } from "../../lib/cache.js";
 
 async function handle(sock, messageInfo) {
   const { remoteJid, isGroup, message, sender, senderType } = messageInfo;
-  if (!isGroup) return; // Only Grub
+  if (!isGroup) return; // Groups only
 
   try {
-    // Mendapatkan metadata grup
+    // Get group metadata
     const groupMetadata = await getGroupMetadata(sock, remoteJid);
     const participants = groupMetadata.participants;
     const isAdmin = participants.some(
@@ -25,7 +25,7 @@ async function handle(sock, messageInfo) {
 
     const members = groupMetadata.participants;
 
-    // Filter hanya member yang belum menjadi admin
+    // Filter only members who are not yet admins
     const nonAdmins = members
       .filter((participant) => !participant.admin)
       .map((participant) => participant.id);
@@ -38,25 +38,25 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Promosikan semua non-admin menjadi admin
+    // Promote all non-admins to admin
     await sock.groupParticipantsUpdate(remoteJid, nonAdmins, "promote");
 
-    // Kirim pesan keberhasilan dengan jumlah member yang dipromosikan
+    // Send success message with number of promoted members
     await sendMessageWithMention(
       sock,
       remoteJid,
-      `*${nonAdmins.length}* _member telah dipromosikan menjadi admin._`,
+      `*${nonAdmins.length}* _member(s) have been promoted to admin._`,
       message,
       senderType
     );
   } catch (error) {
     console.error("Error in promoteall command:", error);
 
-    // Kirim pesan kesalahan
+    // Send error message
     await sock.sendMessage(
       remoteJid,
       {
-        text: "⚠️ An error occurred while mencoba promoting member menjadi admin.",
+        text: "⚠️ An error occurred while trying to promote members to admin.",
       },
       { quoted: message }
     );

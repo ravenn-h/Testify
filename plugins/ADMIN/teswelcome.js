@@ -5,7 +5,7 @@ async function handle(sock, messageInfo) {
   const { remoteJid, sender, message, pushName, content, prefix, command } =
     messageInfo;
   try {
-    // Validasi input konten
+    // Validate content input
     if (!content) {
       await sock.sendMessage(
         remoteJid,
@@ -19,12 +19,12 @@ async function handle(sock, messageInfo) {
       return;
     }
 
-    // Indikator proses
+    // Processing indicator
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
-    // Ambil metadata grup dan profil user
+    // Get group metadata and user profile
     const groupMetadata = await getGroupMetadata(sock, remoteJid);
     const { size, subject, desc } = groupMetadata;
     const ppUser = await getProfilePictureUrl(sock, sender);
@@ -32,7 +32,7 @@ async function handle(sock, messageInfo) {
 
     let buffer;
 
-    // Mapping content ke parameter API
+    // Map content to API parameters
     const apiRoutes = {
       1: {
         endpoint: "https://api.autoresbot.com/api/maker/welcome1",
@@ -107,13 +107,13 @@ async function handle(sock, messageInfo) {
       return;
     }
 
-    // Periksa apakah content valid
+    // Check if content is valid
     const route = apiRoutes[content];
     if (!route) {
       await sock.sendMessage(
         remoteJid,
         {
-          text: `_⚠️ Format not valid! Pilih angka 1-7._ \n_ atau *text*_`,
+          text: `_⚠️ Format not valid! Choose a number 1-7 or *text*._`,
         },
         { quoted: message }
       );
@@ -121,23 +121,22 @@ async function handle(sock, messageInfo) {
     }
     try {
       const response = await axios.post(route.endpoint, route.params, {
-        responseType: "arraybuffer", // Mengembalikan data sebagai buffer
+        responseType: "arraybuffer", // Return data as buffer
       });
       buffer = Buffer.from(response.data);
     } catch (error) {
       if (error.response) {
-        // Error dari server, ambil detail responsenya
         const status = error.response.status;
         const statusText = error.response.statusText;
         let responseData;
 
         try {
-          // Coba parsing body response sebagai JSON
+          // Try parsing response body as JSON
           responseData = JSON.parse(
             Buffer.from(error.response.data).toString()
           );
         } catch (parseErr) {
-          // Kalau tidak bisa di-parse, tampilkan raw string
+          // If unable to parse, show raw string
           responseData = Buffer.from(error.response.data).toString();
         }
 
@@ -148,21 +147,21 @@ async function handle(sock, messageInfo) {
           responseData
         );
       } else if (error.request) {
-        // Request dikirim, tapi tidak ada response
+        // Request sent, but no response received
         console.error("No response received from API:", error.request);
       } else {
-        // Kesalahan saat preparing request
+        // Error while setting up the request
         console.error("Error in setting up the request:", error.message);
       }
       buffer = null;
     }
 
-    // Kirim hasil ke user
+    // Send result to user
     await sock.sendMessage(
       remoteJid,
       {
         image: buffer,
-        caption: `_Untuk menggunakan template ini silakan ketik_ *.templatewelcome ${content}*`,
+        caption: `_To use this template type_ *.templatewelcome ${content}*`,
       },
       { quoted: message }
     );

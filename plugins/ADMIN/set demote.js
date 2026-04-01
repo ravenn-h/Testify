@@ -5,7 +5,7 @@ import mess from "../../strings.js";
 async function handle(sock, messageInfo) {
   const { remoteJid, isGroup, message, content, sender, command, prefix } =
     messageInfo;
-  if (!isGroup) return; // Only Grub
+  if (!isGroup) return; // Groups only
 
   const groupMetadata = await getGroupMetadata(sock, remoteJid);
   const participants = groupMetadata.participants;
@@ -21,11 +21,11 @@ async function handle(sock, messageInfo) {
     return;
   }
 
-  // Validasi input kosong
+  // Validate empty input
   if (!content || !content.trim()) {
     const MSG = `_⚠️ Usage format:_ \n\n_💬 Example:_ _*${
       prefix + command
-    } @name telah di turunkan dari admin*_
+    } @name has been demoted from admin*_
         
 _*List Variable*_
 
@@ -38,7 +38,7 @@ ${global.group.variable}`;
   }
   await setDemote(remoteJid, content.trim());
 
-  // Kirim pesan berhasil
+  // Send success message
   return await sock.sendMessage(
     remoteJid,
     {

@@ -6,7 +6,7 @@ import fs from "fs";
 import path from "path";
 import mess from "../../strings.js";
 
-// Menggunakan cwd untuk menentukan path absolut file JSON
+// Using cwd to determine absolute path of JSON file
 const absenJson = path.join(
   process.cwd(),
   "database",
@@ -29,7 +29,7 @@ const badwordJson = path.join(process.cwd(), "database", "badword.json");
 const slrJson = path.join(process.cwd(), "database", "slr.json");
 const listJson = path.join(process.cwd(), "database", "list.json");
 
-// Fungsi untuk memeriksa apakah pengirim adalah admin grup
+// Function to check if sender is a group admin
 async function isAdmin(sock, remoteJid, sender) {
   try {
     const groupMetadata = await getGroupMetadata(sock, remoteJid);
@@ -42,15 +42,15 @@ async function isAdmin(sock, remoteJid, sender) {
   }
 }
 
-// Fungsi utama untuk resetting grup
+// Main function for resetting group
 async function handle(sock, messageInfo) {
   const { remoteJid, isGroup, message, sender } = messageInfo;
 
-  // Make sure hanya grup yang dapat menjalankan fitur ini
+  // Ensure only groups can run this feature
   if (!isGroup) return;
 
   try {
-    // Periksa apakah pengirim adalah admin grup
+    // Check if sender is a group admin
     const adminStatus = await isAdmin(sock, remoteJid, sender);
     if (!adminStatus) {
       await sock.sendMessage(
@@ -61,10 +61,10 @@ async function handle(sock, messageInfo) {
       return;
     }
 
-    // Lakukan reset grup untuk remoteJid tertentu
+    // Perform group reset for specific remoteJid
     await resetGroupSettings(remoteJid);
 
-    // Kirim pesan konfirmasi setelah reset berhasil
+    // Send confirmation message after successful reset
     await sock.sendMessage(
       remoteJid,
       { text: "Group settings have been successfully reset." },
@@ -73,7 +73,7 @@ async function handle(sock, messageInfo) {
   } catch (error) {
     console.error("Error in resetgc command:", error);
 
-    // Kirim pesan kesalahan jika terjadi error
+    // Send error message if an error occurs
     await sock.sendMessage(
       remoteJid,
       { text: "⚠️ An error occurred while resetting group settings." },
@@ -82,10 +82,10 @@ async function handle(sock, messageInfo) {
   }
 }
 
-// Fungsi untuk resetting pengaturan grup berdasarkan remoteJid
+// Function for resetting group settings by remoteJid
 async function resetGroupSettings(remoteJid) {
   try {
-    // Membaca data dari semua file JSON
+    // Read data from all JSON files
     const absenData = JSON.parse(fs.readFileSync(absenJson, "utf8"));
     const groupParticipantData = JSON.parse(
       fs.readFileSync(groupParticipantJson, "utf8")
@@ -95,14 +95,14 @@ async function resetGroupSettings(remoteJid) {
     const slrData = JSON.parse(fs.readFileSync(slrJson, "utf8"));
     const listData = JSON.parse(fs.readFileSync(listJson, "utf8"));
 
-    // Reset data di file absen.json jika ada
+    // Reset data in absen.json if it exists
     if (absenData[remoteJid]) {
       delete absenData[remoteJid];
       fs.writeFileSync(absenJson, JSON.stringify(absenData, null, 2));
     } else {
     }
 
-    // Reset data di file group participant.json jika ada
+    // Reset data in group participant.json if it exists
     if (groupParticipantData[remoteJid]) {
       delete groupParticipantData[remoteJid];
       fs.writeFileSync(
@@ -112,28 +112,28 @@ async function resetGroupSettings(remoteJid) {
     } else {
     }
 
-    // Reset data di file totalchat.json jika ada
+    // Reset data in totalchat.json if it exists
     if (totalChatData[remoteJid]) {
       delete totalChatData[remoteJid];
       fs.writeFileSync(totalChatJson, JSON.stringify(totalChatData, null, 2));
     } else {
     }
 
-    // Reset data di file badword.json jika ada
+    // Reset data in badword.json if it exists
     if (badwordData[remoteJid]) {
       delete badwordData[remoteJid];
       fs.writeFileSync(badwordJson, JSON.stringify(badwordData, null, 2));
     } else {
     }
 
-    // Reset data di file slr.json jika ada
+    // Reset data in slr.json if it exists
     if (slrData[remoteJid]) {
       delete slrData[remoteJid];
       fs.writeFileSync(slrJson, JSON.stringify(slrData, null, 2));
     } else {
     }
 
-    // Reset data di file list.json jika ada
+    // Reset data in list.json if it exists
     if (listData[remoteJid]) {
       delete listData[remoteJid];
       fs.writeFileSync(listJson, JSON.stringify(listData, null, 2));

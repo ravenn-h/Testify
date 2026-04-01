@@ -6,10 +6,10 @@ async function handle(sock, messageInfo) {
   const { remoteJid, isGroup, message, content, sender, command, prefix } =
     messageInfo;
 
-  // Periksa apakah pesan berasal dari grup
+  // Check if message comes from a group
   if (!isGroup) return;
 
-  // Mendapatkan metadata grup
+  // Get group metadata
   const groupMetadata = await getGroupMetadata(sock, remoteJid);
   const participants = groupMetadata.participants;
   const isAdmin = participants.some(
@@ -24,15 +24,14 @@ async function handle(sock, messageInfo) {
     return;
   }
 
-  // Validasi input kosong
+  // Validate empty input
   if (!content || !content.trim()) {
-    const usageMessage = `⚠️ *Format Penggunaan:*
+    const usageMessage = `⚠️ *Usage Format:*
 
-💬 *Contoh:* 
+💬 *Example:* 
 _${prefix}${command} 2_
 
-_Hanya tersedia *1 sampai 7*_
-_atau *text*_
+_Only *1 to 7* or *text* is available_
 
 _To preview the welcome image, type *.teswelcome*_`;
 
@@ -45,11 +44,11 @@ _To preview the welcome image, type *.teswelcome*_`;
   }
 
   if (content == "text") {
-    // Atur template list
+    // Set template
     await setTemplateWelcome(remoteJid, content);
 
-    // Kirim pesan sukses
-    const successMessage = `✅ _Template Welcome Berhasil Diatur_`;
+    // Send success message
+    const successMessage = `✅ _Welcome Template Successfully Set_`;
     await sock.sendMessage(
       remoteJid,
       { text: successMessage },
@@ -58,11 +57,11 @@ _To preview the welcome image, type *.teswelcome*_`;
     return;
   }
 
-  const validNumbers = /^[1-7]$/; // Regex untuk angka 1-5
+  const validNumbers = /^[1-7]$/;
   if (!validNumbers.test(content.trim())) {
     const invalidMessage = `⚠️ _Input not valid!_
 
-_Hanya diperbolehkan angka dari *1* sampai *7*._`;
+_Only numbers from *1* to *7* are allowed._`;
     await sock.sendMessage(
       remoteJid,
       { text: invalidMessage },
@@ -71,11 +70,11 @@ _Hanya diperbolehkan angka dari *1* sampai *7*._`;
     return;
   }
 
-  // Atur template list
+  // Set template
   await setTemplateWelcome(remoteJid, content);
 
-  // Kirim pesan sukses
-  const successMessage = `✅ _Template Welcome Berhasil Diatur_`;
+  // Send success message
+  const successMessage = `✅ _Welcome Template Successfully Set_`;
   await sock.sendMessage(
     remoteJid,
     { text: successMessage },

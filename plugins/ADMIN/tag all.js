@@ -2,7 +2,7 @@ import mess from "../../strings.js";
 import { getGroupMetadata } from "../../lib/cache.js";
 
 async function sendTextMessage(sock, remoteJid, text, quoted) {
-  // Fungsi helper untuk sending pesan teks
+  // Helper function for sending text message
   return await sock.sendMessage(remoteJid, { text }, { quoted });
 }
 
@@ -10,7 +10,7 @@ async function handle(sock, messageInfo) {
   const { remoteJid, message, sender, content, isQuoted } = messageInfo;
 
   try {
-    // Mendapatkan metadata grup
+    // Get group metadata
     const groupMetadata = await getGroupMetadata(sock, remoteJid);
     const participants = groupMetadata.participants;
     const isAdmin = participants.some(
@@ -25,17 +25,17 @@ async function handle(sock, messageInfo) {
       return;
     }
 
-    // Pesan default jika no content
-    const messageContent = content?.trim() || "kosong";
+    // Default message if no content
+    const messageContent = content?.trim() || "empty";
 
-    // Buat teks tag semua
+    // Create tag all text
     let teks = `══✪〘 *👥 Tag All* 〙✪══\n➲ *Message: ${messageContent}*\n\n`;
     const mentions = participants.map((member) => {
       teks += `⭔ @${member.id.split("@")[0]}\n`;
       return member.id;
     });
 
-    // Kirim pesan dengan mentions
+    // Send message with mentions
     await sock.sendMessage(
       remoteJid,
       { text: teks, mentions },
@@ -43,7 +43,7 @@ async function handle(sock, messageInfo) {
     );
   } catch (error) {
     console.error("Error:", error);
-    // Tangani error dengan pesan ke user
+    // Handle error with message to user
     await sendTextMessage(
       sock,
       remoteJid,

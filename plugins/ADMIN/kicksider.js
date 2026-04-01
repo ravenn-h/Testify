@@ -4,7 +4,7 @@ import { getActiveUsers } from "../../lib/users.js";
 import { sendMessageWithMention } from "../../lib/utils.js";
 import { getGroupMetadata } from "../../lib/cache.js";
 
-const TOTAL_HARI_SIDER = 30; // total hari maksimum dianggap tidak aktif
+const TOTAL_HARI_SIDER = 30; // maximum days of inactivity before considered a side account
 const DELAY_KICK = 3000;
 
 let inProccess = false;
@@ -34,7 +34,7 @@ async function handle(sock, messageInfo) {
       await sendMessageWithMention(
         sock,
         remoteJid,
-        `_Proses pembersihan member sider is in progress, silakan tunggu hingga selesai_`,
+        `_Side account member cleanup is in progress, please wait until it's done_`,
         message,
         senderType
       );
@@ -60,7 +60,7 @@ async function handle(sock, messageInfo) {
 
     const input = content.toLowerCase().trim();
 
-    // Tangani jika input .kicksider all atau angka
+    // Handle if input is .kicksider all or a number
     if (input === "all" || (!isNaN(input) && Number(input) > 0)) {
       const jumlahKick =
         input === "all"
@@ -79,7 +79,7 @@ async function handle(sock, messageInfo) {
 
         await new Promise((resolve) => setTimeout(resolve, DELAY_KICK));
 
-        // Ambil nomor saja sebelum @
+        // Get the number before @
         const memberNumber = member.split("@")[0];
 
         if (memberNumber === config.phone_number_bot) continue;
@@ -115,7 +115,7 @@ async function handle(sock, messageInfo) {
       return;
     }
 
-    // Default info saat hanya ketik .kicksider tanpa argumen valid
+    // Default info when typing .kicksider without a valid argument
     await sendMessageWithMention(
       sock,
       remoteJid,

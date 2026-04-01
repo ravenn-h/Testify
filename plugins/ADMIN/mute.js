@@ -4,10 +4,10 @@ import { getGroupMetadata } from "../../lib/cache.js";
 
 async function handle(sock, messageInfo) {
   const { remoteJid, isGroup, message, sender, command } = messageInfo;
-  if (!isGroup) return; // Only Grub
+  if (!isGroup) return; // Groups only
 
   try {
-    // Mendapatkan metadata grup
+    // Get group metadata
     const groupMetadata = await getGroupMetadata(sock, remoteJid);
     const participants = groupMetadata.participants;
     const isAdmin = participants.some(
@@ -22,13 +22,13 @@ async function handle(sock, messageInfo) {
       return;
     }
 
-    // Cari data grup berdasarkan ID
+    // Find group data by ID
     const dataGroup = await findGroup(remoteJid);
     if (!dataGroup) {
       throw new Error("Group data not found.");
     }
 
-    // Respon berdasarkan perintah
+    // Response based on command
     let responseText = "";
     let updateData = false;
 
@@ -42,19 +42,19 @@ async function handle(sock, messageInfo) {
       responseText = "_Command not recognized._";
     }
 
-    // Perbarui data grup jika perintah valid
+    // Update group data if command is valid
     if (updateData) {
       await updateGroup(remoteJid, updateData);
     }
 
-    // Kirim pesan ke grup
+    // Send message to group
     await sock.sendMessage(
       remoteJid,
       { text: responseText },
       { quoted: message }
     );
   } catch (error) {
-    // Tangani kesalahan
+    // Handle error
     console.error(error.message);
     await sock.sendMessage(
       remoteJid,

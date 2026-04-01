@@ -7,9 +7,9 @@ import { convertTime, getTimeRemaining } from "../../lib/utils.js";
 async function handle(sock, messageInfo) {
   const { remoteJid, isGroup, message, content, sender, command, prefix } =
     messageInfo;
-  if (!isGroup) return; // Hanya untuk grup
+  if (!isGroup) return; // Groups only
 
-  // Mendapatkan metadata grup
+  // Get group metadata
   const groupMetadata = await getGroupMetadata(sock, remoteJid);
   const participants = groupMetadata.participants;
   const isAdmin = participants.some(
@@ -26,7 +26,7 @@ async function handle(sock, messageInfo) {
 
   const currentTime = moment().tz("Asia/Jakarta").format("HH:mm");
 
-  // Validasi input kosong
+  // Validate empty input
   if (!content || !content.trim()) {
     const MSG = `_⚠️ Usage format:_ \n\n_💬 Example:_ _*${
       prefix + command
@@ -41,7 +41,6 @@ _The bot will automatically close the group at that time every day_ \n\n_To remo
   }
 
   if (content.trim() == "off") {
-    // delete
     await setGroupSchedule(sock, remoteJid, content.trim(), "closeTime");
     return await sock.sendMessage(
       remoteJid,
@@ -51,10 +50,10 @@ _The bot will automatically close the group at that time every day_ \n\n_To remo
     return;
   }
 
-  // Validasi format jam
+  // Validate time format
   const timeRegex = /^([01]?\d|2[0-3]):[0-5]\d$/; // Format HH:mm
   if (!timeRegex.test(content.trim())) {
-    const MSG = `_⚠️ Format jam not valid!_\n\n_Make sure format jam adalah HH:mm (contoh: 23:10)_`;
+    const MSG = `_⚠️ Time format not valid!_\n\n_Make sure the format is HH:mm (example: 23:10)_`;
     return await sock.sendMessage(
       remoteJid,
       { text: MSG },
@@ -62,13 +61,13 @@ _The bot will automatically close the group at that time every day_ \n\n_To remo
     );
   }
 
-  // Lanjutkan proses penyimpanan jadwal
+  // Proceed with saving schedule
   await setGroupSchedule(sock, remoteJid, content.trim(), "closeTime");
 
   const serverTime = convertTime(content.trim());
   const { hours, minutes } = getTimeRemaining(serverTime);
 
-  // Kirim pesan berhasil
+  // Send success message
   return await sock.sendMessage(
     remoteJid,
     {

@@ -3,10 +3,10 @@ import { getGroupMetadata } from "../../lib/cache.js";
 
 async function handle(sock, messageInfo) {
   const { remoteJid, isGroup, message, isQuoted, sender } = messageInfo;
-  if (!isGroup) return; // Only Grub
+  if (!isGroup) return; // Groups only
 
   try {
-    // Mendapatkan metadata grup
+    // Get group metadata
     const groupMetadata = await getGroupMetadata(sock, remoteJid);
     const participants = groupMetadata.participants;
     const isAdmin = participants.some(
@@ -21,7 +21,7 @@ async function handle(sock, messageInfo) {
       return;
     }
 
-    // Jika ada the message that dikutip, hapus pesan tersebut
+    // If there is a quoted message, delete it
     if (isQuoted) {
       await sock.sendMessage(remoteJid, {
         delete: {

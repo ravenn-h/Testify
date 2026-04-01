@@ -6,10 +6,10 @@ import mess from "../../strings.js";
 const icon_on = "🟢";
 const icon_off = "🔴";
 
-// Membantu untuk memformat status fitur
+// Helper to format feature status
 const formatFeatureStatus = (status) => (status ? icon_on : icon_off);
 
-// Daftar fitur yang ada dalam group
+// List of features in the group
 const featureList = [
   { name: "antilink", label: "ᴀɴᴛɪʟɪɴᴋ" },
   { name: "antilinkv2", label: "ᴀɴᴛɪʟɪɴᴋᴠ2" },
@@ -54,9 +54,9 @@ const featureList = [
   { name: "antihidetag2", label: "ᴀɴᴛɪʜɪᴅᴇᴛᴀɢ2" },
 ];
 
-// Membuat template dengan memeriksa status setiap fitur
+// Create template by checking the status of each feature
 const createTemplate = (fitur) => {
-  let template = `ɢᴜɴᴀᴋᴀɴ *.off ᴄᴏᴍᴍᴀɴᴅ*\n\n`;
+  let template = `ᴜsᴇ *.off ᴄᴏᴍᴍᴀɴᴅ*\n\n`;
 
   featureList.forEach(({ name, label }) => {
     template += `[${formatFeatureStatus(fitur[name])}] ${label}\n`;
@@ -64,32 +64,32 @@ const createTemplate = (fitur) => {
 
   template += `
 
-ᴄᴏɴᴛᴏʜ : *.ᴏff antilink*
+ᴇxᴀᴍᴘʟᴇ : *.ᴏff antilink*
 
-Kᴇᴛᴇʀᴀɴɢᴀɴ
-${icon_on} = Fɪᴛᴜʀ ᴀᴋᴛɪꜰ
-${icon_off} = Fɪᴛᴜʀ ᴛɪᴅᴀᴋ ᴀᴋᴛɪꜰ`;
+Lᴇɢᴇɴᴅ
+${icon_on} = Fᴇᴀᴛᴜʀᴇ ᴀᴄᴛɪᴠᴇ
+${icon_off} = Fᴇᴀᴛᴜʀᴇ ɪɴᴀᴄᴛɪᴠᴇ`;
 
   return template;
 };
 
-// Fungsi untuk activating fitur secara dinamis
+// Function to dynamically deactivate features
 const activateFeature = async (remoteJid, featureName, currentStatus) => {
   if (!currentStatus) {
-    return `⚠️ _Fitur *${featureName}* sudah Nonaktifkan sebelumnya._`;
+    return `⚠️ _Feature *${featureName}* is already disabled._`;
   }
 
   const updateData = { fitur: { [featureName]: false } };
   await updateGroup(remoteJid, updateData);
-  return `🚀 _Berhasil Menonaktifkan Fitur *${featureName}*._`;
+  return `🚀 _Successfully disabled feature *${featureName}*._`;
 };
 
 async function handle(sock, messageInfo) {
   const { remoteJid, isGroup, message, content, sender } = messageInfo;
-  if (!isGroup) return; // Only Grub
+  if (!isGroup) return; // Groups only
 
   try {
-    // Mendapatkan metadata grup
+    // Get group metadata
     const groupMetadata = await getGroupMetadata(sock, remoteJid);
     const participants = groupMetadata.participants;
     const isAdmin = participants.some(
@@ -109,7 +109,7 @@ async function handle(sock, messageInfo) {
       throw new Error("Group data not found");
     }
 
-    // Cek jika konten cocok dengan fitur yang ada
+    // Check if content matches an existing feature
     const feature = featureList.find(
       ({ name }) => content.toLowerCase() === name.toLowerCase()
     );
@@ -133,7 +133,7 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Jika tidak ada fitur yang cocok, kirim template status fitur
+    // If no matching feature, send feature status template
     const template_onchat = createTemplate(dataGrub.fitur);
     await sock.sendMessage(
       remoteJid,
@@ -142,7 +142,7 @@ async function handle(sock, messageInfo) {
     );
   } catch (error) {
     console.error("Error handling the message:", error);
-    // Handling error jika grup data not found atau kesalahan lainnya
+    // Handle error if group data not found or other errors
     await sock.sendMessage(
       remoteJid,
       { text: "An error occurred while processing the command." },
