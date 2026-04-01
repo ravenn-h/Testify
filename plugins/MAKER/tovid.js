@@ -25,7 +25,7 @@ async function handle(sock, messageInfo) {
 
       const mediaPath = path.join("tmp", media);
       if (!fs.existsSync(mediaPath)) {
-        throw new Error("File media not found setelah diunduh.");
+        throw new Error("Media file not found after download.");
       }
 
       const api = new ApiAutoresbot(config.APIKEY);
@@ -42,7 +42,7 @@ async function handle(sock, messageInfo) {
       if (command == "togif") {
         await sock.sendMessage(remoteJid, {
           video: buffer,
-          gifPlayback: true, // Menjadikan video sebagai GIF
+          gifPlayback: true, // Make video play as GIF
           caption: "",
         });
         return;
@@ -54,7 +54,7 @@ async function handle(sock, messageInfo) {
     } else {
       return await sock.sendMessage(
         remoteJid,
-        { text: `⚠️ _Kirim/Balas media dengan caption *${prefix + command}*_` },
+        { text: `⚠️ _Send/Reply to media with caption *${prefix + command}*_` },
         { quoted: message }
       );
     }
@@ -62,7 +62,7 @@ async function handle(sock, messageInfo) {
     console.log(error);
     await sock.sendMessage(
       remoteJid,
-      { text: "Maaf, an error occurred. Try again later!" },
+      { text: "Sorry, an error occurred. Try again later!" },
       { quoted: message }
     );
   }

@@ -2,7 +2,7 @@ import config from "../../config.js";
 import { sendImageAsSticker } from "../../lib/exif.js";
 import axios from "axios";
 
-// Peta nama warna ke kode warna
+// Color name to hex code map
 const colorMap = {
   merah: "#FF0000",
   hijau: "#00FF00",
@@ -32,7 +32,7 @@ async function handle(sock, messageInfo) {
   try {
     const text = isQuoted?.text || content;
 
-    // Validasi input konten
+    // Validate content input
     if (!text) {
       await sock.sendMessage(
         remoteJid,
@@ -43,27 +43,27 @@ async function handle(sock, messageInfo) {
         },
         { quoted: message }
       );
-      return; // Hentikan eksekusi jika none konten
+      return; // Stop execution if no content
     }
 
-    // Pisahkan teks dan kode/nama warna jika tersedia
+    // Split text and color code/name if available
     const [text2, bgColorInput] = text.split("|").map((item) => item.trim());
 
-    // Cek apakah warna input adalah nama warna atau kode warna
+    // Check if color input is a color name or hex code
     const backgroundColor =
       colorMap[bgColorInput?.toLowerCase()] || bgColorInput || "#FFFFFF";
 
-    // Kirimkan pesan loading dengan reaksi emoji
+    // Send loading message with emoji reaction
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
-    // Ambil URL gambar profil user (fallback jika gagal)
+    // Get user profile picture URL (fallback on failure)
     const ppnyauser = await sock
       .profilePictureUrl(sender, "image")
       .catch(() => "https://telegra.ph/file/6880771a42bad09dd6087.jpg");
 
-    // Konfigurasi JSON untuk API quote
+    // JSON configuration for quote API
     const json = {
       type: "quote",
       format: "png",
@@ -88,7 +88,7 @@ async function handle(sock, messageInfo) {
       ],
     };
 
-    // Mengirimkan permintaan ke API quote
+    // Send request to quote API
     const response = await axios.post(
       "https://bot.lyo.su/quote/generate",
       json,
@@ -97,18 +97,18 @@ async function handle(sock, messageInfo) {
       }
     );
 
-    // Konversi gambar base64 ke buffer
+    // Convert base64 image to buffer
     const buffer = Buffer.from(response.data.result.image, "base64");
 
-    // Kirimkan stiker hasil quote
+    // Send quote sticker
     const options = {
       packname: config.sticker_packname,
       author: config.sticker_author,
     };
     await sendImageAsSticker(sock, remoteJid, buffer, options, message);
   } catch (error) {
-    // Tangani kesalahan dan kirimkan pesan error ke user
-    const errorMessage = `Maaf, an error occurred while processing permintaan Anda. Try again later.\n\nError: ${error.message}`;
+    // Handle error and send error message to user
+    const errorMessage = `Sorry, an error occurred while processing your request. Try again later.\n\nError: ${error.message}`;
     await sock.sendMessage(
       remoteJid,
       {

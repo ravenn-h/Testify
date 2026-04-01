@@ -1,4 +1,4 @@
-const DATABASE = {}; // Simpan game di RAM
+const DATABASE = {}; // Store game in RAM
 
 const MONEY_MENANG = 100;
 const opsiLoading = "sticker"; // sticker, emoticon
@@ -37,12 +37,12 @@ const ladders = {
 
 let pendingDelete = null;
 
-// Fungsi kirim sticker
+// Function to send sticker
 async function kirimSticker(sock, remoteJid, namaFile, message) {
   try {
     const mediaPath = path.join(process.cwd(), "database/assets", namaFile);
 
-    // Cek apakah file ada
+    // Check if file exists
     if (!fs.existsSync(mediaPath)) {
       throw new Error(`File not found: ${mediaPath}`);
     }
@@ -57,7 +57,7 @@ async function kirimSticker(sock, remoteJid, namaFile, message) {
       { quoted: message }
     );
   } catch (error) {
-    console.error("Failed to send stiker:", error.message);
+    console.error("Failed to send sticker:", error.message);
   }
 }
 
@@ -80,7 +80,7 @@ async function handle(sock, messageInfo) {
   const command = content?.toLowerCase();
 
   if (!content) {
-    let infoText = "🎮 *Info Game Ular Tangga*\n";
+    let infoText = "🎮 *Snakes and Ladders Game Info*\n";
 
     if (game.players.length === 0) {
       infoText += "👥 No players have joined yet.\n";
@@ -89,15 +89,15 @@ async function handle(sock, messageInfo) {
         .map(
           (p, i) =>
             `${i + 1}. @${p.split("@")[0]}${
-              i === game.turnIndex && game.started ? " 🔄 (giliran)" : ""
+              i === game.turnIndex && game.started ? " 🔄 (turn)" : ""
             }`
         )
         .join("\n");
-      infoText += `👥 Pemain (${game.players.length}/10):\n${playerList}\n`;
+      infoText += `👥 Players (${game.players.length}/10):\n${playerList}\n`;
     }
 
     infoText += `\nStatus: ${game.started ? "🟢 Started" : "🔴 Not started"}`;
-    infoText += `\n\n✅ Gunakan *.snakes join* untuk bergabung\n🚀 Gunakan *.snakes start* untuk memulai game\ndan *.snakes reset* untuk resetting permainan`;
+    infoText += `\n\n✅ Use *.snakes join* to join\n🚀 Use *.snakes start* to start the game\nand *.snakes reset* to reset the game`;
 
     return await sendMessageWithMention(
       sock,
@@ -137,7 +137,7 @@ async function handle(sock, messageInfo) {
     return await sendMessageWithMention(
       sock,
       remoteJid,
-      `✅ @${sender.split("@")[0]} berhasil bergabung. Total pemain: ${
+      `✅ @${sender.split("@")[0]} has joined. Total players: ${
         game.players.length
       }`,
       message,
@@ -166,7 +166,7 @@ async function handle(sock, messageInfo) {
     return await sendMessageWithMention(
       sock,
       remoteJid,
-      `🎲 Permainan dimulai!\nGiliran pertama: @${
+      `🎲 Game started!\nFirst turn: @${
         game.players[0].split("@")[0]
       } type ".snakes play" to roll the dice.`,
       message,
@@ -174,7 +174,7 @@ async function handle(sock, messageInfo) {
     );
   }
 
-  // Play (lempar dadu)
+  // Play (roll dice)
   if (command === "play") {
     if (!game.started) {
       return await sock.sendMessage(
@@ -188,7 +188,7 @@ async function handle(sock, messageInfo) {
       return await sendMessageWithMention(
         sock,
         remoteJid,
-        `🔄 Bukan giliranmu. Sekarang giliran: @${
+        `🔄 Not your turn. Current turn: @${
           game.players[game.turnIndex].split("@")[0]
         }`,
         message,
@@ -200,7 +200,7 @@ async function handle(sock, messageInfo) {
     let posBefore = game.positions[sender];
     game.positions[sender] += dice;
 
-    // Cek posisi tidak boleh lebih dari 100
+    // Make sure position doesn't exceed 100
     if (game.positions[sender] > 100) {
       const overflow = game.positions[sender] - 100;
       game.positions[sender] = 100 - overflow;
@@ -209,23 +209,22 @@ async function handle(sock, messageInfo) {
     let moveInfo = "";
     if (snakes[game.positions[sender]]) {
       game.positions[sender] = snakes[game.positions[sender]];
-      moveInfo = "🐍 Kena ular! Turun";
+      moveInfo = "🐍 Hit a snake! Slide down";
     } else if (ladders[game.positions[sender]]) {
       game.positions[sender] = ladders[game.positions[sender]];
-      moveInfo = "🪜 Naik tangga!";
+      moveInfo = "🪜 Climbed a ladder!";
     }
 
-    // Cek menang
+    // Check for win
     if (game.positions[sender] === 100) {
       delete DATABASE[remoteJid];
 
-      // Tambahkan money user menang
-
+      // Add winner's money
       const user = await findUser(sender);
 
       if (user) {
         const [docId, userData] = user;
-        const moneyAdd = (userData.money || 0) + MONEY_MENANG; // Default money ke 0 jika undefined
+        const moneyAdd = (userData.money || 0) + MONEY_MENANG; // Default money to 0 if undefined
         await updateUser(sender, { money: moneyAdd });
       } else {
       }
@@ -235,19 +234,19 @@ async function handle(sock, messageInfo) {
         remoteJid,
         `🏆 @${
           sender.split("@")[0]
-        } menang! 🎉🎉\n\nAnda Dapat ${MONEY_MENANG} Money `,
+        } wins! 🎉🎉\n\nYou got ${MONEY_MENANG} Money`,
         message,
         senderType
       );
     }
 
-    // Giliran berikutnya
+    // Next turn
     game.turnIndex = (game.turnIndex + 1) % game.players.length;
 
-    // Update game ke DATABASE (tidak wajib karena objek sudah referensi)
+    // Update game in DATABASE (optional since object is referenced)
     DATABASE[remoteJid] = game;
 
-    // Ambil semua avatar pemain untuk gambar
+    // Fetch all player avatars for the image
     const params = new URLSearchParams();
     for (let player of game.players) {
       const pp = await getProfilePictureUrl(sock, player);
@@ -270,9 +269,9 @@ async function handle(sock, messageInfo) {
 
       const customizedMessage = `🎲 @${
         sender.split("@")[0]
-      } melempar dadu: ${dice}\n📍 Posisi sekarang: ${
+      } rolled: ${dice}\n📍 Current position: ${
         game.positions[sender]
-      } ${moveInfo}\n➡️ Giliran selanjutnya: @${
+      } ${moveInfo}\n➡️ Next turn: @${
         game.players[game.turnIndex].split("@")[0]
       }`;
 
@@ -292,7 +291,7 @@ async function handle(sock, messageInfo) {
               remoteJid: remoteJid,
               fromMe: true,
               id: pendingDelete,
-              participant: undefined, // tidak perlu disertakan
+              participant: undefined, // not required
             },
           });
         }

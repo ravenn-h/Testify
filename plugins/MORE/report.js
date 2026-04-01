@@ -8,25 +8,25 @@ async function handle(sock, messageInfo) {
   const { m, remoteJid, content, prefix, command } = messageInfo;
 
   try {
-    // Validasi konten
+    // Validate content
     if (!content) {
       return await reply(
         m,
         `⚠️ _Usage format:_ \n\n_💬 Example:_ _*${
           prefix + command
-        }* error play music, Berikut linknya https://tiktok.com_`
+        }* error play music, Here is the link https://tiktok.com_`
       );
     }
 
     if (content.length < 30) {
-      return await reply(m, `_⚠️ Minimal 30 Karakter_`);
+      return await reply(m, `_⚠️ Minimum 30 Characters_`);
     }
 
-    // Persiapkan data
-    const title = `Laporan Bug Resbot V${global.version}`;
+    // Prepare data
+    const title = `Bug Report Resbot V${global.version}`;
     const api = new ApiAutoresbot(config.APIKEY);
 
-    // Kirim laporan ke API
+    // Send report to API
     const response = await api.get(`/api/database/report-issues`, {
       title,
       description: content,
@@ -36,15 +36,15 @@ async function handle(sock, messageInfo) {
       await sock.sendMessage(
         remoteJid,
         {
-          text: "✅ Laporan successful dikirim. Terima kasih atas kontribusinya!",
+          text: "✅ Report successfully sent. Thank you for your contribution!",
         },
         { quoted: m }
       );
     } else {
-      throw new Error("No data dari API.");
+      throw new Error("No data from API.");
     }
   } catch (error) {
-    console.error("Error saat sending laporan:", error.message);
+    console.error("Error while sending report:", error.message);
     await reply(m, `⚠️ ${error.message}`);
   }
 }

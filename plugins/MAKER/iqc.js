@@ -4,12 +4,12 @@ const ApiAutoresbot = ApiAutoresbotModule.default || ApiAutoresbotModule;
 import config from "../../config.js";
 import mess from "../../strings.js";
 
-// Fungsi untuk buat angka acak dalam range
+// Function to generate random number in range
 function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// Fungsi untuk format waktu "HH:mm"
+// Function to format time "HH:mm"
 function randomTime(baseDate = new Date()) {
   let hour = randomInt(0, 23);
   let minute = randomInt(0, 59);
@@ -34,7 +34,7 @@ async function handle(sock, messageInfo) {
     const text =
       content && content.trim() !== "" ? content : isQuoted?.text ?? null;
 
-    // Validasi input konten
+    // Validate content input
     if (!text) {
       await sock.sendMessage(
         remoteJid,
@@ -48,15 +48,15 @@ async function handle(sock, messageInfo) {
       return;
     }
 
-    // Kirimkan pesan loading dengan reaksi emoji
+    // Send loading message with emoji reaction
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
-    // Fungsi format waktu WIB (GMT+7)
+    // Function to format WIB time (GMT+7)
     function getWaktuIndonesia() {
       const date = new Date();
-      // Ubah ke GMT+7
+      // Convert to GMT+7
       const options = { timeZone: "Asia/Jakarta", hour12: false };
       const formatter = new Intl.DateTimeFormat("id-ID", {
         ...options,
@@ -66,14 +66,14 @@ async function handle(sock, messageInfo) {
       return formatter.format(date);
     }
 
-    // Di dalam handle():
+    // Inside handle():
     const chatTime = getWaktuIndonesia();
     const statusBarTime = getWaktuIndonesia();
 
     // Random value
-    const batteryLevel = randomInt(5, 100).toString(); // antara 5% - 100%
+    const batteryLevel = randomInt(5, 100).toString(); // between 5% - 100%
 
-    // Buat instance API dan ambil data dari endpoint
+    // Create API instance and fetch data from endpoint
     const api = new ApiAutoresbot(config.APIKEY);
     const buffer = await api.getBuffer("/api/maker/iqc", {
       text,
@@ -94,7 +94,7 @@ async function handle(sock, messageInfo) {
     );
   } catch (error) {
     console.log(error);
-    const errorMessage = `Maaf, an error occurred while processing permintaan Anda. Try again later.\n\nError: ${error.message}`;
+    const errorMessage = `Sorry, an error occurred while processing your request. Try again later.\n\nError: ${error.message}`;
     await sock.sendMessage(
       remoteJid,
       { text: errorMessage },

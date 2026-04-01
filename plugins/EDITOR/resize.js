@@ -29,7 +29,7 @@ async function validateSizeInput(content, sock, remoteJid, message) {
   if (isNaN(width) || isNaN(height) || width < 1 || height < 1) {
     await sock.sendMessage(
       remoteJid,
-      { text: "⚠️ _Masukkan ukuran yang valid. Contoh: .resize 100 200_" },
+      { text: "⚠️ _Enter a valid size. Example: .resize 100 200_" },
       { quoted: message }
     );
     return false;

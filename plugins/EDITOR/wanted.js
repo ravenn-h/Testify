@@ -21,7 +21,7 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Tampilkan reaksi "Loading"
+    // Show "Loading" reaction
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
@@ -33,7 +33,7 @@ async function handle(sock, messageInfo) {
     const mediaPath = path.join("tmp", media);
 
     if (!fs.existsSync(mediaPath)) {
-      throw new Error("File media not found setelah diunduh.");
+      throw new Error("Media file not found after download.");
     }
 
     const api = new ApiAutoresbot(config.APIKEY);
@@ -58,16 +58,16 @@ async function handle(sock, messageInfo) {
       { quoted: message }
     );
   } catch (error) {
-    console.error("Kesalahan saat processing perintah Hd:", error);
+    console.error("Error while processing Hd command:", error);
 
-    // Kirim pesan kesalahan yang lebih informatif
+    // Send more informative error message
     const errorMessage = `_An error occurred while processing the image._`;
     await reply(m, errorMessage);
   }
 }
 export default {
   handle,
-  Commands: ["wanted"], // Perintah yang diproses oleh handler ini
+  Commands: ["wanted"], // Commands processed by this handler
   OnlyPremium: false,
   OnlyOwner: false,
 };

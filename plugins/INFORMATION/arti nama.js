@@ -26,18 +26,18 @@ async function handle(sock, messageInfo) {
 
     const api = new ApiAutoresbot(config.APIKEY);
 
-    // Memanggil API dengan penanganan kesalahan dan pengecekan respons
+    // Call API with error handling and response check
     const response = await api.get("/api/primbon/artinama", { text: content });
 
     if (response && response.data) {
-      // Mengirim pesan jika data dari respons tersedia
+      // Send message if response data is available
       await sock.sendMessage(
         remoteJid,
         { text: response.data },
         { quoted: message }
       );
     } else {
-      // Mengirim pesan default jika respons data kosong atau none
+      // Send default message if response data is empty or none
       await sock.sendMessage(
         remoteJid,
         { text: "Sorry, no response from the server." },
@@ -45,7 +45,7 @@ async function handle(sock, messageInfo) {
       );
     }
   } catch (error) {
-    // Memberi tahu user jika ada kesalahan
+    // Notify user if an error occurred
     await sock.sendMessage(
       remoteJid,
       {

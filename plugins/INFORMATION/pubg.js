@@ -13,7 +13,7 @@ async function handle(sock, messageInfo) {
     if (!trimmedContent) {
       return await sock.sendMessage(
         remoteJid,
-        { text: `_Masukkan ID GAME_\n\n${prefix + command} 5178789962` },
+        { text: `_Enter your GAME ID_\n\n${prefix + command} 5178789962` },
         { quoted: message }
       );
     }
@@ -23,20 +23,20 @@ async function handle(sock, messageInfo) {
       return await sock.sendMessage(
         remoteJid,
         {
-          text: `⚠️ _Format salah. Gunakan:_\n\n${prefix + command} <user_id>`,
+          text: `⚠️ _Wrong format. Use:_\n\n${prefix + command} <user_id>`,
         },
         { quoted: message }
       );
     }
 
-    // Mengirimkan reaksi loading
+    // Send loading reaction
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
     const api = new ApiAutoresbot(config.APIKEY);
 
-    // Memanggil API
+    // Call API
     const response = await api.get("/api/stalker/pubg-mobile", { user_id });
 
     if (response?.data) {
@@ -47,7 +47,7 @@ async function handle(sock, messageInfo) {
 ◧ User ID : ${user_id}
 ◧ Username : ${username || "Unknown"}`;
 
-      // Mengirimkan data yang diperoleh
+      // Send retrieved data
       await sock.sendMessage(
         remoteJid,
         { text: gameDataId },
@@ -56,7 +56,7 @@ async function handle(sock, messageInfo) {
       return;
     } else {
       logCustom("info", content, `ERROR-COMMAND-${command}.txt`);
-      // Respons kosong atau none data
+      // Empty response or no data
       await sock.sendMessage(
         remoteJid,
         { text: "Sorry, no response from the server." },
@@ -68,7 +68,7 @@ async function handle(sock, messageInfo) {
     console.error("Error:", error);
     logCustom("info", content, `ERROR-COMMAND-${command}.txt`);
 
-    // Penanganan kesalahan dengan pesan ke user
+    // Handle error with message to user
     await sock.sendMessage(
       remoteJid,
       {

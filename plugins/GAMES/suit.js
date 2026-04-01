@@ -7,9 +7,9 @@ import {
 } from "../../database/temporary_db/suit.js";
 import { sendMessageWithMention, convertToJid } from "../../lib/utils.js";
 
-const WAKTU_GAMES = 60; // 60 detik
+const WAKTU_GAMES = 60; // 60 seconds
 
-// Fungsi untuk memulai permainan
+// Function to start the game
 async function startGame(
   sock,
   remoteJid,
@@ -18,9 +18,6 @@ async function startGame(
   message,
   senderType
 ) {
-
-
-
   addUser(remoteJid, {
     status: false,
     player1,
@@ -31,11 +28,11 @@ async function startGame(
     groupId: remoteJid,
   });
 
-  const gameQuestion = `_*SUIT PvP*_\n\n@${player1.split`@`[0]} menantang @${
+  const gameQuestion = `_*SUIT PvP*_\n\n@${player1.split`@`[0]} challenges @${
     player2.split`@`[0]
-  } untuk bermain suit.\n\nSilakan @${
+  } to a suit game.\n\nPlease @${
     player2.split`@`[0]
-  } ketik *terima* atau *tolak* dalam ${WAKTU_GAMES}s`;
+  } type *accept* or *reject* within ${WAKTU_GAMES}s`;
   await sendMessageWithMention(
     sock,
     remoteJid,
@@ -44,20 +41,20 @@ async function startGame(
     senderType
   );
 
-  // Timer untuk membatalkan jika tidak ada respon
+  // Timer to cancel if no response
   setTimeout(async () => {
     if (isUserPlaying(remoteJid)) {
       removeUser(remoteJid);
       await sock.sendMessage(
         remoteJid,
-        { text: "Waktu habis! Suit dibatalkan." },
+        { text: "Time's up! Suit game cancelled." },
         { quoted: message }
       );
     }
-  }, WAKTU_GAMES * 1000); // 2 menit / 60 detik
+  }, WAKTU_GAMES * 1000); // 2 minutes / 60 seconds
 }
 
-// Fungsi utama untuk menangani command
+// Main function to handle command
 async function handle(sock, messageInfo) {
   const { remoteJid, message, sender, mentionedJid, senderType } = messageInfo;
 
@@ -73,7 +70,7 @@ async function handle(sock, messageInfo) {
     return await sendMessageWithMention(
       sock,
       remoteJid,
-      `_Siapa yang ingin kamu tantang?_\nTag orangnya.\n\nContoh: suit @${
+      `_Who do you want to challenge?_\nTag the person.\n\nExample: suit @${
         sender.split`@`[0]
       }`,
       message,
@@ -82,7 +79,6 @@ async function handle(sock, messageInfo) {
   }
 
   const player1 = sender;
-  //const player2 = mentionedJid[0];
 
   const player2 = await convertToJid(sock, mentionedJid[0])
 
@@ -94,7 +90,7 @@ async function handle(sock, messageInfo) {
     );
   }
   console.log(`
-🎮 MEMULAI GAME
+🎮 STARTING GAME
 ──────────────────────────────
 Room        : ${remoteJid}
 Player 1    : ${player1}

@@ -24,7 +24,7 @@ async function handle(sock, messageInfo) {
       react: { text: "⏰", key: message.key },
     });
 
-    // Panggil API Kodam
+    // Call Kodam API
     const response = await api.get(`/api/game/kodam`);
     if (!response?.data) {
       console.error("⚠️ API response is empty or invalid:", response);
@@ -36,14 +36,14 @@ async function handle(sock, messageInfo) {
     let bufferAudio = await textToAudio(resultKodam);
 
     if (!bufferAudio) {
-      console.error("⚠️ Gagal menghasilkan audio dari teks.");
+      console.error("⚠️ Failed to generate audio from text.");
       return false;
     }
 
     const inputPath = path.join(process.cwd(), generateUniqueFilename());
     await fs.writeFile(inputPath, bufferAudio);
 
-    let bufferFinal = bufferAudio; // Default gunakan buffer original
+    let bufferFinal = bufferAudio; // Default: use original buffer
 
     try {
       const convertedPath = await convertAudioToCompatibleFormat(inputPath);
@@ -61,7 +61,7 @@ async function handle(sock, messageInfo) {
   } catch (error) {
     console.error("⚠️ An error occurred:", error);
 
-    const errorMessage = `Maaf, an error occurred while processing permintaan Anda. Mohon try again later.\n\n${
+    const errorMessage = `Sorry, an error occurred while processing your request. Please try again later.\n\n${
       error.message || "Unknown error"
     }`;
     await sock.sendMessage(

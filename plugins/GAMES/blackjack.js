@@ -4,7 +4,7 @@ import {
 } from "../../database/temporary_db/blackjack.js";
 import { findUser, updateUser } from "../../lib/users.js";
 
-let mode = "hard"; // normal, hard, setan (mode setan gk mungkin menang)
+let mode = "hard"; // normal, hard, setan (setan mode is unwinnable)
 
 let kartu_blackjack_player = [];
 let kartu_blackjack_computer = [];
@@ -63,20 +63,20 @@ function getRandomCard(deck) {
   return deck[Math.floor(Math.random() * deck.length)];
 }
 
-// Fungsi untuk menghitung nilai kartu
+// Function to calculate card values
 function getNilaiKartu_Blackjack(kartu) {
   return kartu.reduce((total, kartu) => {
     if (["J", "Q", "K"].includes(kartu)) return total + 10;
-    if (kartu === "A") return total + 1; // Bisa diatur menjadi 1 atau 11
+    if (kartu === "A") return total + 1; // Can be set to 1 or 11
     return total + (parseInt(kartu) || 0);
   }, 0);
 }
 
-// Fungsi untuk menangani game
+// Function to handle game
 async function handle(sock, messageInfo) {
   const { remoteJid, message, content, fullText, sender } = messageInfo;
 
-  // Periksa jika user sedang bermain
+  // Check if user is already playing
   if (isUserPlaying(sender)) {
     return await sock.sendMessage(
       remoteJid,
@@ -85,7 +85,7 @@ async function handle(sock, messageInfo) {
     );
   }
 
-  // Validasi input taruhan
+  // Validate bet input
   const taruhan = parseInt(content);
   if (!taruhan || taruhan <= 0) {
     return await sock.sendMessage(
@@ -97,7 +97,7 @@ async function handle(sock, messageInfo) {
     );
   }
 
-  // Ambil data user
+  // Fetch user data
   const dataUsers = await findUser(sender);
   if (!dataUsers) {
     return await sock.sendMessage(
@@ -129,11 +129,11 @@ async function handle(sock, messageInfo) {
 
   const totalPlayer = getNilaiKartu_Blackjack(playerCards);
 
-  // Update saldo user
+  // Update user balance
   const updatedMoney = moneyUsers - taruhan;
   await updateUser(sender, { money: updatedMoney });
 
-  // Tambahkan user ke game
+  // Add user to game
   addUser(sender, {
     playerCards,
     computerCards,
@@ -148,10 +148,10 @@ async function handle(sock, messageInfo) {
 
 💻 Computer Cards: ${computerCards[0]}, ?
 
-💰 Taruhan: *${taruhan}*
+💰 Bet: *${taruhan}*
 
-Ketik *hit* untuk mengambil kartu tambahan.
-Ketik *stand* untuk mengakhiri giliran.`;
+Type *hit* to draw an additional card.
+Type *stand* to end your turn.`;
 
   await sock.sendMessage(
     remoteJid,

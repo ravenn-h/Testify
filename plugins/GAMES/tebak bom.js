@@ -10,10 +10,10 @@ import { logWithTime } from "../../lib/utils.js";
 async function handle(sock, messageInfo) {
   const { remoteJid, message, content, fullText } = messageInfo;
 
-  // Periksa apakah pesan mengandung kata "bom"
+  // Check if message contains the word "bom"
   if (!fullText.includes("bom")) return true;
 
-  // Periksa apakah user sedang bermain
+  // Check if user is already playing
   if (isUserPlaying(remoteJid)) {
     await sock.sendMessage(
       remoteJid,
@@ -23,7 +23,7 @@ async function handle(sock, messageInfo) {
     return;
   }
 
-  // Buah dan bom
+  // Fruit and bomb
   const buah = [
     "🍏",
     "🍎",
@@ -53,7 +53,7 @@ async function handle(sock, messageInfo) {
     return posisiBom + 1;
   };
 
-  // Generate grid buah
+  // Generate fruit grid
   const grid = [
     acakArray(buah.slice(0, 3)),
     acakArray(buah.slice(3, 6)),
@@ -65,24 +65,24 @@ async function handle(sock, messageInfo) {
   const bomView_User = `1️⃣ 2️⃣ 3️⃣\n4️⃣ 5️⃣ 6️⃣\n7️⃣ 8️⃣ 9️⃣`;
   const bomView_User_Abjad = `A B C D E F G H I`;
 
-  // Tambahkan user ke database
+  // Add user to database
   addUser(remoteJid, {
     posisiBom: posisiBomReal,
     terjawab: [],
     ListBuah: grid,
     bomView_User: bomView_User_Abjad,
-    hadiah: 5, // Jumlah money jika menang
+    hadiah: 5, // Prize amount if won
     moneyMenang: 10,
-    moneyKalah: 25, // Jumlah pengurangan jika kalah
+    moneyKalah: 25, // Deduction amount if lost
     command: fullText,
   });
 
-  logWithTime("Tebak Bom", `Posisibom : ${posisiBomReal}`);
+  logWithTime("Tebak Bom", `BombPosition: ${posisiBomReal}`);
 
-  // Kirim pesan awal permainan
+  // Send initial game message
   await sock.sendMessage(
     remoteJid,
-    { text: `_*Tebak Bom Dimulai*_\n\n${bomView_User}` },
+    { text: `_*Bomb Guessing Game Started*_\n\n${bomView_User}` },
     { quoted: message }
   );
 }

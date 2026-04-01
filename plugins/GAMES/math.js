@@ -12,7 +12,7 @@ try {
     const { remoteJid, message, sender, isGroup, command, content, fullText } =
     messageInfo;
 
-  // Cek apakah user sedang bermain
+  // Check if user is already playing
   const isPlaying = isUserPlaying(remoteJid);
   if (isPlaying) {
     return sock.sendMessage(
@@ -26,7 +26,7 @@ try {
     return sock.sendMessage(
       remoteJid,
       {
-        text: `Contoh useran: *math medium*\n\nMode yang tersedia: ${Object.keys(
+        text: `Example: *math medium*\n\nAvailable modes: ${Object.keys(
           modes
         ).join(" | ")}`,
       },
@@ -39,7 +39,7 @@ try {
     return sock.sendMessage(
       remoteJid,
       {
-        text: `Mode not valid! \n\nMode yang tersedia: ${Object.keys(
+        text: `Mode not valid! \n\nAvailable modes: ${Object.keys(
           modes
         ).join(" | ")}`,
       },
@@ -61,34 +61,34 @@ try {
     );
   }
 
-  // Set timer berdasarkan waktu dari result
+  // Set timer based on time from result
   const timer = setTimeout(async () => {
     if (isUserPlaying(remoteJid)) {
-      removeUser(remoteJid); // Hapus user jika waktu habis
+      removeUser(remoteJid); // Remove user if time runs out
       await sock.sendMessage(
         remoteJid,
-        { text: `Waktu habis! Jawabannya : ${result.jawaban}` },
+        { text: `Time's up! The answer is: ${result.jawaban}` },
         { quoted: message }
       );
     }
-  }, result.waktu); // Gunakan waktu dari result
+  }, result.waktu); // Use time from result
 
   result.timer = timer;
   result.command = fullText;
 
-  // Tambahkan user ke permainan
+  // Add user to the game
   addUser(remoteJid, result);
 
   const waktuDetik = (result.waktu / 1000).toFixed(2);
   await sock.sendMessage(
     remoteJid,
     {
-      text: `*Berapa hasil dari: ${result.soal.toLowerCase()}*?\n\nWaktu: ${waktuDetik} detik`,
+      text: `*What is the result of: ${result.soal.toLowerCase()}*?\n\nTime: ${waktuDetik} seconds`,
     },
     { quoted: message }
   );
-  console.log(`Jawaban : ${result.jawaban}`);
-  logWithTime("Math", `Jawaban : ${result.jawaban}`);
+  console.log(`Answer: ${result.jawaban}`);
+  logWithTime("Math", `Answer: ${result.jawaban}`);
 } catch (error) {
   console.error("Error in math.js:", error);
   

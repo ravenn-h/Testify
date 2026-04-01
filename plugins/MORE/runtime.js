@@ -4,7 +4,7 @@ import { execSync } from "child_process";
 import fs from "fs";
 import path from "path";
 
-// Fungsi format uptime
+// Uptime format function
 function getUptime(seconds) {
   const days = Math.floor(seconds / (24 * 3600));
   seconds %= 24 * 3600;
@@ -15,7 +15,7 @@ function getUptime(seconds) {
   return `${days}d ${hours}h ${minutes}m ${secs}s`;
 }
 
-// Fungsi platform yang lebih fleksibel
+// More flexible platform function
 function getPlatform() {
   const platform = os.platform();
   if (platform === "win32") return "Windows";
@@ -23,7 +23,7 @@ function getPlatform() {
   return platform;
 }
 
-// Fungsi disk info tergantung OS
+// OS-dependent disk info function
 function getDiskInfo() {
   try {
     if (os.platform() === "win32") {
@@ -44,7 +44,7 @@ function getDiskInfo() {
             ((parseInt(total) - parseInt(free)) / 1024 ** 3).toFixed(2) + " GB",
         };
       });
-      // Ambil drive C sebagai default
+      // Get drive C as default
       return diskData.find((d) => d.drive === "C:") || diskData[0];
     } else {
       const total = execSync("df -h --output=size / | tail -1")
@@ -63,7 +63,7 @@ function getDiskInfo() {
   }
 }
 
-// Waktu mulai bot
+// Bot start time
 const botStartTime = Date.now();
 
 async function handle(sock, messageInfo) {

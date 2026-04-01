@@ -12,29 +12,29 @@ import {
   isUserPlaying,
 } from "../../database/temporary_db/cak lontong.js";
 
-const WAKTU_GAMES = 60; // 60 detik
+const WAKTU_GAMES = 60; // 60 seconds
 
 const api = new ApiAutoresbot(config.APIKEY);
 
 /**
- * Mengirim pesan ke user.
- * @param {Object} sock - Instance koneksi.
- * @param {string} remoteJid - ID user.
- * @param {Object} content - Konten pesan.
- * @param {Object} options - Opsi tambahan untuk pengiriman pesan.
+ * Send message to user.
+ * @param {Object} sock - Connection instance.
+ * @param {string} remoteJid - User ID.
+ * @param {Object} content - Message content.
+ * @param {Object} options - Additional options for message sending.
  */
 const sendMessage = async (sock, remoteJid, content, options = {}) => {
   try {
     await sock.sendMessage(remoteJid, content, options);
   } catch (error) {
-    console.error(`Failed to send pesan ke ${remoteJid}:`, error);
+    console.error(`Failed to send message to ${remoteJid}:`, error);
   }
 };
 
 /**
- * Menangani game Cak Lontong.
- * @param {Object} sock - Instance koneksi.
- * @param {Object} messageInfo - Informasi pesan.
+ * Handle the Cak Lontong game.
+ * @param {Object} sock - Connection instance.
+ * @param {Object} messageInfo - Message information.
  */
 const handle = async (sock, messageInfo) => {
   const { remoteJid, message, fullText } = messageInfo;
@@ -43,7 +43,7 @@ const handle = async (sock, messageInfo) => {
     return true;
   }
 
-  // Cek apakah user sudah bermain
+  // Check if user is already playing
   if (isUserPlaying(remoteJid)) {
     await sendMessage(
       sock,
@@ -58,7 +58,7 @@ const handle = async (sock, messageInfo) => {
     const response = await api.get("/api/game/caklontong");
     const { soal, jawaban, deskripsi } = response.data;
 
-    // Timer 60 detik untuk menjawab
+    // 60-second timer to answer
     const timer = setTimeout(async () => {
       if (isUserPlaying(remoteJid)) {
         removeUser(remoteJid);
@@ -73,26 +73,26 @@ const handle = async (sock, messageInfo) => {
       }
     }, WAKTU_GAMES * 1000);
 
-    // Tambahkan user ke database
+    // Add user to database
     addUser(remoteJid, {
       answer: jawaban.toLowerCase(),
-      hadiah: 10, // Jumlah hadiah jika menang
+      hadiah: 10, // Prize amount if won
       deskripsi,
       command: fullText,
       timer: timer,
     });
 
-    // Kirim pertanyaan ke user
+    // Send question to user
     await sendMessage(
       sock,
       remoteJid,
-      { text: `*Jawablah Pertanyaan Berikut :*\n${soal}\n*Waktu : 60s*` },
+      { text: `*Answer the Following Question:*\n${soal}\n*Time: 60s*` },
       { quoted: message }
     );
 
-    logWithTime("Caklontong", `Jawaban : ${jawaban}`);
+    logWithTime("Caklontong", `Answer: ${jawaban}`);
   } catch (error) {
-    const errorMessage = `Maaf, an error occurred while processing permintaan Anda. Mohon try again later.\n\n${
+    const errorMessage = `Sorry, an error occurred while processing your request. Please try again later.\n\n${
       error || "Unknown error"
     }`;
     await sendMessage(

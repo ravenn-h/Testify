@@ -6,7 +6,7 @@ const api = new ApiAutoresbot(config.APIKEY);
 import mess from "../../strings.js";
 import { logWithTime } from "../../lib/utils.js";
 
-const WAKTU_GAMES = 60; // 60 detik
+const WAKTU_GAMES = 60; // 60 seconds
 
 import {
   addUser,
@@ -28,7 +28,7 @@ async function handle(sock, messageInfo) {
     const answer = response.data.jawaban;
     const deskripsi = response.data.deskripsi;
 
-    // Ketika sedang bermain
+    // When already playing
     if (isUserPlaying(remoteJid)) {
       return await sock.sendMessage(
         remoteJid,
@@ -37,11 +37,11 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Buat timer baru untuk user
+    // Create new timer for user
     const timer = setTimeout(async () => {
       if (!isUserPlaying(remoteJid)) return;
 
-      removeUser(remoteJid); // Hapus user dari database jika waktu habis
+      removeUser(remoteJid); // Remove user from database if time runs out
 
       if (mess.game_handler.waktu_habis) {
         const messageWarning = mess.game_handler.waktu_habis.replace(
@@ -56,10 +56,10 @@ async function handle(sock, messageInfo) {
       }
     }, WAKTU_GAMES * 1000);
 
-    // Tambahkan user ke database
+    // Add user to database
     addUser(remoteJid, {
       answer: answer.toLowerCase(),
-      hadiah: 10, // jumlah money jika menang
+      hadiah: 10, // prize amount if won
       command: fullText,
       timer: timer,
     });
@@ -68,14 +68,14 @@ async function handle(sock, messageInfo) {
       remoteJid,
       {
         image: { url: UrlData },
-        caption: `Silahkan Jawab Soal Di Atas Ini\n\nDeskripsi : ${deskripsi}\nWaktu : ${WAKTU_GAMES}s`,
+        caption: `Please Answer the Question Above\n\nDescription: ${deskripsi}\nTime: ${WAKTU_GAMES}s`,
       },
       { quoted: message }
     );
 
-    logWithTime("Tebak Gambar", `Jawaban : ${answer}`);
+    logWithTime("Tebak Gambar", `Answer: ${answer}`);
   } catch (error) {
-    const errorMessage = `Maaf, an error occurred while processing permintaan Anda. Mohon try again later.\n\n${
+    const errorMessage = `Sorry, an error occurred while processing your request. Please try again later.\n\n${
       error || "Unknown error"
     }`;
     await sock.sendMessage(

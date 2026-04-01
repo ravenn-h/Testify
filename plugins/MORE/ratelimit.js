@@ -2,16 +2,16 @@ import config from "../../config.js";
 
 async function handle(sock, messageInfo) {
   const { remoteJid, message } = messageInfo;
-  const rateLimitSeconds = config.rate_limit / 1000; // Konversi ke detik
+  const rateLimitSeconds = config.rate_limit / 1000; // Convert to seconds
 
   const response = `⏱️ *Rate Limit Bot*
 
-🕒 _Batas waktu useran perintah_: *${rateLimitSeconds} detik*
+🕒 _Command usage time limit_: *${rateLimitSeconds} seconds*
 
-📌 *Mengapa ada batasan ini?*
-Untuk menjaga agar bot tidak sending terlalu banyak pesan dalam waktu singkat dan menghindari spam. Oleh karena itu, setiap perintah baru dapat diproses setelah jeda ${rateLimitSeconds} detik.
+📌 *Why is there a limit?*
+To prevent the bot from sending too many messages in a short time and avoid spam. Each new command can be processed after a ${rateLimitSeconds}-second delay.
 
-🙏 Terima kasih atas pengertiannya!`;
+🙏 Thank you for your understanding!`;
 
   await sock.sendMessage(remoteJid, { text: response }, { quoted: message });
 }

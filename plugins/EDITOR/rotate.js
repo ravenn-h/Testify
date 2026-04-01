@@ -7,10 +7,10 @@ async function handle(sock, messageInfo) {
   const { remoteJid, message, content, isQuoted, type, prefix, command } =
     messageInfo;
 
-  // Tentukan tipe media
+  // Determine media type
   const mediaType = isQuoted ? `${isQuoted.type}Message` : `${type}Message`;
 
-  // Validasi tipe media
+  // Validate media type
   if (mediaType !== "imageMessage") {
     await sock.sendMessage(
       remoteJid,
@@ -20,25 +20,25 @@ async function handle(sock, messageInfo) {
     return;
   }
 
-  // Validasi input rotasi
+  // Validate rotation input
   const rotationAngle = parseInt(content, 10);
   if (isNaN(rotationAngle) || rotationAngle < 1 || rotationAngle > 360) {
     await sock.sendMessage(
       remoteJid,
-      { text: "⚠️ _Masukkan Rotate 1 - 360_" },
+      { text: "⚠️ _Enter a rotation value between 1 - 360_" },
       { quoted: message }
     );
     return;
   }
 
   try {
-    // Unduh media
+    // Download media
     const media = isQuoted
       ? await downloadQuotedMedia(message)
       : await downloadMedia(message);
     const mediaPath = `tmp/${media}`;
 
-    // Make sure file ada sebelum diproses
+    // Make sure file exists before processing
     if (!fs.existsSync(mediaPath)) {
       await sock.sendMessage(
         remoteJid,
@@ -48,7 +48,7 @@ async function handle(sock, messageInfo) {
       return;
     }
 
-    // Tampilkan reaksi "Loading"
+    // Show "Loading" reaction
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });

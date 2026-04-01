@@ -9,18 +9,18 @@ async function handle(sock, messageInfo) {
         m,
         `_⚠️ Usage format:_ \n\n_💬 Example:_ _*${prefix + command} resbot*_
 
-ᴄᴏɴᴛᴏʜ ꜱᴛʏʟᴇ
-𝓬𝓸𝓷𝓽𝓸𝓱 𝓼𝓽𝔂𝓵𝓮2
-contoh style3
-ⓒⓞⓝⓣⓞⓗ ⓢⓣⓨⓛⓔ④
-𝐜𝐨𝐧𝐭𝐨𝐡 𝐬𝐭𝐲𝐥𝐞𝟓
-𝗰𝗼𝗻𝘁𝗼𝗵 𝘀𝘁𝘆𝗹𝗲𝟲
-𝘤𝘰𝘯𝘵𝘰𝘩 𝘴𝘵𝘺𝘭𝘦7
-𝙘𝙤𝙣𝙩𝙤𝙝 𝙨𝙩𝙮𝙡𝙚8
-🄲🄾🄽🅃🄾🄷 🅂🅃🅈🄻🄴9
-🅲🅾️🅽🆃🅾️🅷 🆂🆃🆈🅻🅴10
+ᴇxᴀᴍᴘʟᴇ ꜱᴛʏʟᴇ
+𝓮𝔁𝓪𝓶𝓹𝓵𝓮 𝓼𝓽𝔂𝓵𝓮2
+example style3
+ⓔⓧⓐⓜⓟⓛⓔ ⓢⓣⓨⓛⓔ④
+𝐞𝐱𝐚𝐦𝐩𝐥𝐞 𝐬𝐭𝐲𝐥𝐞𝟓
+𝗲𝘅𝗮𝗺𝗽𝗹𝗲 𝘀𝘁𝘆𝗹𝗲𝟲
+𝘦𝘹𝘢𝘮𝘱𝘭𝘦 𝘴𝘵𝘺𝘭𝘦7
+𝙚𝙭𝙖𝙢𝙥𝙡𝙚 𝙨𝙩𝙮𝙡𝙚8
+🄴🅇🄰🄼🄿🄻🄴 🅂🅃🅈🄻🄴9
+🅴🆇🅰🅼🅿🅻🅴 🆂🆃🆈🅻🅴10
                 
-_Gunakan .style2 sampai .style10_`
+_Use .style2 to .style10_`
       );
     }
 

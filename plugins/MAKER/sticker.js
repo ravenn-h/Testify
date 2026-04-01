@@ -19,7 +19,7 @@ async function handle(sock, messageInfo) {
       const mediaPath = path.join("tmp", media);
 
       if (!fs.existsSync(mediaPath)) {
-        throw new Error("File media not found setelah diunduh.");
+        throw new Error("Media file not found after download.");
       }
 
       const buffer = fs.readFileSync(mediaPath);
@@ -29,26 +29,26 @@ async function handle(sock, messageInfo) {
         author: config.sticker_author,
       };
 
-      // Kirim stiker
+      // Send sticker
       await sendImageAsSticker(sock, remoteJid, buffer, options, message);
 
-      // Hapus file sementara
+      // Delete temporary file
       fs.unlinkSync(mediaPath);
     } else {
-      // Jika pesan bukan gambar atau video
+      // If message is not an image or video
       await sock.sendMessage(
         remoteJid,
         {
-          text: `⚠️ _Kirim/Balas gambar dengan caption *${prefix + command}*_`,
+          text: `⚠️ _Send/Reply to an image with caption *${prefix + command}*_`,
         },
         { quoted: message }
       );
     }
   } catch (error) {
-    console.error("An error occurred while processing stiker:", error);
+    console.error("An error occurred while processing sticker:", error);
     await sock.sendMessage(
       remoteJid,
-      { text: "Maaf, an error occurred. Try again later!" },
+      { text: "Sorry, an error occurred. Try again later!" },
       { quoted: message }
     );
   }

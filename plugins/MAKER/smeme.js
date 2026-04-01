@@ -19,7 +19,7 @@ async function handle(sock, messageInfo) {
   const { remoteJid, message, type, isQuoted, content, prefix, command } =
     messageInfo;
   try {
-    // Cek jika none teks/konten
+    // Check if no text/content
     if (!content) {
       return sock.sendMessage(
         remoteJid,
@@ -38,28 +38,28 @@ async function handle(sock, messageInfo) {
 
     const mediaType = isQuoted ? isQuoted.type : type;
 
-    // Hanya proses image dan sticker
+    // Only process image and sticker
     if (mediaType !== "image" && mediaType !== "sticker") {
       return sock.sendMessage(
         remoteJid,
         {
-          text: `⚠️ _Kirim/Balas gambar dengan caption *${prefix + command}*_`,
+          text: `⚠️ _Send/Reply to an image with caption *${prefix + command}*_`,
         },
         { quoted: message }
       );
     }
 
-    // Pisahkan teks smeme
+    // Split smeme text
     const [smemeText1 = "", smemeText2 = ""] = (content || "").split("|");
 
-    // Unduh media
+    // Download media
     const media = isQuoted
       ? await downloadQuotedMedia(message)
       : await downloadMedia(message);
 
     const mediaPath = path.join("tmp", media);
     if (!fs.existsSync(mediaPath)) {
-      throw new Error("File media not found setelah diunduh.");
+      throw new Error("Media file not found after download.");
     }
 
     const api = new ApiAutoresbot(config.APIKEY);
@@ -71,7 +71,7 @@ async function handle(sock, messageInfo) {
     const url = response.data.url;
 
     if (url) {
-      // Ambil buffer hasil API smeme
+      // Get buffer result from smeme API
 
       const buffer = await api.getBuffer("/api/maker/smeme", {
         text: smemeText1,
@@ -81,7 +81,7 @@ async function handle(sock, messageInfo) {
         height: 500,
       });
 
-      // Konversi ke webp
+      // Convert to webp
       const webpBuffer = await sharp(buffer).webp().toBuffer();
 
       const options = {
@@ -94,7 +94,7 @@ async function handle(sock, messageInfo) {
   } catch (error) {
     await sock.sendMessage(
       remoteJid,
-      { text: "Maaf, an error occurred. Try again later!" },
+      { text: "Sorry, an error occurred. Try again later!" },
       { quoted: message }
     );
   }

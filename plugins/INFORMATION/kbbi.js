@@ -18,7 +18,7 @@ async function handle(sock, messageInfo) {
   const { remoteJid, message, content, prefix, command } = messageInfo;
 
   try {
-    // Validasi input
+    // Validate input
     if (!content.trim() || content.trim() == "") {
       return sendMessageWithQuote(
         sock,
@@ -28,35 +28,35 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Tampilkan reaksi "Loading"
+    // Show "Loading" reaction
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
-    // Inisialisasi API
+    // Initialize API
     const api = new ApiAutoresbot(config.APIKEY);
 
-    // Memanggil API dengan parameter
+    // Call API with parameters
     const response = await api.get("/api/information/kbbi", { q: content });
 
-    // Menangani respons API
+    // Handle API response
     if (response.code === 200 && response.data) {
       const { kata, keterangan } = response.data;
       const bersih = cleanHtml(keterangan);
-      const kbbiData = `_*Kata:*_ ${kata}\n\n_*Arti:*_ ${bersih}`;
+      const kbbiData = `_*Word:*_ ${kata}\n\n_*Meaning:*_ ${bersih}`;
 
-      // Kirimkan text
+      // Send text
       await sendMessageWithQuote(sock, remoteJid, message, kbbiData);
     } else {
-      // Menangani kasus jika respons tidak sesuai atau kosong
+      // Handle case if response is invalid or empty
       const errorMessage =
         response?.message ||
-        "Sorry, no response from the server. Please try again nanti.";
+        "Sorry, no response from the server. Please try again later.";
       await sendMessageWithQuote(sock, remoteJid, message, errorMessage);
     }
   } catch (error) {
-    // Menangani kesalahan dan sending pesan ke user
-    const errorMessage = `Maaf, an error occurred while processing your request. Please try again later.\n\nError Details: ${
+    // Handle error and send message to user
+    const errorMessage = `Sorry, an error occurred while processing your request. Please try again later.\n\nError Details: ${
       error.message || error
     }`;
     await sendMessageWithQuote(sock, remoteJid, message, errorMessage);

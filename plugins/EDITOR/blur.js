@@ -29,7 +29,7 @@ async function validateBlurLevel(content, sock, remoteJid, message) {
   if (isNaN(blurLevel) || blurLevel < 1 || blurLevel > 100) {
     await sock.sendMessage(
       remoteJid,
-      { text: "⚠️ _Masukkan nilai blur antara 1 - 100_" },
+      { text: "⚠️ _Enter a blur value between 1 - 100_" },
       { quoted: message }
     );
     return false;
@@ -105,7 +105,7 @@ async function handle(sock, messageInfo) {
         { quoted: message }
       );
     } else {
-      throw new Error("File hasil blur not found.");
+      throw new Error("Blur output file not found.");
     }
   } catch (error) {
     console.error("Error processing image:", error);

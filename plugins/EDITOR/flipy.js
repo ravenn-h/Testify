@@ -7,10 +7,10 @@ async function handle(sock, messageInfo) {
   const { remoteJid, message, content, isQuoted, type, prefix, command } =
     messageInfo;
 
-  // Tentukan tipe media
+  // Determine media type
   const mediaType = isQuoted ? `${isQuoted.type}Message` : `${type}Message`;
 
-  // Validasi tipe media
+  // Validate media type
   if (mediaType !== "imageMessage") {
     await sock.sendMessage(
       remoteJid,
@@ -21,13 +21,13 @@ async function handle(sock, messageInfo) {
   }
 
   try {
-    // Unduh media
+    // Download media
     const media = isQuoted
       ? await downloadQuotedMedia(message)
       : await downloadMedia(message);
     const mediaPath = `tmp/${media}`;
 
-    // Make sure file ada sebelum diproses
+    // Make sure file exists before processing
     if (!fs.existsSync(mediaPath)) {
       await sock.sendMessage(
         remoteJid,
@@ -37,16 +37,16 @@ async function handle(sock, messageInfo) {
       return;
     }
 
-    // Tampilkan reaksi "Loading"
+    // Show "Loading" reaction
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
     const outputImagePath = `tmp/tmp_flipx${Date.now()}.jpg`;
 
-    await sharp(mediaPath).flop().toFile(outputImagePath); // Vertikal
+    await sharp(mediaPath).flop().toFile(outputImagePath); // Horizontal flip
 
-    // Make sure file hasil ada dan valid
+    // Make sure output file exists and is valid
     if (fs.existsSync(outputImagePath)) {
       await sock.sendMessage(
         remoteJid,

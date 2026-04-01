@@ -11,7 +11,7 @@ const filePath = path.join(
 );
 const buffer = readFileAsBuffer(filePath);
 
-// Daftar dare
+// List of dares
 const dares = [
   'Send a message to your ex saying "I still like you"',
   "Call your crush/partner right now and screenshot the result for the players",
@@ -39,14 +39,14 @@ const dares = [
   "Pretend to be possessed, e.g., by a tiger, grasshopper, refrigerator, etc.",
 ];
 
-// Fungsi untuk menangani pesan
+// Function to handle messages
 async function handle(sock, messageInfo) {
   const { remoteJid, message } = messageInfo;
 
-  // Pilih dare secara acak
+  // Pick a dare at random
   const selectedDare = dares[Math.floor(Math.random() * dares.length)];
 
-  // Kirim pesan dengan gambar dan caption
+  // Send message with image and caption
   await sock.sendMessage(
     remoteJid,
     {

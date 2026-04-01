@@ -7,21 +7,21 @@ import {
 } from "../../database/temporary_db/tictactoe.js";
 import TicTacToe from "../../lib/games/tictactoe.js";
 
-const WAKTU_GAMES = 60; // 60 detik
+const WAKTU_GAMES = 60; // 60 seconds
 
 async function handle(sock, messageInfo) {
   const { remoteJid, message, sender, isGroup, command } = messageInfo;
 
   const groupOnlyMessage = { text: mess.game.isGroup };
-  const waitingMessage = `Waiting for partner (${WAKTU_GAMES} s)... \n\nKetik *${command}* untuk menanggapi`;
-  const timeoutMessage = `⏳ Waktu habis! Tidak ada lawan yang ingin bermain`;
+  const waitingMessage = `Waiting for partner (${WAKTU_GAMES} s)... \n\nType *${command}* to respond`;
+  const timeoutMessage = `⏳ Time's up! No opponent wanted to play`;
 
-  // Cek apakah permainan di grup
+  // Check if game is in a group
   if (!isGroup) {
     return sock.sendMessage(remoteJid, groupOnlyMessage, { quoted: message });
   }
 
-  // Cek apakah user sedang bermain
+  // Check if user is already playing
   const isPlaying = isUserPlaying(remoteJid);
   if (isPlaying) {
     const currentGame = getUser(remoteJid);
@@ -34,7 +34,7 @@ async function handle(sock, messageInfo) {
     return true;
   }
 
-  // Tambahkan user ke database
+  // Add user to database
   addUser(remoteJid, {
     id_room: remoteJid,
     playerX: sender,
@@ -43,13 +43,13 @@ async function handle(sock, messageInfo) {
     game: new TicTacToe(sender, "o"),
   });
 
-  // Set timer untuk 120 detik
+  // Set 120-second timer
   setTimeout(async () => {
     if (isUserPlaying(remoteJid)) {
       const currentGame = getUser(remoteJid);
       if (currentGame.state === "PLAYING") return true;
 
-      removeUser(remoteJid); // Hapus user jika waktu habis
+      removeUser(remoteJid); // Remove user if time runs out
       await sock.sendMessage(
         remoteJid,
         { text: timeoutMessage },
@@ -59,7 +59,7 @@ async function handle(sock, messageInfo) {
     }
   }, WAKTU_GAMES * 1000);
 
-  // Kirim pesan waiting for
+  // Send waiting message
   await sock.sendMessage(
     remoteJid,
     { text: waitingMessage },

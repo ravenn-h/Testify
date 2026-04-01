@@ -13,7 +13,7 @@ async function handle(sock, messageInfo) {
     const text =
       content && content.trim() !== "" ? content : isQuoted?.text ?? null;
 
-    // Validasi input konten
+    // Validate content input
     if (!text) {
       await sock.sendMessage(
         remoteJid,
@@ -24,20 +24,20 @@ async function handle(sock, messageInfo) {
         },
         { quoted: message }
       );
-      return; // Hentikan eksekusi jika none konten
+      return; // Stop execution if no content
     }
 
-    // Kirimkan pesan loading dengan reaksi emoji
+    // Send loading message with emoji reaction
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
-    // Bersihkan konten
+    // Sanitize content
     const sanitizedContent = encodeURIComponent(
       text.trim().replace(/\n+/g, " ")
     );
 
-    // Buat instance API dan ambil data dari endpoint
+    // Create API instance and fetch data from endpoint
     const api = new ApiAutoresbot(config.APIKEY);
     const buffer = await api.getBuffer("/api/maker/bratvid", {
       text: sanitizedContent,
@@ -48,12 +48,12 @@ async function handle(sock, messageInfo) {
       author: config.sticker_author,
     };
 
-    // Kirim stiker
+    // Send sticker
     await sendImageAsSticker(sock, remoteJid, buffer, options, message);
   } catch (error) {
     logCustom("info", content, `ERROR-COMMAND-${command}.txt`);
-    // Tangani kesalahan dan kirimkan pesan error ke user
-    const errorMessage = `Maaf, an error occurred while processing permintaan Anda. Try again later.\n\nError: ${error.message}`;
+    // Handle error and send error message to user
+    const errorMessage = `Sorry, an error occurred while processing your request. Try again later.\n\nError: ${error.message}`;
     await sock.sendMessage(
       remoteJid,
       {

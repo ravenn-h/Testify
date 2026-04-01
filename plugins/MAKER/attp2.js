@@ -8,7 +8,7 @@ async function handle(sock, messageInfo) {
 
   try {
     const text = content ?? isQuoted?.text ?? null;
-    // Validasi input konten
+    // Validate content input
     if (!text) {
       await sock.sendMessage(
         remoteJid,
@@ -19,19 +19,19 @@ async function handle(sock, messageInfo) {
         },
         { quoted: message }
       );
-      return; // Hentikan eksekusi jika none konten
+      return; // Stop execution if no content
     }
 
-    // Kirimkan pesan loading dengan reaksi emoji
+    // Send loading message with emoji reaction
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
-    // Buat instance API dan ambil data dari endpoint
+    // Create API instance and fetch data from endpoint
     const api = new ApiAutoresbot(config.APIKEY);
     const response = await api.getBuffer("/api/maker/attp3", { text: text });
 
-    // Kirimkan stiker sebagai respon
+    // Send sticker as response
     await sock.sendMessage(
       remoteJid,
       {
@@ -40,8 +40,8 @@ async function handle(sock, messageInfo) {
       { quoted: message }
     );
   } catch (error) {
-    // Tangani kesalahan dan kirimkan pesan error ke user
-    const errorMessage = `Maaf, an error occurred while processing permintaan Anda. Try again later.\n\nError: ${error.message}`;
+    // Handle error and send error message to user
+    const errorMessage = `Sorry, an error occurred while processing your request. Try again later.\n\nError: ${error.message}`;
     await sock.sendMessage(
       remoteJid,
       {

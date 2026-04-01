@@ -21,17 +21,17 @@ async function handle(sock, messageInfo) {
       .split("|")
       .map((s) => s.trim());
 
-    // Validasi tipe media
+    // Validate media type
     if (!["image", "sticker"].includes(mediaType)) {
       return sendError(
         sock,
         remoteJid,
         message,
-        `⚠️ _Kirim/Balas gambar/stiker dengan caption *${prefix + command}*_`
+        `⚠️ _Send/Reply to an image/sticker with caption *${prefix + command}*_`
       );
     }
 
-    // Validasi konten input
+    // Validate input content
     if (!content.trim()) {
       return sendError(
         sock,
@@ -39,12 +39,12 @@ async function handle(sock, messageInfo) {
         message,
         `_Example: *wm az creative*_
 
-_Contoh 1: wm nama_
-_Contoh 2: wm youtube | creative_`
+_Example 1: wm name_
+_Example 2: wm youtube | creative_`
       );
     }
 
-    // Unduh media
+    // Download media
     const mediaPath = `./tmp/${
       isQuoted
         ? await downloadQuotedMedia(message)
@@ -52,10 +52,10 @@ _Contoh 2: wm youtube | creative_`
     }`;
 
     if (!fs.existsSync(mediaPath)) {
-      throw new Error("File media not found setelah diunduh.");
+      throw new Error("Media file not found after download.");
     }
 
-    // Buat stiker dengan watermark
+    // Create sticker with watermark
     const sticker = new Sticker(mediaPath, {
       pack: packname,
       author: author,
@@ -70,7 +70,7 @@ _Contoh 2: wm youtube | creative_`
       sock,
       remoteJid,
       message,
-      `Maaf, an error occurred while processing permintaan Anda. Try again later.\n\nError: ${error.message}`
+      `Sorry, an error occurred while processing your request. Try again later.\n\nError: ${error.message}`
     );
   }
 }

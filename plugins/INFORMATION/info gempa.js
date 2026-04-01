@@ -6,52 +6,52 @@ import config from "../../config.js";
 async function handle(sock, messageInfo) {
   const { remoteJid, message, prefix, command, content } = messageInfo;
 
-  // Ikon loading untuk menunjukkan proses sedang berjalan
+  // Loading icon to indicate process is running
   const loadingReaction = { react: { text: "⏰", key: message.key } };
   const errorMessage =
     "Sorry, an error occurred while processing your request. Try again later.";
 
   try {
-    // Mengirim reaksi loading
+    // Send loading reaction
     await sock.sendMessage(remoteJid, loadingReaction);
 
     const api = new ApiAutoresbot(config.APIKEY);
 
-    // Memanggil endpoint API untuk getting informasi gempa
+    // Call API endpoint to get earthquake information
     const response = await api.get(`/api/information/gempadirasakan`);
 
-    // Validasi respons dari API
+    // Validate API response
     if (response?.data?.length) {
       const gempaInfo = response.data[0];
-      const capt = `_*Info Gempa Terbaru*_
+      const capt = `_*Latest Earthquake Info*_
 
-*◧ Tanggal:* ${gempaInfo.Tanggal}
-*◧ Wilayah:* ${gempaInfo.Wilayah}
+*◧ Date:* ${gempaInfo.Tanggal}
+*◧ Region:* ${gempaInfo.Wilayah}
 *◧ DateTime:* ${gempaInfo.DateTime}
-*◧ Lintang:* ${gempaInfo.Lintang}
-*◧ Bujur:* ${gempaInfo.Bujur}
+*◧ Latitude:* ${gempaInfo.Lintang}
+*◧ Longitude:* ${gempaInfo.Bujur}
 *◧ Magnitude:* ${gempaInfo.Magnitude}
-*◧ Kedalaman:* ${gempaInfo.Kedalaman}
+*◧ Depth:* ${gempaInfo.Kedalaman}
 *◧ Felt:* ${gempaInfo.Dirasakan || "No felt information available"}
 `;
 
-      // Mengirim informasi gempa kepada user
+      // Send earthquake info to user
       await sock.sendMessage(remoteJid, { text: capt }, { quoted: message });
     } else {
-      // Mengirim pesan default jika data not available
+      // Send default message if data not available
       await sock.sendMessage(
         remoteJid,
-        { text: "Maaf, none informasi gempa at this time." },
+        { text: "Sorry, no earthquake information available at this time." },
         { quoted: message }
       );
     }
   } catch (error) {
-    console.error("Error saat memanggil API gempa:", error);
+    console.error("Error calling earthquake API:", error);
 
-    // Menangani error dan sending pesan ke user
+    // Handle error and send message to user
     await sock.sendMessage(
       remoteJid,
-      { text: `${errorMessage}\n\nDetail Kesalahan: ${error.message}` },
+      { text: `${errorMessage}\n\nError Details: ${error.message}` },
       { quoted: message }
     );
   }

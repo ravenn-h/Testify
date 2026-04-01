@@ -10,7 +10,7 @@ async function handle(sock, messageInfo) {
   try {
     const trimmedContent = content.trim();
 
-    // Validasi input user
+    // Validate user input
     if (!trimmedContent) {
       return await sendErrorMessage(
         sock,
@@ -22,18 +22,18 @@ async function handle(sock, messageInfo) {
 
     const user_id = trimmedContent;
 
-    // Mengirim reaksi loading
+    // Send loading reaction
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
-    // Inisialisasi API dan memanggil endpoint
+    // Initialize API and call endpoint
     const api = new ApiAutoresbot(config.APIKEY);
     const response = await api.get("/api/stalker/tiktok", {
       username: user_id,
     });
 
-    // Validasi respons API
+    // Validate API response
     if (response?.data) {
       const { nickname, desc, avatar, follower, following } = response.data;
 
@@ -48,7 +48,7 @@ async function handle(sock, messageInfo) {
 `;
 
       try {
-        // Kirim gambar jika avatar ada dan valid
+        // Send image if avatar exists and is valid
         if (Array.isArray(avatar) && avatar[0]) {
           return await sock.sendMessage(
             remoteJid,
@@ -60,7 +60,7 @@ async function handle(sock, messageInfo) {
         //console.warn("Failed to send avatar image:", error.message || error);
       }
 
-      // Kirim teks jika avatar gagal atau none
+      // Send text if avatar fails or is absent
       return await sock.sendMessage(
         remoteJid,
         { text: resultTiktok },
@@ -69,7 +69,7 @@ async function handle(sock, messageInfo) {
     }
 
     logCustom("info", content, `ERROR-COMMAND-${command}.txt`);
-    // Jika respons none data
+    // If response has no data
     await sendErrorMessage(
       sock,
       remoteJid,
@@ -80,11 +80,11 @@ async function handle(sock, messageInfo) {
     console.error("Error:", error);
     logCustom("info", content, `ERROR-COMMAND-${command}.txt`);
 
-    // Penanganan kesalahan dengan pesan ke user
+    // Handle error with message to user
     await sendErrorMessage(
       sock,
       remoteJid,
-      `Maaf, an error occurred while processing permintaan Anda. Try again later.\n\n*Detail*: ${
+      `Sorry, an error occurred while processing your request. Try again later.\n\n*Detail*: ${
         error.message || error
       }`,
       message
@@ -92,7 +92,7 @@ async function handle(sock, messageInfo) {
   }
 }
 
-// Fungsi utilitas untuk sending pesan kesalahan
+// Utility function for sending error messages
 async function sendErrorMessage(sock, remoteJid, text, quotedMessage) {
   await sock.sendMessage(remoteJid, { text }, { quoted: quotedMessage });
 }

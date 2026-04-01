@@ -15,7 +15,7 @@ async function handle(sock, messageInfo) {
   const { remoteJid, message } = messageInfo;
 
   try {
-    // Periksa apakah user sudah bermain
+    // Check if user is already playing
     if (isUserPlaying(remoteJid)) {
       await sock.sendMessage(
         remoteJid,
@@ -25,7 +25,7 @@ async function handle(sock, messageInfo) {
       return;
     }
 
-    // Ambil data permainan dari API
+    // Fetch game data from API
     const response = await api.get(`/api/game/family100`);
     const gameData = response?.data;
 
@@ -36,31 +36,31 @@ async function handle(sock, messageInfo) {
     const { soal, jawaban } = gameData;
     console.log(jawaban);
 
-    logWithTime("Family100", `Jawaban : ${jawaban}`);
+    logWithTime("Family100", `Answer: ${jawaban}`);
 
-    // Tambahkan user ke database permainan
+    // Add user to game database
     addUser(remoteJid, {
       soal,
       answer: jawaban,
-      terjawab: Array(jawaban.length).fill(false), // Array untuk jawaban yang sudah ditebak
-      hadiahPerJawabanBenar: 1, // Hadiah untuk setiap jawaban yang benar
-      hadiahJikaMenang: 20, // Hadiah jika semua jawaban berhasil ditebak (menang)
+      terjawab: Array(jawaban.length).fill(false), // Array for answers already guessed
+      hadiahPerJawabanBenar: 1, // Prize for each correct answer
+      hadiahJikaMenang: 20, // Prize if all answers are guessed (win)
     });
 
-    // Format pesan untuk pertanyaan
+    // Format question message
     const hasSpacedAnswer = jawaban.some((answer) => answer.includes(" "));
-    const messageText = `*Jawablah Pertanyaan Berikut:*\n${soal}\n\nTerdapat *${
+    const messageText = `*Answer the Following Question:*\n${soal}\n\nThere are *${
       jawaban.length
-    }* jawaban${hasSpacedAnswer ? " (beberapa jawaban terdapat spasi)" : ""}.`;
+    }* answer(s)${hasSpacedAnswer ? " (some answers contain spaces)" : ""}.`;
 
-    // Kirim pesan ke user
+    // Send message to user
     await sock.sendMessage(
       remoteJid,
       { text: messageText },
       { quoted: message }
     );
   } catch (error) {
-    const errorMessage = `Maaf, an error occurred while processing permintaan Anda. Mohon try again later.\n\n${
+    const errorMessage = `Sorry, an error occurred while processing your request. Please try again later.\n\n${
       error || "Unknown error"
     }`;
     await sock.sendMessage(

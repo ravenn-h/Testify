@@ -6,7 +6,7 @@ import {
   isUserPlaying,
 } from "../../database/temporary_db/tebak angka.js";
 
-const WAKTU_GAMES = 60; // 60 detik
+const WAKTU_GAMES = 60; // 60 seconds
 
 async function handle(sock, messageInfo) {
   const { remoteJid, message, content, fullText } = messageInfo;
@@ -14,7 +14,7 @@ async function handle(sock, messageInfo) {
   let level_tebakangka = "";
 
   if (!fullText.includes("angka")) {
-    return true; // Skip plugin ini
+    return true; // Skip this plugin
   }
 
   const validLevels = ["easy", "normal", "hard", "expert", "setan"];
@@ -27,7 +27,7 @@ async function handle(sock, messageInfo) {
     return await sock.sendMessage(
       remoteJid,
       {
-        text: `Masukkan Level\n\nContoh *tebak angka easy*\n\n*Opsi*\neasy\nnormal\nhard\nexpert\nsetan`,
+        text: `Enter a Level\n\nExample *tebak angka easy*\n\n*Options*\neasy\nnormal\nhard\nexpert\nsetan`,
       },
       { quoted: message }
     );
@@ -51,11 +51,11 @@ async function handle(sock, messageInfo) {
     );
   }
 
-  // Buat timer baru untuk user
+  // Create a new timer for user
   const timer = setTimeout(async () => {
     if (!isUserPlaying(remoteJid)) return;
 
-    removeUser(remoteJid); // Hapus user dari database jika waktu habis
+    removeUser(remoteJid); // Remove user from database if time runs out
 
     if (mess.game_handler.waktu_habis) {
       const messageWarning = mess.game_handler.waktu_habis.replace(
@@ -70,18 +70,18 @@ async function handle(sock, messageInfo) {
     }
   }, WAKTU_GAMES * 1000);
 
-  // Tambahkan user ke database
+  // Add user to database
   addUser(remoteJid, {
     angkaAcak,
     level: level_tebakangka,
     angkaEnd: akhir_angkaAcak,
-    attempts: 6, // jumlah percobaan
-    hadiah: 10, // jumlah money jika menang
+    attempts: 6, // number of attempts
+    hadiah: 10, // prize amount if won
     command: fullText,
     timer: timer,
   });
 
-  // Kirim pesan awal
+  // Send initial message
   await sock.sendMessage(
     remoteJid,
     {
@@ -90,7 +90,7 @@ async function handle(sock, messageInfo) {
     { quoted: message }
   );
 
-  logWithTime("Tebak Angka", `Jawaban : ${angkaAcak}`);
+  logWithTime("Tebak Angka", `Answer: ${angkaAcak}`);
 }
 
 export default {

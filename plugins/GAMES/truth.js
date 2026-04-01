@@ -11,7 +11,7 @@ const filePath = path.join(
 );
 const buffer = readFileAsBuffer(filePath);
 
-// Daftar pertanyaan truth
+// List of truth questions
 const truths = [
   "Have you ever liked someone? How long did it last?",
   "If you could, who in the group/outside the group would you want as your best friend? (can be same/different)",
@@ -36,14 +36,14 @@ const truths = [
   "What was your worst habit in school?",
 ];
 
-// Fungsi untuk menangani pesan
+// Function to handle messages
 async function handle(sock, messageInfo) {
   const { remoteJid, message } = messageInfo;
 
-  // Pilih truth secara acak
+  // Pick a truth at random
   const selectedTruth = truths[Math.floor(Math.random() * truths.length)];
 
-  // Kirim pesan dengan gambar dan caption
+  // Send message with image and caption
   await sock.sendMessage(
     remoteJid,
     {

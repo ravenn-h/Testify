@@ -9,7 +9,7 @@ async function handle(sock, messageInfo) {
   let baileysVersion = "Not found";
 
   try {
-    // Cari path package.json Baileys
+    // Find Baileys package.json path
     const pkgPath = path.resolve("node_modules/baileys/package.json");
     const pkgData = fs.readFileSync(pkgPath, "utf-8");
     const pkg = JSON.parse(pkgData);
@@ -20,7 +20,7 @@ async function handle(sock, messageInfo) {
   }
 
   const responseText = [
-    `◧ ᴠᴇʀꜱɪ ꜱᴄ : ${global.version}`,
+    `◧ ᴠᴇʀꜱɪᴏɴ ꜱᴄ : ${global.version}`,
     `◧ ʙᴀɪʟᴇʏꜱ   : v${baileysVersion}`,
   ].join("\n");
 
