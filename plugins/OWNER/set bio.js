@@ -1,0 +1,44 @@
+async function handle(sock, messageInfo) {
+  const { remoteJid, message, content, prefix, command } = messageInfo;
+
+  try {
+    // Validasi input nama
+    if (!content || !content.trim()) {
+      return await sock.sendMessage(
+        remoteJid,
+        {
+          text: `_⚠️ Usage format:_ \n\n_💬 Example:_ _*${
+            prefix + command
+          } resbot pintar*_`,
+        },
+        { quoted: message }
+      );
+    }
+
+    // Perbarui bio bot
+    await sock.updateProfileStatus(content);
+
+    // Kirim pesan sukses
+    return await sock.sendMessage(
+      remoteJid,
+      { text: `_Sukses changing bio bot menjadi *${content}*_` },
+      { quoted: message }
+    );
+  } catch (error) {
+    console.error("Error processing message:", error);
+
+    // Kirim pesan error
+    return await sock.sendMessage(
+      remoteJid,
+      { text: "An error occurred while processing the message." },
+      { quoted: message }
+    );
+  }
+}
+
+export default {
+  handle,
+  Commands: ["setbio"],
+  OnlyPremium: false,
+  OnlyOwner: true,
+};

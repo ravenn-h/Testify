@@ -1,0 +1,56 @@
+import mess from "../../strings.js";
+import { getGroupMetadata } from "../../lib/cache.js";
+
+async function sendMessage(sock, remoteJid, text, message) {
+  try {
+    await sock.sendMessage(remoteJid, { text }, { quoted: message });
+  } catch (error) {
+    console.error(`Failed to send message: ${error.message}`);
+  }
+}
+
+async function handle(sock, messageInfo) {
+  const { remoteJid, isGroup, message, sender, command } = messageInfo;
+
+  if (!isGroup) {
+    await sendMessage(sock, remoteJid, mess.general.isGroup, message);
+    return;
+  }
+
+  try {
+    // Mendapatkan metadata grup
+    const groupMetadata = await getGroupMetadata(sock, remoteJid);
+    const participants = groupMetadata.participants;
+    const isAdmin = participants.some(
+      (p) => (p.phoneNumber === sender || p.id === sender) && p.admin
+    );
+
+    if (!isAdmin) {
+      await sendMessage(sock, remoteJid, mess.general.isAdmin, message);
+      return;
+    }
+
+    const responseText = `
+_Mode ${command}_
+
+*Type: .on ${command}*
+
+_Noted!_
+Antilink: delete message
+Antilinkv2: delete message + kick member
+
+Antilinkwa: delete message (WA link)
+Antilinkwav2: delete message + kick (WA link)
+`;
+    await sendMessage(sock, remoteJid, responseText.trim(), message);
+  } catch (error) {
+    console.error(`Error in handle function: ${error.message}`);
+  }
+}
+
+export default {
+  handle,
+  Commands: ["antilink"],
+  OnlyPremium: false,
+  OnlyOwner: false,
+};

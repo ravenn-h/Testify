@@ -1,124 +1,140 @@
-const MENU_TIMEOUT = 120000;
+// handle/menu.js
+import menuProxy, { loadMenuOnce } from "../database/menu.js";
+import config from "../config.js";
+import { readFileAsBuffer } from "../lib/fileHelper.js";
+import { reply, style, getCurrentDate, readMore } from "../lib/utils.js";
+import { isOwner, isPremiumUser } from "../lib/users.js";
+import fs from "fs/promises";
+import path from "path";
 
-const CATEGORIES = [
-    [1, 'التـحـمـيـل', 'downloads', '📂'],
-    [2, 'الـمـجـمـوعـات', 'group', '🐞'],
-    [3, 'الـمـلـصـقـات', 'sticker', '🌄'],
-    [4, 'الـمـطـوريـن', 'owner', '🇩🇪'],
-    [5, 'امـثـلـه', 'example', '✳️'],
-    [6, 'الـادوات', 'tools', '🚀'],
-    [7, 'الـبـحـث', 'search', '🌐'],
-    [8, 'الادمــن', 'admin', '👨🏻‍⚖️'],
-    [9, 'الالــعـاب', 'games', '🎮'],
-    [10, 'الچيف', 'gif', '✴️'],
-    [11, 'الـبــنـك', 'bank', '💰'],
-    [12, 'أخــرى', 'other', '🌹']
-];
+// konstanta
+const linkGroup = "https://chat.whatsapp.com/JeijvuGffXh8rjicZkCSzy?mode=hqrt2";
+const AUDIO_MENU = true;
+const soundPagi = "pagi.opus";
+const soundSiang = "siang.opus";
+const soundSore = "sore.opus";
+const soundPetang = "petang.opus";
+const soundMalam = "malam.opus"; // ./database/audio
 
-const getCat = n => CATEGORIES.find(c => c[0] === n);
+async function getGreeting() {
+  const now = new Date();
+  const wibHours = (now.getUTCHours() + 7) % 24;
 
-if (!global.menus) global.menus = {};
+  let fileName;
+  if (wibHours >= 5 && wibHours <= 10) fileName = soundPagi;
+  else if (wibHours >= 11 && wibHours < 15) fileName = soundSiang;
+  else if (wibHours >= 15 && wibHours <= 18) fileName = soundSore;
+  else if (wibHours > 18 && wibHours <= 19) fileName = soundPetang;
+  else fileName = soundMalam;
 
-const clean = () => {
-    const now = Date.now();
-    Object.keys(global.menus).forEach(k => {
-        if (now - global.menus[k].time > MENU_TIMEOUT) delete global.menus[k];
-    });
+  try {
+    return await fs.readFile(
+      path.join(process.cwd(), "database", "audio", fileName)
+    );
+  } catch (err) {
+    console.error("Error reading audio file:", err);
+    return null;
+  }
+}
+
+const formatMenu = (title, items) => {
+  const formattedItems = items.map((item) => {
+    if (typeof item === "string") return `├ ${item}`;
+    if (typeof item === "object" && item.command && item.description)
+      return `├ ${item.command} ${item.description}`;
+    return "├ [Invalid item]";
+  });
+
+  return `╭──『 *${title.toUpperCase()}* 』\n${formattedItems.join(
+    "\n"
+  )}\n╰───────────❒`;
 };
 
-const getImg = (bot) => {
-    const { images } = bot.config.info;
-    return Array.isArray(images) ? images[Math.floor(Math.random() * images.length)] : images;
-};
+async function handle(sock, messageInfo) {
+  const { m, remoteJid, pushName, sender, content, command, message } =
+    messageInfo;
 
-const context = (jid, img) => ({
-    mentionedJid: [jid],
-    isForwarded: true,
-    forwardingScore: 1,
-    forwardedNewsletterMessageInfo: {
-        newsletterJid: '120363225356834044@newsletter',
-        newsletterName: '𝐕𝐈𝐈7 ~ 𝐂𝐡𝐚𝐧𝐧𝐞𝐥 🕷️',
-        serverMessageId: 0
-    },
-    externalAdReply: {
-        title: "𝐏𝐎𝐌𝐍𝐈-𝐀𝐈 🎪 | 𝐁𝐨𝐭 𝐢𝐬 𝐛𝐮𝐢𝐥𝐭 𝐨𝐧 𝐭𝐡𝐞 𝐖𝐒/𝐕𝐈𝐈 𝐟𝐫𝐚𝐦𝐞𝐰𝐨𝐫𝐤",
-        body: "𝚆𝚑𝚊𝚝𝚜𝙰𝚙𝚙 𝚋𝚘𝚝 𝚝𝚑𝚊𝚝 𝚒𝚜 𝚎𝚊𝚜𝚢 𝚝𝚘 𝚖𝚘𝚍𝚒𝚏𝚢 𝚊𝚗𝚍 𝚟𝚎𝚛𝚢 𝚏𝚊𝚜𝚝",
-        thumbnailUrl: img,
-        sourceUrl: '',
-        mediaType: 1,
-        renderLargerThumbnail: true
+  const roleUser = isOwner(sender)
+    ? "Owner"
+    : isPremiumUser(sender)
+    ? "Premium"
+    : "user";
+
+  const date = getCurrentDate();
+  const category = (content || "").toLowerCase();
+
+  // --- make sure menu sudah ter-load ---
+  const menuData = await loadMenuOnce();
+
+  let response;
+  let result;
+
+  if (category && menuData[category]) {
+    response = formatMenu(category.toUpperCase(), menuData[category]);
+    result = await reply(m, style(response) || "Failed to apply style.");
+  } else if (command === "menu") {
+    response = `╭──『 *MENU UTAMA* 』
+${Object.keys(menu)
+  .map((key) => `├ ${key}`)
+  .join("\n")}
+╰───────────❒`;
+    result = await reply(m, style(response) || "Failed to apply style.");
+  } else if (command === "allmenu") {
+    response = `Hello, ${pushName || "Unknown"}
+Vellyn multidevice adalah sistem cerdas yang mampu melakukan tugas, pencarian, serta pengambilan data atau informasi secara langsung melalui WhatsApp.
+
+> 𖥔 ︳ᴄʀᴇᴀᴛᴏʀ : ᴋᴀʀᴛʟᴢʏ ᴅɪɢɪᴛᴀʟ
+> 𖥔 ︳ɴᴀᴍᴀ ʙᴏᴛ : ᴠᴇʟʟʏɴ-ᴍᴜʟᴛɪᴅᴇᴠɪᴄᴇ
+> 𖥔 ︳ᴛᴀɴɢɢᴀʟ : ${date}
+> 𖥔 ︳ʀᴏʟᴇ ᴜꜱᴇʀ : ${roleUser}
+> 𖥔 ︳ᴠᴇʀsɪ : 0.1
+
+${Object.keys(menuData)
+  .map((key) => formatMenu(key.toUpperCase(), menuData[key]))
+  .join("\n\n")}`;
+
+    const buffer = await readFileAsBuffer("@assets/allmenu.jpg");
+
+    result = await sock.sendMessage(
+      remoteJid,
+      {
+        text: style(response),
+        contextInfo: {
+          externalAdReply: {
+            showAdAttribution: false,
+            title: ``,
+            body: ``,
+            thumbnail: buffer,
+            jpegThumbnail: buffer,
+            thumbnailUrl: linkGroup,
+            sourceUrl: linkGroup,
+            mediaType: 1,
+            renderLargerThumbnail: true,
+          },
+        },
+      },
+      { quoted: message }
+    );
+  }
+
+  // Kirim audio jika allmenu atau menu tanpa kategori
+  if (command === "allmenu" || (command === "menu" && !category)) {
+    if (AUDIO_MENU) {
+      const audioBuffer = await getGreeting();
+      if (audioBuffer) {
+        await sock.sendMessage(
+          remoteJid,
+          { audio: audioBuffer, mimetype: "audio/mp4", ptt: true, },
+          { quoted: result }
+        );
+      }
     }
-});
+  }
+}
 
-const menu = async (m, { conn, bot }) => {
-    clean();
-    
-    const cmds = await bot.getAllCommands();
-    const cats = {};
-    
-    cmds.forEach(c => {
-        if (!c.usage?.length) return;
-        const cat = c.category || 'other';
-        if (!cats[cat]) cats[cat] = [];
-        cats[cat].push(c);
-    });
-
-    const txt = `
-رَبَّنَا اغْفِرْ لَنَا وَلِإِخْوَانِنَا الَّذِينَ سَبَقُونَا بِالْإِيمَانِ
-وَلَا تَجْعَلْ فِي قُلُوبِنَا غِلًّا لِّلَّذِينَ آمَنُوا رَبَّنَا إِنَّكَ رَءُوفٌ رَّحِيمٌ
-╭─┈─┈─┈─⟞🎪⟝─┈─┈─┈─╮
-${CATEGORIES.map(c => `┃ ⌯︙${c[0]} ~ *قـسـم ${c[1]} ${c[3]}*`).join('\n')}
-╰─┈─┈─┈─⟞🎪⟝─┈─┈─┈─╯
-> *رد عـلـي الـرسـالـه بـ رقـم الـقـسـم فـقـط بـدون نـقـطـه*`;
-
-    const msg = await conn.sendMessage(m.chat, { 
-        text: txt,
-        contextInfo: context(m.sender, getImg(bot))
-    }, { quoted: reply_status });
-  
-    global.menus[msg.key.id] = { cats, chatId: m.chat, time: Date.now() };
+export default {
+  Commands: ["menu", "allmenu"],
+  OnlyPremium: false,
+  OnlyOwner: false,
+  handle,
 };
-
-menu.before = async (m, { conn, bot }) => {
-    clean();
-    
-    const menuData = global.menus[m.quoted?.id];
-    if (!menuData) return false;
-    
-    const cat = getCat(parseInt(m.text));
-    if (!cat) {
-        await conn.sendMessage(m.chat, { text: '*❌≥ اختار رقم من القائمة بس*' }, { quoted: reply_status });
-        return true;
-    }
-    
-    const cmds = menuData.cats[cat[2]];
-    if (!cmds?.length) {
-        await conn.sendMessage(m.chat, { text: '*❌≥ القسم فاضي*' }, { quoted: reply_status });
-        return true;
-    }
-    
-    await conn.sendMessage(m.chat, { delete: { remoteJid: m.chat, id: m.quoted.id, fromMe: true } });
-    delete global.menus[m.quoted.id];
-    
-    const cmdsList = cmds.map(c => `┃${cat[3]} /${c.usage.join(`\n┃${cat[3]} /`)}`).join('\n');
-    
-    await conn.sendMessage(m.chat, { 
-        text: `
-╭─┈─┈─┈─⟞${cat[3]}⟝─┈─┈─┈─╮
-┃ *⌯︙ قـسـم ${cat[1]} ${cat[3]}*
-╰─┈─┈─┈─⟞${cat[3]}⟝─┈─┈─┈─╯
-
-${cmdsList}
-
-╭─┈─┈─┈─⟞${cat[3]}⟝─┈─┈─┈─╮
-┃ *⌯︙𝐕𝐈𝐈7 ~ ${bot.config.info.nameBot}*
-╰─┈─┈─┈─⟞${cat[3]}⟝─┈─┈─┈─╯
-> *رَبَّنَا اغْفِرْ لَنَا وَلِإِخْوَانِنَا*`.trim(),
-        contextInfo: context(m.sender, getImg(bot))
-    }, { quoted: reply_status });
-    
-    return true;
-};
-
-menu.command = ['الاوامر', 'القائمة', 'menu', 'اوامر'];
-export default menu;

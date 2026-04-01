@@ -1,36 +1,70 @@
-let handler = async (m, { conn, bot }) => {
-  let watermark = 'VA';
-  
-  let quoted = {
-    key: { fromMe: false, participant: '0@s.whatsapp.net', remoteJid: 'status@broadcast' },
-    message: { conversation: 'Pomni AI ❤️💙' }
-  };
-  const num = bot.config.owners[0].jid.split("@")[0];
-  let vcard = `BEGIN:VCARD
+import { sendMessageWithMention } from "../lib/utils.js";
+import { listOwner } from "../lib/users.js";
+import config from "../config.js";
+
+export async function handle(sock, messageInfo) {
+  const { remoteJid, message, sender, senderType } = messageInfo;
+
+  const data = listOwner();
+
+  let list = [];
+  let no = 1;
+
+  for (const item of data) {
+    const vcard = `BEGIN:VCARD
 VERSION:3.0
-FN:${watermark}
-TEL;type=CELL;waid=${num}:+${num}
+N:Owner ${no}
+FN:Owner ${no}
+TEL;waid=${item.split("@")[0]}:${item.split("@")[0]}
+EMAIL;type=INTERNET:${config.owner_email}
+URL:https://github.com/kartlzyounkaaa
+ADR:;;${config.region};;;
 END:VCARD`;
 
-  let img = 'https://i.pinimg.com/originals/e2/21/20/e221203f319df949ee65585a657501a2.jpg';
-  
-  await conn.sendMessage(m.chat, {
-    contacts: { displayName: watermark, contacts: [{ vcard }] },
-    contextInfo: {
-      forwardingScore: 2023,
-      externalAdReply: {
-        title: '𝑇𝛨𝛯 𝛩𝑊𝛮𝛯𝑅',
-        body: watermark,
-        sourceUrl: 'https://whatsapp.com/channel/0029Vb3UUKz3QxS3bgWmTc3x',
-        thumbnailUrl: img,
-        mediaType: 1,
-        showAdAttribution: true,
-        renderLargerThumbnail: true
-      }
-    }
-  }, { quoted })
+    list.push({
+      displayName: `Owner ${no}`,
+      vcard: vcard,
+    });
+    no++;
+  }
+
+  if (data.length === 0) {
+    return await sendMessageWithMention(
+      sock,
+      remoteJid,
+      "Owner not registered!",
+      message,
+      senderType
+    );
+  }
+
+  // Mengirim pesan kontak
+const chatId = await sock.sendMessage(
+  remoteJid,
+  {
+    contacts: {
+      displayName: `Daftar Owner (${data.length})`,
+      contacts: list,
+    },
+  },
+  { quoted: message }
+);
+
+
+  // Kirim pesan dengan mention
+  await sendMessageWithMention(
+    sock,
+    remoteJid,
+    `Hai Kak @${sender.split("@")[0]}, berikut adalah daftar owner bot ini`,
+    chatId,
+    senderType
+  );
+}
+
+export default {
+  Commands: ["owner"],
+  OnlyPremium: false,
+  OnlyOwner: false,
+  handle,
 };
 
-handler.command = /^(owner|مطور|المطور)$/i;
-
-export default handler;
