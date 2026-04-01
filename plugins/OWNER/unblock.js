@@ -7,43 +7,43 @@ async function handle(sock, messageInfo) {
   const extSender = senderType === "user" ? "@whatsapp.net" : "@lid";
 
   try {
-    // Validasi input kosong
+    // Validate empty input
     if (!content || !content.trim()) {
       return await reply(
         m,
-        `⚠️ _Masukkan format yang valid_\n\n_Example: *${
+        `⚠️ _Please enter a valid format_\n\n_Example: *${
           prefix + command
         } 628xxx*_`
       );
     }
 
-    // Tentukan nomor target
+    // Determine target number
     let targetNumber = (mentionedJid?.[0] || content).replace(/\D/g, "");
     const originalNumber = targetNumber;
 
-    // Ambil data user dari database
+    // Get user data from database
     const dataUsers = await findUser(originalNumber);
 
     if (!dataUsers) {
       return await reply(
         m,
-        `⚠️ _Nomor ${originalNumber} not found di database._\n\n` +
-          `_Make sure nomor yang dimasukkan benar dan terdaftar dalam database._`
+        `⚠️ _Number ${originalNumber} not found in database._\n\n` +
+          `_Make sure the number entered is correct and registered in the database._`
       );
     }
 
-    // Perbarui status user menjadi "block"
+    // Update user status to "active"
     await updateUser(originalNumber, { status: "active" });
     await sock.updateBlockStatus(`${originalNumber}${extSender}`, "unblock");
     return await reply(
       m,
-      `✅ _Nomor ${originalNumber} successful dibuka dari pemblokiran!_`
+      `✅ _Number ${originalNumber} successfully unblocked!_`
     );
   } catch (error) {
     console.error("Error handling command:", error);
     return await reply(
       m,
-      `_An error occurred while processing permintaan. Please try again nanti._`
+      `_An error occurred while processing request. Please try again later._`
     );
   }
 }

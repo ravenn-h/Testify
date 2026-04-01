@@ -7,17 +7,17 @@ async function handle(sock, messageInfo) {
     messageInfo;
 
   try {
-    // Membaca data user
+    // Read user data
     const user = await readUsers();
 
-    // Ambil semua ID user (jid)
+    // Get all user IDs (jid)
     const statusJidList = Object.keys(user);
 
     const nomorTanpaBroadcast = statusJidList.filter(
       (jid) => jid !== "status@broadcast"
     );
 
-    // Unduh media dan tentukan tipe media
+    // Download media and determine media type
     const media = isQuoted
       ? await downloadQuotedMedia(message)
       : await downloadMedia(message);
@@ -26,11 +26,11 @@ async function handle(sock, messageInfo) {
       ? content
       : isQuoted?.content?.caption || "";
 
-    // Validasi pesan kosong
+    // Validate empty message
     if (!media && (!mediaContent || mediaContent.trim() === "")) {
       const tex = `_⚠️ Usage format:_ \n\n_💬 Example:_ _*${
         prefix + command
-      } tes*_`;
+      } test*_`;
       return await sock.sendMessage(
         remoteJid,
         { text: tex },
@@ -41,12 +41,12 @@ async function handle(sock, messageInfo) {
     if (media) {
       const mediaPath = `tmp/${media}`;
 
-      // Cek apakah file ada
+      // Check if file exists
       if (!fs.existsSync(mediaPath)) {
-        throw new Error(`File media not found: ${mediaPath}`);
+        throw new Error(`Media file not found: ${mediaPath}`);
       }
 
-      // Kirim media sesuai tipe
+      // Send media according to type
       await sendMedia(
         sock,
         "status@broadcast",
@@ -65,7 +65,7 @@ async function handle(sock, messageInfo) {
 
     return await sock.sendMessage(
       remoteJid,
-      { text: "Sukses sending status whatsapp" },
+      { text: "Successfully sent WhatsApp status" },
       { quoted: message }
     );
   } catch (error) {
@@ -76,7 +76,7 @@ async function handle(sock, messageInfo) {
   }
 }
 
-// Fungsi untuk sending media
+// Function for sending media
 async function sendMedia(
   sock,
   remoteJid,
@@ -95,7 +95,7 @@ async function sendMedia(
   if (mediaOptions[type]) {
     await sock.sendMessage(remoteJid, mediaOptions[type], { statusJidList });
   } else {
-    throw new Error(`Tipe media tidak didukung: ${type}`);
+    throw new Error(`Unsupported media type: ${type}`);
   }
 }
 

@@ -19,15 +19,15 @@ async function handle(sock, messageInfo) {
       if (!sewa[groupId]) {
         try {
           await sock.groupLeave(groupId);
-          await sleep(2000); // Delay 2 detik agar tidak spam
+          await sleep(2000); // 2 second delay to avoid spam
           listMessage += `╭───────────────
 │ *Subject* : ${groupData.subject}
-│ *ID Grup* : ${groupId}
+│ *Group ID* : ${groupId}
 ╰───────────────\n\n`;
           count++;
         } catch (leaveErr) {
-          console.error(`Gagal keluar dari grup ${groupId}:`, leaveErr.message);
-          listMessage += `⚠️ *Gagal keluar dari grup: ${groupData.subject} (${groupId})*\n\n`;
+          console.error(`Failed to leave group ${groupId}:`, leaveErr.message);
+          listMessage += `⚠️ *Failed to leave group: ${groupData.subject} (${groupId})*\n\n`;
         }
       }
     }
@@ -35,7 +35,7 @@ async function handle(sock, messageInfo) {
     if (count === 0) {
       listMessage = "✅ _All groups have an active subscription._";
     } else {
-      listMessage += `*Total keluar: ${count} grup.*`;
+      listMessage += `*Total left: ${count} group(s).*`;
     }
 
     await sock.sendMessage(remoteJid, { text: listMessage });

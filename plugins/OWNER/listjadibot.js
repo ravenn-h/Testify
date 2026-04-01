@@ -1,51 +1,51 @@
 import fs from "fs";
 import path from "path";
 
-// Fungsi untuk menangani perintah "listjadibot"
+// Function to handle the "listjadibot" command
 async function handle(sock, messageInfo) {
   const { remoteJid, message, sender } = messageInfo;
 
   try {
-    // Kirim reaksi sebagai tanda sedang diproses
+    // Send reaction to indicate processing
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
-    // Path folder sesi
+    // Session folder path
     const SESSION_PATH = "./session/";
 
-    // Periksa apakah folder sesi ada
+    // Check if session folder exists
     if (!fs.existsSync(SESSION_PATH)) {
       await sock.sendMessage(
         remoteJid,
-        { text: `⚠️ Folder sesi not found.` },
+        { text: `⚠️ Session folder not found.` },
         { quoted: message }
       );
       return;
     }
 
-    // Baca isi folder sesi
+    // Read session folder contents
     const sessionFolders = fs.readdirSync(SESSION_PATH).filter((folderName) => {
       const folderPath = path.join(SESSION_PATH, folderName);
-      return fs.lstatSync(folderPath).isDirectory(); // Make sure hanya folder
+      return fs.lstatSync(folderPath).isDirectory(); // Make sure only folders
     });
 
-    // Jika none subfolder di dalam sesi
+    // If no subfolders inside session
     if (sessionFolders.length === 0) {
       await sock.sendMessage(
         remoteJid,
-        { text: `📂 Tidak ada jadibot yang ditemukan.` },
+        { text: `📂 No jadibot found.` },
         { quoted: message }
       );
       return;
     }
 
-    // Buat daftar nomor telepon dari nama folder
-    const listMessage = `📜 *Daftar Jadibot:*\n\n${sessionFolders
+    // Build phone number list from folder names
+    const listMessage = `📜 *Jadibot List:*\n\n${sessionFolders
       .map((folder, index) => `*${index + 1}.* ${folder}`)
       .join("\n")}`;
 
-    // Kirim daftar ke user
+    // Send list to user
     await sock.sendMessage(
       remoteJid,
       { text: listMessage },
@@ -55,7 +55,7 @@ async function handle(sock, messageInfo) {
     console.error("An error occurred:", error);
     await sock.sendMessage(
       remoteJid,
-      { text: `⚠️ An error occurred while processing perintah.` },
+      { text: `⚠️ An error occurred while processing command.` },
       { quoted: message }
     );
   }

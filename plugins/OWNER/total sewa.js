@@ -6,23 +6,23 @@ async function handle(sock, messageInfo) {
   try {
     const sewa = await listSewa();
 
-    // Jika none list
+    // If no list found
     if (!sewa || Object.keys(sewa).length === 0) {
       await sock.sendMessage(remoteJid, {
-        text: "⚠️ _Tidak Ada daftar sewa ditemukan_",
+        text: "⚠️ _No subscription list found_",
       });
       return;
     }
 
     const listMessage = `*Total : ${Object.keys(sewa).length}*`;
 
-    // Kirim pesan daftar sewa
+    // Send subscription list message
     await sock.sendMessage(remoteJid, {
       text: listMessage,
     });
   } catch (error) {
     await sock.sendMessage(remoteJid, {
-      text: "_An error occurred while mengambil daftar sewa_",
+      text: "_An error occurred while retrieving the subscription list_",
     });
   }
 }

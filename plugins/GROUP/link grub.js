@@ -5,7 +5,7 @@ async function handle(sock, messageInfo) {
   const { remoteJid, message, sender, isGroup } = messageInfo;
 
   try {
-    // Periksa apakah perintah dijalankan di grup
+    // Check whether the command is executed in a group
     if (!isGroup) {
       return await sock.sendMessage(
         remoteJid,
@@ -14,14 +14,14 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Mendapatkan metadata grup
+    // Get group metadata
     const groupMetadata = await getGroupMetadata(sock, remoteJid);
     const groupInviteCode = await sock.groupInviteCode(remoteJid);
 
-    // Membuat teks balasan
+    // Build the reply text
     const text = `https://chat.whatsapp.com/${groupInviteCode}`;
 
-    // Mengirimkan balasan
+    // Send the reply
     return await sock.sendMessage(remoteJid, { text }, { quoted: message });
   } catch (error) {
     await sock.sendMessage(

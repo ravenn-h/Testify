@@ -6,26 +6,26 @@ import { deleteCache } from "../../lib/globalCache.js";
 async function handle(sock, messageInfo) {
   const { remoteJid, message, content, sender, prefix, command } = messageInfo;
 
-  // Validasi input kosong atau tidak sesuai format
+  // Validate empty or invalid format input
   if (!content || content.trim() === "") {
     return await sock.sendMessage(
       remoteJid,
       {
         text: `_⚠️ Usage format:_ \n\n_💬 Example:_ _*${
           prefix + command
-        } xxxx@g.us 30*_\n\n_*30* artinya 30 hari, bot otomatis akan keluar apabila waktu habis_\n\n_Jika Bot Sudah Bergabung ke Grup Sewa dan untuk perpanjang silakan ketik *.tambahsewa*_`,
+        } xxxx@g.us 30*_\n\n_*30* means 30 days, bot will automatically leave when time expires_\n\n_If the Bot has already joined the Subscription Group and you want to extend, type *.tambahsewa*_`,
       },
       { quoted: message }
     );
   }
 
-  // Split content menjadi array untuk memisahkan link dan jumlah hari
+  // Split content into array to separate link and number of days
   const args = content.trim().split(" ");
   if (args.length < 2) {
     return await sock.sendMessage(
       remoteJid,
       {
-        text: `⚠️ Format not valid. Contoh useran:\n\n_*${
+        text: `⚠️ Format not valid. Example usage:\n\n_*${
           prefix + command
         } xxx@g.us 30*_`,
       },
@@ -33,15 +33,15 @@ async function handle(sock, messageInfo) {
     );
   }
 
-  const linkGrub = args[0]; // Ambil link grup
-  const totalHari = parseInt(args[1], 10); // Konversi hari menjadi angka
+  const linkGrub = args[0]; // Get group link
+  const totalHari = parseInt(args[1], 10); // Convert days to number
 
-  // Validasi link grup
+  // Validate group link
   if (!linkGrub.includes("@g.us")) {
     return await sock.sendMessage(
       remoteJid,
       {
-        text: `⚠️ ID grup harus mengandung '@g.us'. Contoh useran:\n\n_*${
+        text: `⚠️ Group ID must contain '@g.us'. Example usage:\n\n_*${
           prefix + command
         } xxx@g.us 30*_`,
       },
@@ -49,12 +49,12 @@ async function handle(sock, messageInfo) {
     );
   }
 
-  // Validasi jumlah hari
+  // Validate number of days
   if (isNaN(totalHari) || totalHari <= 0) {
     return await sock.sendMessage(
       remoteJid,
       {
-        text: `⚠️ Jumlah hari not valid. Contoh useran:\n\n_*${
+        text: `⚠️ Number of days not valid. Example usage:\n\n_*${
           prefix + command
         } xxx@g.us 30*_`,
       },
@@ -69,7 +69,7 @@ async function handle(sock, messageInfo) {
   const timestampExpiration = expirationDate.getTime();
 
   try {
-    // Proses penambahan sewa ke database
+    // Process adding subscription to database
     await addSewa(linkGrub, {
       linkGrub: linkGrub,
       start: hariini,
@@ -78,34 +78,34 @@ async function handle(sock, messageInfo) {
 
     deleteCache(`sewa-${remoteJid}`); // reset cache
 
-    // Kirim pesan successful
+    // Send success message
     return await sock.sendMessage(
       remoteJid,
       {
         text:
-          `_*Bot Sudah Bergabung*_` +
-          `\nNomor Bot : ${config.phone_number_bot}` +
+          `_*Bot Has Joined*_` +
+          `\nBot Number : ${config.phone_number_bot}` +
           `\nExpired : *${selisihHari(timestampExpiration)}*` +
-          `\n\n_Untuk Mengecek status sewa ketik *.ceksewa* pada group tersebut_`,
+          `\n\n_To check subscription status type *.ceksewa* in that group_`,
       },
       { quoted: message }
     );
   } catch (error) {
     console.log(error);
 
-    // Pesan error default
+    // Default error message
     let info = "_Make sure the group link is valid._";
 
-    // Periksa pesan error
+    // Check error message
     if (error instanceof Error && error.message.includes("not-authorized")) {
-      info = `_Kemungkinan Anda pernah dikeluarkan dari grup. Solusi: undang bot kembali atau masukkan secara manual._`;
+      info = `_You may have been removed from the group before. Solution: invite the bot back or add it manually._`;
     }
 
-    // Kirim pesan error ke user
+    // Send error message to user
     return await sock.sendMessage(
       remoteJid,
       {
-        text: `⚠️ _Gagal bergabung ke grup._\n\n${info}`,
+        text: `⚠️ _Failed to join the group._\n\n${info}`,
       },
       { quoted: message }
     );

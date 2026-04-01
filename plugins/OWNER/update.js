@@ -40,7 +40,7 @@ async function handle(sock, messageInfo) {
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||
-        `_Gagal mengambil data pembaruan dari server. Please try again nanti._`;
+        `_Failed to retrieve update data from server. Please try again later._`;
       await sock.sendMessage(
         remoteJid,
         { text: errorMessage },
@@ -51,7 +51,7 @@ async function handle(sock, messageInfo) {
 
     if (data.status && data.updates.length === 0) {
       await sock.sendMessage(remoteJid, {
-        text: `⚠️ _Script sudah menggunakan versi terbaru._\n\n_Version : ${global.version}_`,
+        text: `⚠️ _Script is already using the latest version._\n\n_Version : ${global.version}_`,
         quoted: message,
       });
       return;
@@ -65,14 +65,14 @@ async function handle(sock, messageInfo) {
       } else {
         const latestUpdate = data.updates[data.updates.length - 1];
         let messageText =
-          `✅ _Update Tersedia_\n\n` +
-          `_Versi Saat Ini_ : ${global.version}\n` +
-          `_Versi Tersedia_ : ${latestUpdate.version}\n\n` +
+          `✅ _Update Available_\n\n` +
+          `_Current Version_ : ${global.version}\n` +
+          `_Available Version_ : ${latestUpdate.version}\n\n` +
           `◧ *List Update Files*\n\n` +
           latestUpdate.files.map((item) => `- ${item.name}`).join("\n") +
-          `\n\n_Catatan Update_ : ${latestUpdate.noted}\n\n` +
-          `_Untuk updating script ketik *.updateforce -y*_\n\n` +
-          `⚠️ _Proses ini akan updating script ke versi terbaru secara keseluruhan_`;
+          `\n\n_Update Notes_ : ${latestUpdate.noted}\n\n` +
+          `_To update the script type *.updateforce -y*_\n\n` +
+          `⚠️ _This process will update the script to the latest version entirely_`;
 
         await sock.sendMessage(
           remoteJid,
@@ -86,7 +86,7 @@ async function handle(sock, messageInfo) {
     } catch (error) {
       console.error("Error downloading update ZIP:", error.message);
       await sock.sendMessage(remoteJid, {
-        text: `⚠️ _Failed to download file pembaruan. Please try again nanti._`,
+        text: `⚠️ _Failed to download update file. Please try again later._`,
         quoted: message,
       });
       return;
@@ -102,26 +102,26 @@ async function handle(sock, messageInfo) {
     fs.mkdirSync(outputDir, { recursive: true });
 
     try {
-      console.log("📂 Mengekstrak ZIP menggunakan sistem unzip...");
+      console.log("📂 Extracting ZIP using system unzip...");
       execSync(`unzip -o updates.zip -d updates/`, { stdio: "inherit" });
     } catch (error) {
       await sock.sendMessage(remoteJid, {
-        text: `⚠️ Update hanya support di os Linux `,
+        text: `⚠️ Update only supports Linux OS`,
         quoted: message,
       });
-      console.error("❌ Gagal mengekstrak file ZIP:", error);
+      console.error("❌ Failed to extract ZIP file:", error);
       return;
     } finally {
-      fs.unlinkSync(zipFilePath); // Hapus ZIP setelah ekstraksi selesai
+      fs.unlinkSync(zipFilePath); // Delete ZIP after extraction is complete
     }
 
     const sourceDir = path.join(outputDir, "files");
     const targetDir = process.cwd();
 
     if (!fs.existsSync(sourceDir)) {
-      console.error(`❌ Folder sumber not found: ${sourceDir}`);
+      console.error(`❌ Source folder not found: ${sourceDir}`);
       await sock.sendMessage(remoteJid, {
-        text: `❌ _Folder sumber not found!_`,
+        text: `❌ _Source folder not found!_`,
         quoted: message,
       });
       return;
@@ -131,7 +131,7 @@ async function handle(sock, messageInfo) {
     } catch (error) {
       console.error("Error copying files:", error.message);
       await sock.sendMessage(remoteJid, {
-        text: `⚠️ _Gagal menyalin file pembaruan._`,
+        text: `⚠️ _Failed to copy update files._`,
         quoted: message,
       });
       return;
@@ -140,13 +140,13 @@ async function handle(sock, messageInfo) {
     fse.removeSync(outputDir);
 
     await sock.sendMessage(remoteJid, {
-      text: `✅ _Pembaruan successful dilakukan!_ \n\n_Silakan restart server anda atau bisa mengetik *.restart*_`,
+      text: `✅ _Update completed successfully!_ \n\n_Please restart your server or type *.restart*_`,
       quoted: message,
     });
   } catch (error) {
     console.error("Unexpected error:", error.message);
     await sock.sendMessage(remoteJid, {
-      text: `❌ _Gagal updating script. Please try again nanti._`,
+      text: `❌ _Failed to update script. Please try again later._`,
       quoted: message,
     });
   }

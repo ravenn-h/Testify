@@ -1,4 +1,4 @@
-// DEMOTEME: Menjadikan owner ke member jika bot sudah admin
+// DEMOTEME: Demotes the owner to member if the bot is already an admin
 
 import mess from "../../strings.js";
 
@@ -14,19 +14,19 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Proses demote
+    // Process demote
     await sock.groupParticipantsUpdate(remoteJid, [sender], "demote");
 
-    // Kirim pesan
+    // Send message
     await sock.sendMessage(
       remoteJid,
-      { text: "✅ _Successful Menjadi Member_" },
+      { text: "✅ _Successfully Demoted to Member_" },
       { quoted: message }
     );
   } catch (error) {
     console.error("Error in promoteme command:");
 
-    // Kirim pesan kesalahan
+    // Send error message
     await sock.sendMessage(
       remoteJid,
       {

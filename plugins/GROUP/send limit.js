@@ -4,12 +4,12 @@ import { sendMessageWithMention, convertToJid } from "../../lib/utils.js";
 async function handle(sock, messageInfo) {
   const { remoteJid, message, content, sender, command, prefix } = messageInfo;
 
-  // Validasi input kosong
+  // Validate empty input
   if (!content || content.trim() === "") {
     return await sock.sendMessage(
       remoteJid,
       {
-        text: `⚠️ _Masukkan format yang valid_\n\n_Contoh: *${
+        text: `⚠️ _Please enter a valid format_\n\n_Example: *${
           prefix + command
         } @tag 50*_`,
       },
@@ -18,13 +18,13 @@ async function handle(sock, messageInfo) {
   }
 
   try {
-    // Pisahkan konten
+    // Split the content
     const args = content.trim().split(/\s+/);
     if (args.length < 2) {
       return await sock.sendMessage(
         remoteJid,
         {
-          text: `⚠️ _Format not valid. Contoh:_ *${
+          text: `⚠️ _Invalid format. Example:_ *${
             prefix + command
           } @tag 50*`,
         },
@@ -32,11 +32,11 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    const target = args[0]; // Nomor penerima atau tag
- 
+    const target = args[0]; // Recipient number or tag
+
     const r = await convertToJid(sock, target);
-    if(!r) {
-       return await sock.sendMessage(
+    if (!r) {
+      return await sock.sendMessage(
         remoteJid,
         { text: `⚠️ _User not found, make sure the target has chatted in this group_` },
         { quoted: message }
@@ -44,12 +44,12 @@ async function handle(sock, messageInfo) {
     }
     const limitToSend = parseInt(args[1], 10);
 
-    // Validasi jumlah limit
+    // Validate limit amount
     if (isNaN(limitToSend) || limitToSend <= 0) {
       return await sock.sendMessage(
         remoteJid,
         {
-          text: `⚠️ _Jumlah limit harus berupa angka positif_\n\n_Contoh: *${
+          text: `⚠️ _The limit amount must be a positive number_\n\n_Example: *${
             prefix + command
           } @tag 50*_`,
         },
@@ -57,25 +57,25 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Fungsi helper: ekstrak hanya nomor
+    // Helper function: extract numbers only
     function extractNumber(input) {
       input = input
         .trim()
-        .replace(/^@/, "") // hapus awalan @
-        .replace(/@s\.whatsapp\.net$/, ""); // hapus akhiran @s.whatsapp.net
+        .replace(/^@/, "")                   // remove leading @
+        .replace(/@s\.whatsapp\.net$/, "");   // remove trailing @s.whatsapp.net
 
-      // Ambil hanya angka
+      // Keep only digits
       const number = input.replace(/[^0-9]/g, "");
 
-      // Kalau hasilnya tidak ada angka sama sekali, kembalikan null atau ""
+      // Return null if no digits found
       return number.length > 0 ? number : null;
     }
 
-    // Ambil nomor murni target & sender
-    const targetNumber = extractNumber(r); // si penerima
-    const senderNumber = extractNumber(sender); // si pengirim
+    // Extract pure numbers for target & sender
+    const targetNumber = extractNumber(r);      // recipient
+    const senderNumber = extractNumber(sender); // sender
 
-    // Validasi: Tidak bisa kirim ke diri sendiri
+    // Validate: cannot send to yourself
     if (targetNumber === senderNumber) {
       return await sock.sendMessage(
         remoteJid,
@@ -84,7 +84,7 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Ambil data user pengirim
+    // Retrieve sender data
     const senderData = await findUser(sender);
 
     if (!senderData) {
@@ -97,7 +97,7 @@ async function handle(sock, messageInfo) {
 
     const [docId1, userData1] = senderData;
 
-    // Validasi apakah pengirim memiliki cukup limit
+    // Validate whether sender has enough limit
     if (userData1.limit < limitToSend) {
       return await sock.sendMessage(
         remoteJid,
@@ -108,24 +108,24 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Ambil data penerima
+    // Retrieve receiver data
     const receiverData = await findUser(r);
 
     if (!receiverData) {
       return await sock.sendMessage(
         remoteJid,
-        { text: `⚠️ _Pengguna dengan nomor/tag tersebut not found._` },
+        { text: `⚠️ _User with that number/tag was not found._` },
         { quoted: message }
       );
     }
 
     const [docId2, userData2] = receiverData;
 
-    // Update limit user pengirim dan penerima
+    // Update limit for sender and receiver
     await updateUser(sender, { limit: userData1.limit - limitToSend });
     await updateUser(targetNumber, { limit: userData2.limit + limitToSend });
 
-    // Kirim pesan berhasil
+    // Send success message
     return await sock.sendMessage(
       remoteJid,
       {
@@ -136,11 +136,11 @@ async function handle(sock, messageInfo) {
   } catch (error) {
     console.error("An error occurred:", error);
 
-    // Kirim pesan error
+    // Send error message
     return await sock.sendMessage(
       remoteJid,
       {
-        text: `⚠️ An error occurred while processing your request. Please try again nanti.`,
+        text: `⚠️ An error occurred while processing your request. Please try again later.`,
       },
       { quoted: message }
     );

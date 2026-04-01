@@ -42,12 +42,12 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    let targetNumber = userToAction.replace(/\D/g, ""); // Hanya angka
+    let targetNumber = userToAction.replace(/\D/g, ""); // Numbers only
 
     if (targetNumber.length < 10 || targetNumber.length > 15) {
       await sock.sendMessage(
         remoteJid,
-        { text: `⚠️ Nomor not valid.` },
+        { text: `⚠️ Number not valid.` },
         { quoted: message }
       );
       return;
@@ -62,27 +62,27 @@ async function handle(sock, messageInfo) {
       react: { text: "⏰", key: message.key },
     });
 
-    // Make sure folder sesi ada
+    // Make sure session folder exists
     const SESSION_PATH = "./session/";
 
     const senderId = targetNumber.replace("@s.whatsapp.net", "");
     const sessionPath = path.join(SESSION_PATH, senderId);
     const sessionExists = fs.existsSync(sessionPath);
 
-    // Hapus sesi aktif
+    // Delete active session
     const sockSesi = sessions.get(`session/${senderId}`);
     if (sockSesi) {
       const { updateJadibot } = require("@lib/jadibot");
       await updateJadibot(senderId, "stop");
-      await sockSesi.ws.close(); // Tutup WebSocket
-      sessions.delete(`session/${senderId}`); // Hapus dari daftar sesi
+      await sockSesi.ws.close(); // Close WebSocket
+      sessions.delete(`session/${senderId}`); // Remove from session list
     }
 
     if (sessionExists) {
-      // Hapus folder sesi
+      // Delete session folder
       await sock.sendMessage(
         remoteJid,
-        { text: `✅ _${senderId} successful di stop_` },
+        { text: `✅ _${senderId} successfully stopped_` },
         { quoted: message }
       );
       const { updateJadibot } = require("@lib/jadibot");
@@ -90,7 +90,7 @@ async function handle(sock, messageInfo) {
     } else {
       await sock.sendMessage(
         remoteJid,
-        { text: `⚠️ _Folder sesi untuk ${senderId} not found._` },
+        { text: `⚠️ _Session folder for ${senderId} not found._` },
         { quoted: message }
       );
     }
@@ -98,7 +98,7 @@ async function handle(sock, messageInfo) {
     console.error("An error occurred:", error);
     await sock.sendMessage(
       remoteJid,
-      { text: `⚠️ An error occurred while processing perintah.` },
+      { text: `⚠️ An error occurred while processing command.` },
       { quoted: message }
     );
   }

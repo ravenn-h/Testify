@@ -5,7 +5,7 @@ async function handle(sock, messageInfo) {
   const { remoteJid, message, content, sender, command, prefix } = messageInfo;
 
   try {
-    // Validasi input konten
+    // Validate content input
     if (!content) {
       await sock.sendMessage(
         remoteJid,
@@ -16,10 +16,10 @@ async function handle(sock, messageInfo) {
         },
         { quoted: message }
       );
-      return; // Hentikan eksekusi jika none konten
+      return; // Stop execution if no content
     }
 
-    // Cek apakah keyword already exists
+    // Check if keyword already exists
     const currentList = await getDataByGroupId("owner");
     const lowercaseKeyword = content.trim().toLowerCase();
 
@@ -29,7 +29,7 @@ async function handle(sock, messageInfo) {
       return sendMessageWithTemplate(
         sock,
         remoteJid,
-        `✅ _Keyword *${lowercaseKeyword}* successful dihapus._`,
+        `✅ _Keyword *${lowercaseKeyword}* successfully deleted._`,
         message
       );
     } else {
@@ -45,13 +45,13 @@ async function handle(sock, messageInfo) {
     return sendMessageWithTemplate(
       sock,
       remoteJid,
-      "_❌ Maaf, an error occurred while processing data._",
+      "_❌ Sorry, an error occurred while processing data._",
       message
     );
   }
 }
 
-// Fungsi untuk sending pesan dengan template
+// Function for sending message with template
 function sendMessageWithTemplate(sock, remoteJid, text, quoted) {
   return sock.sendMessage(remoteJid, { text }, { quoted });
 }

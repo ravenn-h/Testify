@@ -2,7 +2,7 @@ async function handle(sock, messageInfo) {
   const { remoteJid, message, content, sender, prefix, command } = messageInfo;
 
   try {
-    // Validasi input kosong atau tidak sesuai format
+    // Validate empty or invalid format input
     if (
       !content ||
       content.trim() === "" ||
@@ -19,46 +19,46 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Kirim reaksi ⏰ untuk menunjukkan sedang processing
+    // Send ⏰ reaction to indicate processing
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
-    // Ekstrak ID grup dari tautan
+    // Extract group ID from link
     const groupId = content.split("chat.whatsapp.com/")[1];
     if (!groupId) {
       return await sock.sendMessage(
         remoteJid,
-        { text: `⚠️ Tautan grup not valid.` },
+        { text: `⚠️ Group link not valid.` },
         { quoted: message }
       );
     }
 
-    // Bergabung ke grup menggunakan invite link
+    // Join group using invite link
     try {
       await sock.groupAcceptInvite(groupId);
       await sock.sendMessage(
         remoteJid,
-        { text: `✅ Successful bergabung ke grup.` },
+        { text: `✅ Successfully joined the group.` },
         { quoted: message }
       );
     } catch (error) {
       let info = "_Make sure the group link is valid._";
 
-      // Periksa pesan error
+      // Check error message
       if (error instanceof Error && error.message.includes("not-authorized")) {
-        info = `_Kemungkinan Anda pernah dikeluarkan dari grup. Solusi: undang bot kembali atau masukkan secara manual._`;
+        info = `_You may have been removed from the group before. Solution: invite the bot back or add it manually._`;
       }
 
       if (error instanceof Error && error.message.includes("conflict")) {
-        info = `_Bot Sudah berada di dalam group sebelumnya_`;
+        info = `_Bot was already in the group previously_`;
       }
 
-      // Kirim pesan error ke user
+      // Send error message to user
       return await sock.sendMessage(
         remoteJid,
         {
-          text: `⚠️ _Gagal bergabung ke grup._\n\n${info}`,
+          text: `⚠️ _Failed to join the group._\n\n${info}`,
         },
         { quoted: message }
       );
@@ -67,7 +67,7 @@ async function handle(sock, messageInfo) {
     console.error("An error occurred:", error);
     await sock.sendMessage(
       remoteJid,
-      { text: `⚠️ An error occurred while processing perintah.` },
+      { text: `⚠️ An error occurred while processing command.` },
       { quoted: message }
     );
   }

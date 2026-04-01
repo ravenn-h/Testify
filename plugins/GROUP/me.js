@@ -7,7 +7,7 @@ import { findUser, isOwner, isPremiumUser } from "../../lib/users.js";
 import { getGroupMetadata, getProfilePictureUrl } from "../../lib/cache.js";
 
 const getCountryFlag = (sender) => {
-  const countryCode = sender.slice(0, 2); // Dua angka pertama
+  const countryCode = sender.slice(0, 2); // First two digits (country code)
   const flagMap = {
     62: "./62.png", // Indonesia
     60: "./60.png", // Malaysia
@@ -53,7 +53,7 @@ async function handle(sock, messageInfo) {
     if (!isGroup) {
       await sock.sendMessage(
         remoteJid,
-        { text: "Gunakan .me2 ya kak" },
+        { text: "Please use .me2 instead" },
         { quoted: message }
       );
       return;
@@ -69,7 +69,7 @@ async function handle(sock, messageInfo) {
       (p) => (p.phoneNumber === sender || p.id === sender) && p.admin
     );
 
-    const roleInGrub = isAdmin ? "Admin" : "Member";
+    const roleInGroup = isAdmin ? "Admin" : "Member";
     const role = isOwner(sender)
       ? "Owner"
       : isPremiumUser(sender)
@@ -89,7 +89,7 @@ async function handle(sock, messageInfo) {
       level: userData.level || 0,
       money: userData.money || 0,
       limit: userData.limit || 0,
-      roleInGrub,
+      roleInGrub: roleInGroup,
       flag,
       badge: achievement,
       pp: ppUser,

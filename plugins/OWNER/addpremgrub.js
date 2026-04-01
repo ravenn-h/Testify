@@ -2,8 +2,6 @@ import { findUser, updateUser, registerUser } from "../../lib/users.js";
 import { sendMessageWithMention } from "../../lib/utils.js";
 import { getGroupMetadata } from "../../lib/cache.js";
 
-
-
 let inProccess = false;
 
 async function handle(sock, messageInfo) {
@@ -15,14 +13,14 @@ async function handle(sock, messageInfo) {
       await sendMessageWithMention(
         sock,
         remoteJid,
-        `_Proses is in progress, silakan tunggu hingga selesai_`,
+        `_Process is in progress, please wait until it finishes_`,
         message,
         senderType
       );
       return;
     }
 
-    // ✅ Validasi input
+    // Validate input
     if (!content || content.trim() === "") {
       const tex = `_⚠️ Usage format:_ \n\n💬 Example:\n*${prefix + command}* https://chat.whatsapp.com/xxx 30`;
       return await sock.sendMessage(remoteJid, { text: tex }, { quoted: message });
@@ -31,7 +29,7 @@ async function handle(sock, messageInfo) {
     let [linkgroup, jumlahHariPremium] = content.split(" ");
 
     if (!linkgroup.includes("chat.whatsapp.com") || isNaN(jumlahHariPremium)) {
-      const tex = `⚠️ _Make sure format yang benar:_\n${prefix + command} https://chat.whatsapp.com/xxx 30`;
+      const tex = `⚠️ _Make sure the correct format:_\n${prefix + command} https://chat.whatsapp.com/xxx 30`;
       return await sock.sendMessage(remoteJid, { text: tex }, { quoted: message });
     }
 
@@ -51,7 +49,7 @@ async function handle(sock, messageInfo) {
     });
 
     if (!res.content[0]?.attrs?.id) {
-      const tex = `⚠️ _Link grup not valid atau make sure bot already joined_`;
+      const tex = `⚠️ _Group link not valid or make sure bot has already joined_`;
       await sock.sendMessage(remoteJid, { text: tex }, { quoted: message });
       inProccess = false;
       return;
@@ -59,7 +57,7 @@ async function handle(sock, messageInfo) {
 
     const groupId = res.content[0].attrs.id + "@g.us";
 
-    // ✅ Ambil metadata grup
+    // Get group metadata
     const groupMetadata = await getGroupMetadata(sock, groupId);
     const participants = groupMetadata?.participants || [];
 
@@ -68,32 +66,28 @@ async function handle(sock, messageInfo) {
 
     for (const member of participants) {
       try {
-        // ✅ Ambil JID valid: prioritas phoneNumber, fallback ke id
+        // Get valid JID: prioritize phoneNumber, fallback to id
         const id_users = member.phoneNumber || member.id;
 
         if (typeof id_users !== "string") {
-          console.warn("Skip participant tanpa ID valid:", member);
+          console.warn("Skip participant without valid ID:", member);
           failedCount++;
           continue;
         }
 
-        // Ambil data user
+        // Get user data
         let dataUsers = await findUser(id_users);
 
-        // Hitung tanggal premium baru
+        // Calculate new premium date
         const currentDate = new Date();
         currentDate.setDate(currentDate.getDate() + jumlahHariPremium);
 
         if (!dataUsers) {
-          console.warn(`User belum terdaftar: ${id_users}, coba daftarkan`);
+          console.warn(`User not yet registered: ${id_users}, attempting registration`);
 
-           const username = `user_${id_users.toLowerCase()}`;
-           const res = registerUser(id_users, username);
-           dataUsers = await findUser(id_users);
-
-
-          // failedCount++;
-          // continue;
+          const username = `user_${id_users.toLowerCase()}`;
+          const res = registerUser(id_users, username);
+          dataUsers = await findUser(id_users);
         }
 
         const [docId, userData] = dataUsers;
@@ -103,14 +97,14 @@ async function handle(sock, messageInfo) {
 
         successCount++;
       } catch (error) {
-        console.error(`Gagal adding premium untuk member:`, error);
+        console.error(`Failed to add premium for member:`, error);
         failedCount++;
       }
     }
 
     inProccess = false;
 
-    const responseText = `✅ Successful adding *${successCount}* user ke member premium.\n❌ Gagal: *${failedCount}*`;
+    const responseText = `✅ Successfully added *${successCount}* users to premium membership.\n❌ Failed: *${failedCount}*`;
     await sendMessageWithMention(sock, remoteJid, responseText, message, senderType);
   } catch (error) {
     console.error("Error processing premium addition:", error);
@@ -127,5 +121,5 @@ export default {
   handle,
   Commands: ["addpremgroup", "addpremiumgroup"],
   OnlyPremium: false,
-  OnlyOwner: true, // Hanya owner yang bisa akses
+  OnlyOwner: true, // Only owner can access
 };

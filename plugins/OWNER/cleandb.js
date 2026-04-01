@@ -6,14 +6,14 @@ async function handle(sock, messageInfo) {
   const { m, prefix, command, content, mentionedJid } = messageInfo;
 
   try {
-    // Validasi jika none argumen
+    // Validate if no arguments
     if (!content || !content.trim()) {
       return await reply(
         m,
-        `_⚠️ Fitur ini akan deleting:_\n` +
-          `• Data grup yang sudah keluar dari bot\n` +
-          `• Data user yang tidak aktif selama lebih dari 30 hari\n\n` +
-          `_💡 Cara pakai:_\n*${prefix + command} -y*`
+        `_⚠️ This feature will delete:_\n` +
+          `• Group data that the bot has left\n` +
+          `• User data that has been inactive for more than 30 days\n\n` +
+          `_💡 How to use:_\n*${prefix + command} -y*`
       );
     }
 
@@ -21,10 +21,10 @@ async function handle(sock, messageInfo) {
       const allGroups = await sock.groupFetchAllParticipating();
       const activeGroupIds = Object.keys(allGroups);
 
-      // Ambil semua data group tersimpan
+      // Get all saved group data
       const savedGroups = await readGroup();
 
-      // Buat objek baru hanya dengan grup yang masih aktif
+      // Create new object with only active groups
       const filteredGroups = {};
       for (const groupId of activeGroupIds) {
         if (savedGroups[groupId]) {
@@ -32,18 +32,18 @@ async function handle(sock, messageInfo) {
         }
       }
 
-      // Replace isi database dengan hanya grup aktif
+      // Replace database contents with only active groups
       await replaceGroup(filteredGroups);
 
       await resetMemberOld();
 
-      return await reply(m, `_✅ Successful Membersihkan DB_`);
+      return await reply(m, `_✅ Successfully Cleaned DB_`);
     }
   } catch (error) {
     console.error("Error handling command:", error);
     return await reply(
       m,
-      `_❌ An error occurred while processing perintah. Please try again nanti._`
+      `_❌ An error occurred while processing command. Please try again later._`
     );
   }
 }

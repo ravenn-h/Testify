@@ -1,4 +1,4 @@
-// PROMOTEME: Menjadikan owner ke admin jika bot sudah admin
+// PROMOTEME: Promotes the owner to admin if the bot is already an admin
 
 import mess from "../../strings.js";
 
@@ -14,19 +14,19 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Proses demote
+    // Process promote
     await sock.groupParticipantsUpdate(remoteJid, [sender], "promote");
 
-    // Kirim pesan
+    // Send message
     await sock.sendMessage(
       remoteJid,
-      { text: "✅ _Successful Menjadi Admin_" },
+      { text: "✅ _Successfully Promoted to Admin_" },
       { quoted: message }
     );
   } catch (error) {
     console.error("Error in promoteme command:", error);
 
-    // Kirim pesan kesalahan
+    // Send error message
     await sock.sendMessage(
       remoteJid,
       {

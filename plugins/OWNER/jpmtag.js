@@ -6,7 +6,7 @@ import path from "path";
 import axios from "axios";
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const jeda = 5; // 5 detik
+const jeda = 5; // 5 seconds
 
 let isRunning = false;
 
@@ -24,7 +24,7 @@ async function fetchGroupInfo(url) {
     const response = await axios.get(apiUrl);
     return response.data;
   } catch (error) {
-    console.error(`Gagal fetch info grup untuk ${url}`, error.message);
+    console.error(`Failed to fetch group info for ${url}`, error.message);
     return null;
   }
 }
@@ -41,7 +41,7 @@ async function handle(sock, messageInfo) {
     type,
   } = messageInfo;
 
-  const useMentions = true; // Ubah menjadi true jika ingin menggunakan mention
+  const useMentions = true; // Change to false if you don't want to use mentions
 
   const link = detectFirstWhatsAppGroupLink(content);
 
@@ -50,51 +50,51 @@ async function handle(sock, messageInfo) {
       return await sock.sendMessage(
         remoteJid,
         {
-          text: `⚠️ _Proses Jpm Sedang Berlangsung._ _Silakan tunggu hingga selesai._`,
+          text: `⚠️ _JPM Process is Running._ _Please wait until it finishes._`,
         },
         { quoted: message }
       );
     }
 
-    // Validasi input kosong atau tidak sesuai format
+    // Validate empty or invalid format input
     if (!content || content.trim() === "") {
       return sendErrorMessage(sock, remoteJid, message, prefix, command);
     }
 
     isRunning = true;
-    // Tampilkan reaksi sementara untuk processing
+    // Show temporary reaction for processing
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
-    // Ambil metadata grup
+    // Get group metadata
     const groupFetchAll = await groupFetchAllParticipating(sock);
     if (!groupFetchAll) {
       isRunning = false;
       return await sock.sendMessage(
         remoteJid,
-        { text: `⚠️ Tidak ada grup ditemukan.` },
+        { text: `⚠️ No groups found.` },
         { quoted: message }
       );
     }
 
-    // Filter grup berdasarkan kondisi tertentu
+    // Filter groups based on certain conditions
     const groupIds = Object.values(groupFetchAll)
-      .filter((group) => group.isCommunity == false) // Sesuaikan kondisi
+      .filter((group) => group.isCommunity == false) // Adjust condition as needed
       .map((group) => group.id);
 
     if (groupIds.length === 0) {
       isRunning = false;
       return await sock.sendMessage(
         remoteJid,
-        { text: `⚠️ Tidak ada grup dengan kondisi yang sesuai ditemukan.` },
+        { text: `⚠️ No groups matching the condition were found.` },
         { quoted: message }
       );
     }
 
-    // Ambil informasi pesan
+    // Get message info
     const mediaType = isQuoted ? `${isQuoted.type}Message` : `${type}Message`;
-    const pesangc = content; // Isi pesan untuk dikirim
+    const pesangc = content; // Message content to send
 
     let imageLink;
     if (link) {
@@ -113,13 +113,13 @@ async function handle(sock, messageInfo) {
       const mediaPath = path.join("tmp", media);
 
       if (!fs.existsSync(mediaPath)) {
-        throw new Error("File media not found setelah diunduh.");
+        throw new Error("Media file not found after download.");
       }
 
       buffer = fs.readFileSync(mediaPath);
     }
 
-    // Kirim pesan ke semua grup
+    // Send message to all groups
     for (const groupId of groupIds) {
       const participants = Object.values(
         groupFetchAll[groupId]?.participants || []
@@ -145,16 +145,16 @@ async function handle(sock, messageInfo) {
         });
       }
 
-      // Jeda 5 detik
+      // 5 second delay
       await sleep(jeda * 1000);
     }
 
     isRunning = false;
 
-    // Kirim konfirmasi sukses
+    // Send success confirmation
     await sock.sendMessage(
       remoteJid,
-      { text: `✅ Pesan successful dikirim ke ${groupIds.length} grup` },
+      { text: `✅ Message successfully sent to ${groupIds.length} groups` },
       { quoted: message }
     );
   } catch (error) {
@@ -162,7 +162,7 @@ async function handle(sock, messageInfo) {
     console.error("An error occurred:", error);
     await sock.sendMessage(
       remoteJid,
-      { text: `⚠️ An error occurred while processing perintah.` },
+      { text: `⚠️ An error occurred while processing command.` },
       { quoted: message }
     );
   }
@@ -174,7 +174,7 @@ function sendErrorMessage(sock, remoteJid, message, prefix, command) {
     {
       text: `_⚠️ Usage format:_ \n\n_💬 Example:_ _*${
         prefix + command
-      } pengumuman bot whatsapp*_`,
+      } bot whatsapp announcement*_`,
     },
     { quoted: message }
   );

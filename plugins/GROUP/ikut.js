@@ -1,7 +1,7 @@
 async function handle(sock, messageInfo) {
   try {
     const { isGroup } = messageInfo;
-    if (!isGroup) return; // Hanya untuk grup
+    if (!isGroup) return; // Groups only
 
     await joinGiveaway(sock, messageInfo);
   } catch (err) {
@@ -12,22 +12,22 @@ async function handle(sock, messageInfo) {
 async function joinGiveaway(sock, messageInfo) {
   try {
     const { remoteJid, isGroup, message, sender } = messageInfo;
-    if (!isGroup) return; // Hanya bisa di grup
+    if (!isGroup) return; // Groups only
 
-    // Make sure global.giveawayParticipants terinisialisasi
+    // Make sure global.giveawayParticipants is initialized
     if (!global.giveawayParticipants) global.giveawayParticipants = {};
     if (!global.giveawayParticipants[remoteJid]) {
       await sock.sendMessage(
         remoteJid,
         {
-          text: `⚠ Giveaway has not started! Admin dapat memulai dengan perintah *.giveaway*`,
+          text: `⚠ Giveaway has not started! An admin can start one with the *.giveaway* command`,
         },
         { quoted: message }
       );
       return;
     }
 
-    // Make sure set ada
+    // Make sure the set exists
     const participants = global.giveawayParticipants[remoteJid];
     if (!(participants instanceof Set)) {
       global.giveawayParticipants[remoteJid] = new Set();
@@ -39,7 +39,7 @@ async function joinGiveaway(sock, messageInfo) {
         {
           text: `⚠ @${
             sender.split("@")[0]
-          }, kamu already joined dalam giveaway!`,
+          }, you have already joined the giveaway!`,
         },
         { quoted: message, mentions: [sender] }
       );

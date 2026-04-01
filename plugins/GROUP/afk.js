@@ -3,43 +3,43 @@ import { findUser, updateUser } from "../../lib/users.js";
 async function handle(sock, messageInfo) {
   const { remoteJid, isGroup, message, content, sender, pushName } =
     messageInfo;
-  if (!isGroup) return; // Only Grub
+  if (!isGroup) return; // Groups only
 
   try {
-    // Ambil data user dari database
+    // Retrieve user data from database
     const dataUsers = await findUser(sender);
 
     if (dataUsers) {
       const [docId, userData] = dataUsers;
 
-      const alasan = content
+      const reason = content
         ? `Reason: ${
             content.length > 100 ? content.slice(0, 100) + "..." : content
           }`
         : "No Reason";
 
-      const waktuSekarang = new Date();
+      const currentTime = new Date();
 
-      // Perbarui status user menjadi AFK
+      // Update user status to AFK
       await updateUser(sender, {
         status: "afk",
         afk: {
-          lastChat: waktuSekarang.toISOString(),
-          alasan,
+          lastChat: currentTime.toISOString(),
+          reason,
         },
       });
 
-      // Kirim pesan ke grup atau chat pribadi
+      // Send message to the group or private chat
       await sock.sendMessage(
         remoteJid,
-        { text: `😓 Oh no, ${pushName} has gone AFK.\n\n📌 ${alasan}` },
+        { text: `😓 Oh no, ${pushName} has gone AFK.\n\n📌 ${reason}` },
         { quoted: message }
       );
     }
   } catch (error) {
     console.error("Error in AFK command:", error);
 
-    // Kirim pesan error jika terjadi masalah
+    // Send error message if something goes wrong
     await sock.sendMessage(
       remoteJid,
       {

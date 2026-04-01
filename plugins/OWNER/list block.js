@@ -7,7 +7,7 @@ async function handle(sock, messageInfo) {
   try {
     const users = await readUsers();
 
-    // Ambil hanya user yang statusnya 'block'
+    // Get only users with 'block' status
     const blockedUsers = Object.entries(users)
       .filter(([, userData]) => userData.status === "block")
       .map(([docId, userData]) => ({
@@ -19,12 +19,12 @@ async function handle(sock, messageInfo) {
     if (blockedUsers.length === 0) {
       return await sock.sendMessage(
         remoteJid,
-        { text: "⚠️ Tidak ada user yang diblokir at this time." },
+        { text: "⚠️ No users are blocked at this time." },
         { quoted: message }
       );
     }
 
-    // Format daftar user (pakai username)
+    // Format user list (using username)
     const blockedList = blockedUsers
       .map((user, index) => `◧ *${user.username}*`)
       .join("\n");
@@ -42,7 +42,7 @@ async function handle(sock, messageInfo) {
     console.error("Error fetching users:", error);
     await sock.sendMessage(
       remoteJid,
-      { text: "An error occurred while processing data user." },
+      { text: "An error occurred while processing user data." },
       { quoted: message }
     );
   }

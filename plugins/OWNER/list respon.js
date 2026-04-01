@@ -5,10 +5,10 @@ async function handle(sock, messageInfo) {
   const { remoteJid, message, senderType } = messageInfo;
 
   try {
-    // Ambil data list berdasarkan grup
+    // Get list data by group
     const currentList = await getDataByGroupId("owner");
 
-    // Jika none list
+    // If no list found
     if (!currentList || !currentList.list) {
       await sock.sendMessage(remoteJid, {
         text: "⚠️ _No Response List found, type *addrespon* to create one_\n\n_Only *owners* can add/delete responses_",
@@ -27,10 +27,10 @@ async function handle(sock, messageInfo) {
         .map((keyword) => `◧ ${keyword.toUpperCase()}`)
         .join("\n");
 
-      // Template pesan
-      const templateMessage = `╭✄ *BERIKUT DAFTAR RESPON*\n\n${formattedList}\n╰──────────◇`;
+      // Message template
+      const templateMessage = `╭✄ *HERE IS THE RESPONSE LIST*\n\n${formattedList}\n╰──────────◇`;
 
-      // Kirim pesan dengan mention
+      // Send message with mention
       await sendMessageWithMention(
         sock,
         remoteJid,

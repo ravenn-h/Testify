@@ -5,7 +5,7 @@ async function handle(sock, messageInfo) {
   const { remoteJid, message, content, prefix, command, senderType } =
     messageInfo;
 
-  // --- Validasi input ---
+  // --- Validate input ---
   if (!content?.trim()) {
     const tex =
       `_⚠️ Format: *${prefix + command} tag 30*_\n\n` +
@@ -19,7 +19,7 @@ async function handle(sock, messageInfo) {
     return sock.sendMessage(
       remoteJid,
       {
-        text: `_Masukkan format yang benar_\n\n_Example: *${
+        text: `_Please enter the correct format_\n\n_Example: *${
           prefix + command
         } @tag 50*_`,
       },
@@ -32,7 +32,7 @@ async function handle(sock, messageInfo) {
     return sock.sendMessage(
       remoteJid,
       {
-        text: `⚠️ _Jumlah level harus berupa angka positif_\n\n_Example: *${
+        text: `⚠️ _Level amount must be a positive number_\n\n_Example: *${
           prefix + command
         } username/id 5*_`,
       },
@@ -40,14 +40,14 @@ async function handle(sock, messageInfo) {
     );
   }
 
-  // --- Ambil data user ---
-   const r = await convertToJid(sock, rawNumber)
+  // --- Get user data ---
+  const r = await convertToJid(sock, rawNumber);
   const dataUsers = await findUser(r);
   if (!dataUsers) {
     return sock.sendMessage(
       remoteJid,
       {
-        text: `⚠️ _Pengguna dengan username/id ${r} not found._`,
+        text: `⚠️ _User with username/id ${r} not found._`,
       },
       { quoted: message }
     );
@@ -55,16 +55,16 @@ async function handle(sock, messageInfo) {
 
   const [docId, userData] = dataUsers;
 
-  // --- Update data user ---
+  // --- Update user data ---
   await updateUser(r, {
     level: (userData.level || 0) + levelToAdd,
   });
 
-  // --- Kirim pesan konfirmasi ---
+  // --- Send confirmation message ---
   await sendMessageWithMention(
     sock,
     remoteJid,
-    `✅ _Level successful ditambahkan ${levelToAdd}._`,
+    `✅ _Level successfully added ${levelToAdd}._`,
     message,
     senderType
   );

@@ -6,21 +6,21 @@ async function handle(sock, messageInfo) {
   const { remoteJid, message, content, sender, command, prefix } = messageInfo;
 
   try {
-    // Validasi isi pesan
+    // Validate message content
     if (!content.trim()) {
       return sendMessageWithTemplate(
         sock,
         remoteJid,
-        `_Masukkan Perintah dan Pesannya_\n\nContoh : ${
+        `_Enter the Command and Message_\n\nExample: ${
           prefix + command
-        } donasi | Berikut link donasi...\n\n_Apabila ingin menambah respon dengan gambar, silakan kirim/reply gambarnya dengan caption_ *${
+        } donation | Here is the donation link...\n\n_If you want to add a response with an image, please send/reply to the image with caption_ *${
           prefix + command
         }*`,
         message
       );
     }
 
-    // Pisahkan keyword dan teks
+    // Separate keyword and text
     const [keyword, text] = content.split("|").map((item) => item.trim());
     const lowercaseKeyword = keyword.trim().toLowerCase();
 
@@ -28,31 +28,31 @@ async function handle(sock, messageInfo) {
       return sendMessageWithTemplate(
         sock,
         remoteJid,
-        `⚠️ _Format not valid!_\n\nContoh : *${
+        `⚠️ _Format not valid!_\n\nExample: *${
           prefix + command
-        } donasi | Berikut link donasi...*\n\n_Apabila ingin menambah respon dengan gambar, silakan kirim/reply gambarnya dengan caption_ *${
+        } donation | Here is the donation link...*\n\n_If you want to add a response with an image, please send/reply to the image with caption_ *${
           prefix + command
         }*`,
         message
       );
     }
 
-    // Cek apakah keyword already exists
+    // Check if keyword already exists
     const currentList = await getDataByGroupId(remoteJid);
 
     if (currentList?.list?.[lowercaseKeyword]) {
       return sendMessageWithTemplate(
         sock,
         remoteJid,
-        `_⚠️ Keyword *${lowercaseKeyword}* already exists sebelumnya!_\n_Silakan gunakan keyword lain atau *.updaterespon*_`,
+        `_⚠️ Keyword *${lowercaseKeyword}* already exists!_\n_Please use another keyword or *.updaterespon*_`,
         message
       );
     }
 
-    // Tangani media jika ada
+    // Handle media if any
     const mediaUrl = await handleMedia(messageInfo);
 
-    // Tambahkan ke database
+    // Add to database
     const result = await addList("owner", lowercaseKeyword, {
       text,
       media: mediaUrl,
@@ -62,7 +62,7 @@ async function handle(sock, messageInfo) {
       return sendMessageWithTemplate(
         sock,
         remoteJid,
-        `${lowercaseKeyword} _sudah ditambahkan ke daftar respon_\n\n_Ketik *listrespon* untuk melihat daftar respon._`,
+        `${lowercaseKeyword} _has been added to the response list_\n\n_Type *listrespon* to view the response list._`,
         message
       );
     }
@@ -78,18 +78,18 @@ async function handle(sock, messageInfo) {
     return sendMessageWithTemplate(
       sock,
       remoteJid,
-      "_❌ Maaf, an error occurred while processing data._",
+      "_❌ Sorry, an error occurred while processing data._",
       message
     );
   }
 }
 
-// Fungsi untuk sending pesan dengan template
+// Function for sending message with template
 function sendMessageWithTemplate(sock, remoteJid, text, quoted) {
   return sock.sendMessage(remoteJid, { text }, { quoted });
 }
 
-// Fungsi untuk menangani unduhan media
+// Function for handling media downloads
 async function handleMedia({ isQuoted, type, message }) {
   const supportedMediaTypes = [
     "image",

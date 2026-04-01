@@ -7,15 +7,15 @@ async function handle(sock, messageInfo) {
   const { remoteJid, message } = messageInfo;
 
   try {
-    // Kirim pesan reaksi sebagai tanda proses dimulai
+    // Send reaction message to indicate process has started
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
-    // Buat file restaring.txt dengan nama pengirim (remoteJid)
+    // Create restaring.txt file with the sender's JID (remoteJid)
     fs.writeFile("restaring.txt", remoteJid, (err) => {
       if (err) {
-        console.error("An error occurred while membuat file:", err);
+        console.error("An error occurred while creating file:", err);
         return;
       }
     });

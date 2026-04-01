@@ -5,7 +5,7 @@ async function handle(sock, messageInfo) {
   const { remoteJid, message, content, prefix, command, senderType } =
     messageInfo;
 
-  // --- Validasi input ---
+  // --- Validate input ---
   if (!content?.trim()) {
     const tex =
       `_⚠️ Format: *${prefix + command} tag 30*_\n\n` +
@@ -13,14 +13,14 @@ async function handle(sock, messageInfo) {
     return sock.sendMessage(remoteJid, { text: tex }, { quoted: message });
   }
 
-  // Pisahkan target dan jumlah limit
+  // Separate target and limit amount
   const [rawNumber, rawLimit] = content.split(" ").map((s) => s.trim());
 
   if (!rawNumber || !rawLimit) {
     return sock.sendMessage(
       remoteJid,
       {
-        text: `_Masukkan format yang benar_\n\n_Example: *${
+        text: `_Please enter the correct format_\n\n_Example: *${
           prefix + command
         } @tag 50*_`,
       },
@@ -28,13 +28,13 @@ async function handle(sock, messageInfo) {
     );
   }
 
-  // Validasi jumlah limit
+  // Validate limit amount
   const limitToAdd = parseInt(rawLimit, 10);
   if (isNaN(limitToAdd) || limitToAdd <= 0) {
     return sock.sendMessage(
       remoteJid,
       {
-        text: `⚠️ _Jumlah limit harus berupa angka positif_\n\n_Example: *${
+        text: `⚠️ _Limit amount must be a positive number_\n\n_Example: *${
           prefix + command
         } username/id 5*_`,
       },
@@ -42,13 +42,12 @@ async function handle(sock, messageInfo) {
     );
   }
 
-
-  // --- Cek user single function ---
+  // --- Check user with single function ---
   let dataUsers = await findUser(rawNumber);
   let userJid = rawNumber;
 
   if (!dataUsers) {
-    // Jika tidak ketemu, coba dengan JID
+    // If not found, try with JID
     const r = await convertToJid(sock, rawNumber);
     userJid = r;
     dataUsers = await findUser(r);
@@ -57,7 +56,7 @@ async function handle(sock, messageInfo) {
       return sock.sendMessage(
         remoteJid,
         {
-          text: `⚠️ _Pengguna dengan username/id ${rawNumber} not found._`,
+          text: `⚠️ _User with username/id ${rawNumber} not found._`,
         },
         { quoted: message }
       );
@@ -66,19 +65,18 @@ async function handle(sock, messageInfo) {
 
   const userId = dataUsers[0];
 
-
   const [docId, userData] = dataUsers;
 
-  // --- Update data user ---
+  // --- Update user data ---
   await updateUser(userJid, {
     limit: (userData.limit || 0) + limitToAdd,
   });
 
-  // --- Kirim pesan konfirmasi ---
+  // --- Send confirmation message ---
   await sendMessageWithMention(
     sock,
     remoteJid,
-    `✅ _Limit successful ditambahkan ${limitToAdd}_`,
+    `✅ _Limit successfully added ${limitToAdd}_`,
     message,
     senderType
   );

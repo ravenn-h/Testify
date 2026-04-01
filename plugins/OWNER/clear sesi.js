@@ -9,7 +9,7 @@ async function handle(sock, messageInfo) {
     if (!fs.existsSync(sessionPath)) {
       return await sock.sendMessage(
         remoteJid,
-        { text: `⚠️ Folder sesi not found.` },
+        { text: `⚠️ Session folder not found.` },
         { quoted: message }
       );
     }
@@ -21,7 +21,7 @@ async function handle(sock, messageInfo) {
     if (sessions.length === 0) {
       return await sock.sendMessage(
         remoteJid,
-        { text: `✅ Tidak ada sesi yang perlu dihapus.` },
+        { text: `✅ No sessions need to be deleted.` },
         { quoted: message }
       );
     }
@@ -32,14 +32,14 @@ async function handle(sock, messageInfo) {
 
     await sock.sendMessage(
       remoteJid,
-      { text: `✅ Semua sesi telah dihapus.` },
+      { text: `✅ All sessions have been deleted.` },
       { quoted: message }
     );
   } catch (error) {
     console.error("An error occurred:", error);
     await sock.sendMessage(
       remoteJid,
-      { text: `⚠️ An error occurred while processing perintah.` },
+      { text: `⚠️ An error occurred while processing command.` },
       { quoted: message }
     );
   }

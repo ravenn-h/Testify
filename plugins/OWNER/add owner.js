@@ -4,44 +4,44 @@ import { addOwner } from "../../lib/users.js";
 async function handle(sock, messageInfo) {
   const { m, prefix, command, content } = messageInfo;
 
-  // Validasi input kosong
+  // Validate empty input
   if (!content || !content.trim()) {
     return await reply(
       m,
-      `_Masukkan format yang valid_\n\n_Example: *${prefix + command} 628xxx*_`
+      `_Please enter a valid format_\n\n_Example: *${prefix + command} 628xxx*_`
     );
   }
 
-  // Membersihkan input menjadi hanya angka
-  const ownerNumber = content.replace(/\D/g, ""); // Menghapus karakter non-angka
+  // Clean input to numbers only
+  const ownerNumber = content.replace(/\D/g, ""); // Remove non-numeric characters
 
-  // Validasi format nomor (10-15 digit)
+  // Validate number format (10-15 digits)
   if (!/^\d{10,15}$/.test(ownerNumber)) {
     return await reply(
       m,
-      `_Nomor not valid. Make sure formatnya benar_\n\n_Example: *${
+      `_Number not valid. Make sure the format is correct_\n\n_Example: *${
         prefix + command
       } 628xxx*_`
     );
   }
 
-  // Menambahkan nomor ke daftar owner
+  // Add number to owner list
   try {
     const result = addOwner(ownerNumber);
     if (result) {
       return await reply(
         m,
-        `_Nomor ${ownerNumber} successful ditambahkan sebagai owner._`
+        `_Number ${ownerNumber} successfully added as owner._`
       );
     } else {
       return await reply(
         m,
-        `_Nomor ${ownerNumber} already exists dalam daftar owner._`
+        `_Number ${ownerNumber} already exists in the owner list._`
       );
     }
   } catch (error) {
-    console.error("Error saat adding owner:", error);
-    return await reply(m, `_An error occurred while processing permintaan._`);
+    console.error("Error while adding owner:", error);
+    return await reply(m, `_An error occurred while processing request._`);
   }
 }
 

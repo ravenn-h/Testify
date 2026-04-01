@@ -4,24 +4,24 @@ async function handle(sock, messageInfo) {
   const { remoteJid, message, sender } = messageInfo;
 
   try {
-    // Ambil data user
+    // Retrieve user data
     const dataUsers = await findUser(sender);
 
-    // Jika user not found, tambahkan user baru
+    // If user not found, skip
     if (!dataUsers) {
       return;
     }
 
     const [docId, userData] = dataUsers;
 
-    // Tentukan status premium dengan kalimat yang lebih baik
+    // Determine premium status with a clear message
     let premiumStatus;
     if (userData.premium) {
       const premiumEndDate = new Date(userData.premium);
       const now = new Date();
 
       if (premiumEndDate > now) {
-        premiumStatus = `📋 _Masa Premium kamu hingga:_ ${premiumEndDate.toLocaleString()}`;
+        premiumStatus = `📋 _Your Premium period expires on:_ ${premiumEndDate.toLocaleString()}`;
       } else {
         premiumStatus = "📋 _Your Premium period has expired_";
       }
@@ -29,7 +29,7 @@ async function handle(sock, messageInfo) {
       premiumStatus = "📋 _You currently do not have a premium period_";
     }
 
-    const responseText = `_Halo_ @${sender.split("@")[0]} \n\n${premiumStatus}`;
+    const responseText = `_Hello_ @${sender.split("@")[0]} \n\n${premiumStatus}`;
 
     await sock.sendMessage(
       remoteJid,
@@ -39,11 +39,11 @@ async function handle(sock, messageInfo) {
   } catch (error) {
     console.error("Error handling user data:", error);
 
-    // Kirim pesan kesalahan ke user
+    // Send error message to user
     await sock.sendMessage(
       remoteJid,
       {
-        text: "An error occurred while processing data. Please try again nanti.",
+        text: "An error occurred while processing data. Please try again later.",
       },
       { quoted: message }
     );

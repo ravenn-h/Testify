@@ -2,10 +2,10 @@ async function delay(duration) {
   return new Promise((resolve) => setTimeout(resolve, duration * 1000));
 }
 
-// Fungsi utama
+// Main function
 const clearAllChats = async (sock) => {
   try {
-    // Ambil semua JID chat, kalau none isi dengan array kosong
+    // Get all chat JIDs, default to empty array if none
     const chats = Object.keys(sock.chats || {});
 
     if (chats.length === 0) {
@@ -15,17 +15,17 @@ const clearAllChats = async (sock) => {
 
     for (const jid of chats) {
       try {
-        // 1. Bersihkan isi pesan chat
+        // 1. Clear chat message contents
         await sock.chatModify({ clear: { type: "all" } }, jid);
 
-        await delay(300); // jeda supaya aman dari rate limit
+        await delay(300); // delay to avoid rate limit
 
-        // 2. Hapus chat dari daftar
+        // 2. Delete chat from list
         await sock.chatModify({ delete: true }, jid);
 
-        console.log(`✅ Chat ${jid} dibersihkan & dihapus`);
+        console.log(`✅ Chat ${jid} cleared & deleted`);
       } catch (err) {
-        console.error(`⚠️ Gagal hapus chat ${jid}:`, err.message);
+        console.error(`⚠️ Failed to delete chat ${jid}:`, err.message);
       }
     }
 
@@ -39,11 +39,11 @@ async function handle(sock, messageInfo) {
   const { remoteJid } = messageInfo;
 
   await sock.sendMessage(remoteJid, {
-    text: "⏳ Sedang deleting semua chat...",
+    text: "⏳ Deleting all chats...",
   });
   await clearAllChats(sock);
   await sock.sendMessage(remoteJid, {
-    text: "✅ Semua chat successful dihapus total!",
+    text: "✅ All chats successfully deleted!",
   });
 }
 

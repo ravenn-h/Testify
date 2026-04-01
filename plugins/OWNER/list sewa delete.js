@@ -10,7 +10,7 @@ async function handle(sock, messageInfo) {
 
     if (!sewa || Object.keys(sewa).length === 0) {
       await sock.sendMessage(remoteJid, {
-        text: "⚠️ _Tidak ada daftar sewa ditemukan_",
+        text: "⚠️ _No subscription list found_",
       });
       return;
     }
@@ -25,17 +25,17 @@ async function handle(sock, messageInfo) {
 
     for (const [groupId, data] of sortedSewa) {
       const subject =
-        allGroups[groupId]?.subject || "Nama Grup Tidak Ditemukan";
+        allGroups[groupId]?.subject || "Group Name Not Found";
 
-      if (subject === "Nama Grup Tidak Ditemukan") {
-        // Hapus data sewa berdasarkan ID grup
+      if (subject === "Group Name Not Found") {
+        // Delete subscription data based on group ID
         await deleteSewa(groupId);
         continue;
       }
 
       listMessage += `╭─
 │ Subject : ${subject}
-│ ID Grup : ${groupId}
+│ Group ID : ${groupId}
 │ Expired : ${selisihHari(data.expired)}
 ╰────────────────────────\n`;
 
@@ -49,7 +49,7 @@ async function handle(sock, messageInfo) {
     });
   } catch (error) {
     await sock.sendMessage(remoteJid, {
-      text: "_An error occurred while mengambil daftar sewa_",
+      text: "_An error occurred while retrieving the subscription list_",
     });
   }
 }

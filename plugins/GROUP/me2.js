@@ -4,7 +4,7 @@ import { isOwner, isPremiumUser } from "../../lib/users.js";
 async function handle(sock, messageInfo) {
   const { remoteJid, message, sender, pushName } = messageInfo;
 
-  // Ambil data user
+  // Retrieve user data
   const dataUsers = await findUser(sender);
   if (!dataUsers) return;
 

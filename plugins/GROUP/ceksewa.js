@@ -4,16 +4,16 @@ import { getGroupMetadata } from "../../lib/cache.js";
 
 async function handle(sock, messageInfo) {
   const { remoteJid, isGroup, message } = messageInfo;
-  if (!isGroup) return; // Only Grub
+  if (!isGroup) return; // Groups only
 
-  // Mendapatkan metadata grup
+  // Get group metadata
   const { subject } = await getGroupMetadata(sock, remoteJid);
 
-  // Memeriksa data sewa
+  // Check subscription data
   const dataSewa = await findSewa(remoteJid);
 
   if (!dataSewa) {
-    // Jika grup tidak termasuk sewa bot
+    // Group does not have a bot subscription
     await sock.sendMessage(
       remoteJid,
       { text: "_This Group Does Not Have a Bot Subscription_" },
@@ -22,16 +22,16 @@ async function handle(sock, messageInfo) {
     return;
   }
 
-  // Mengecek masa sewa
-  const selisihHariSewa = selisihHari(dataSewa.expired);
+  // Check subscription duration
+  const remainingDays = selisihHari(dataSewa.expired);
 
-  // Mengirimkan informasi masa sewa
+  // Send subscription info
   await sock.sendMessage(
     remoteJid,
     {
-      text: `_*Name Group:*_ ${subject}
+      text: `_*Group Name:*_ ${subject}
 
-_*Masa Sewabot:*_ _*${selisihHariSewa}*_`,
+_*Bot Subscription:*_ _*${remainingDays}*_`,
     },
     { quoted: message }
   );

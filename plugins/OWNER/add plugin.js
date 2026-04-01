@@ -5,54 +5,54 @@ import path from "path";
 async function handle(sock, messageInfo) {
   const { m, prefix, command, content } = messageInfo;
 
-  // Memisahkan konten berdasarkan tanda '|'
+  // Split content based on '|' separator
   const parts = content.split("|").map((part) => part.trim());
 
   if (parts.length < 2) {
     return await reply(
       m,
-      `_Masukkan format yang valid_\n\n_Example:_ _*${
+      `_Please enter a valid format_\n\n_Example:_ _*${
         prefix + command
-      } newfitur*_ | async function handle(sock, messageInfo) {\n    const { remoteJid, message } = messageInfo;\n    await sock.sendMessage(remoteJid, { text: 'tes new fitur' }, { quoted: message });\n}
+      } newfeature*_ | async function handle(sock, messageInfo) {\n    const { remoteJid, message } = messageInfo;\n    await sock.sendMessage(remoteJid, { text: 'test new feature' }, { quoted: message });\n}
             
 export default {
     handle,
-    Commands: ['newfitur'],
+    Commands: ['newfeature'],
     OnlyPremium: false,
     OnlyOwner: false,
 };`
     );
   }
 
-  // Bagian pertama adalah nama perintah baru (newCommand)
+  // First part is the new command name (newCommand)
   let newCommand = parts[0];
 
-  // Periksa apakah newCommand tidak diakhiri dengan '.js'
+  // Check if newCommand does not end with '.js'
   if (!newCommand.endsWith(".js")) {
-    newCommand += ".js"; // Tambahkan '.js' jika none
+    newCommand += ".js"; // Add '.js' if missing
   }
 
-  // Gabungkan semua elemen setelah elemen pertama untuk getting sisa teks sebagai isi fungsi (functionBody)
+  // Join all elements after the first to get remaining text as function body (functionBody)
   const functionBody = parts.slice(1).join("|");
 
-  // Menggunakan cwd (current working directory)
+  // Use cwd (current working directory)
   const folderPath = path.join(process.cwd(), "./plugins/FEATURES ADD/");
 
-  // Make sure folder tujuan ada
+  // Make sure destination folder exists
   if (!fs.existsSync(folderPath)) {
     fs.mkdirSync(folderPath, { recursive: true });
   }
 
-  // Membuat isi file berdasarkan newCommand dan functionBody
+  // Create file content based on newCommand and functionBody
   const fileContent = functionBody;
 
-  // Menulis file baru dengan nama sesuai newCommand
+  // Write new file with name matching newCommand
   const filePath = path.join(folderPath, `${newCommand}`);
   fs.writeFileSync(filePath, fileContent);
 
   return await reply(
     m,
-    `_Plugin baru dengan nama *${newCommand}* successful dibuat!_\n\n_Restart server untuk menerapkan perubahan_`
+    `_New plugin named *${newCommand}* successfully created!_\n\n_Restart server to apply changes_`
   );
 }
 

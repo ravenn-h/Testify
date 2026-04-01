@@ -28,7 +28,7 @@ const checkIPs = async () => {
 IPv4: ${ipv4}
 IPv6: ${ipv6}`;
   } catch (error) {
-    return `Gagal Saat Mengecek IP: ${error.message}`;
+    return `Failed to check IP: ${error.message}`;
   }
 };
 
@@ -54,9 +54,9 @@ async function handle(sock, messageInfo) {
   } catch (error) {
     // Handle errors
     console.error("Error in handle function:", error);
-    const errorMessage = `Maaf, an error occurred while processing permintaan Anda. Try again later.
+    const errorMessage = `Sorry, an error occurred while processing your request. Try again later.
 
-Detail Kesalahan: ${error.message}`;
+Error Details: ${error.message}`;
     await sock.sendMessage(
       remoteJid,
       { text: errorMessage },

@@ -11,7 +11,7 @@ async function handle(sock, messageInfo) {
         {
           text: `_⚠️ Usage format:_ \n\n_💬 Example:_ _*${
             prefix + command
-          } tolol*_`,
+          } badword*_`,
         },
         { quoted: message }
       );
@@ -25,19 +25,19 @@ async function handle(sock, messageInfo) {
       args
     );
 
-    // Kirim respons ke grup
+    // Send response to group
     await sendResponse(sock, remoteJid, responseMessage, message);
   } catch (error) {
     await sendResponse(
       sock,
       remoteJid,
-      "An error occurred while processing perintah.",
+      "An error occurred while processing command.",
       message
     );
   }
 }
 
-// Fungsi tambahan untuk memastikan data grup tersedia
+// Helper function to ensure group data is available
 async function ensureGroupData(remoteJid) {
   let dataGrub = await findBadword(remoteJid);
   if (!dataGrub) {
@@ -47,23 +47,23 @@ async function ensureGroupData(remoteJid) {
   return dataGrub;
 }
 
-// Fungsi untuk adding kata ke daftar badword
+// Function for adding words to the badword list
 async function addBadwordToList(remoteJid, dataGrub, words) {
   if (words.length === 0) {
-    return "⚠️ _Mohon berikan kata yang ingin ditambahkan. Example: .addbadword tolol_";
+    return "⚠️ _Please provide the word you want to add. Example: .addbadword badword_";
   }
 
   const newWords = words.filter((word) => !dataGrub.listBadword.includes(word));
   if (newWords.length === 0) {
-    return "⚠️ _Semua kata already exists dalam daftar badword._";
+    return "⚠️ _All words already exist in the badword list._";
   }
 
   dataGrub.listBadword.push(...newWords);
   await updateBadword(remoteJid, { listBadword: dataGrub.listBadword });
-  return `✅ _Successful adding kata:_ ${newWords.join(", ")}`;
+  return `✅ _Successfully added words:_ ${newWords.join(", ")}`;
 }
 
-// Fungsi untuk sending respons ke grup
+// Function for sending response to group
 async function sendResponse(sock, remoteJid, text, quotedMessage) {
   await sock.sendMessage(remoteJid, { text }, { quoted: quotedMessage });
 }

@@ -36,7 +36,7 @@ Time : ${backupFilePath.time}
     await sock.sendMessage(
       remoteJid,
       {
-        text: `❌ _Gagal melakukan backup:_ ${err.message}`,
+        text: `❌ _Failed to perform backup:_ ${err.message}`,
       },
       { quoted: message }
     );

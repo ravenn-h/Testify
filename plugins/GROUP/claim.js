@@ -4,7 +4,7 @@ import { formatRemainingTime } from "../../lib/utils.js";
 async function handle(sock, messageInfo) {
   const { remoteJid, message, sender } = messageInfo;
 
-  const CLAIM_COOLDOWN_MINUTES = 120; // 120 atau 2 jam
+  const CLAIM_COOLDOWN_MINUTES = 120; // 120 minutes or 2 hours
   const MIN_CLAIM = 1;
   const MAX_CLAIM = 10;
 
@@ -13,7 +13,7 @@ async function handle(sock, messageInfo) {
   const LimitClaim =
     Math.floor(Math.random() * (MAX_CLAIM - MIN_CLAIM + 1)) + MIN_CLAIM;
 
-  // Ambil data user
+  // Retrieve user data
   const dataUsers = await findUser(sender);
   if (dataUsers) {
     const [docId, userData] = dataUsers;

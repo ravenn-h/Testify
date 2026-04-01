@@ -1,10 +1,10 @@
 async function handle(sock, messageInfo) {
   const { remoteJid, isGroup, message } = messageInfo;
-  if (!isGroup) return; // Only Grub
+  if (!isGroup) return; // Groups only
 
   await sock.sendMessage(
     remoteJid,
-    { text: `Helo ada yang bisa di bantu ?` },
+    { text: `Hello, how can I help you?` },
     { quoted: message }
   );
 }

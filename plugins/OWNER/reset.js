@@ -12,9 +12,9 @@ async function handle(sock, messageInfo) {
     await sock.sendMessage(
       remoteJid,
       {
-        text: `⚠️ _Perintah ini akan deleting seluruh database yang tersimpan pada bot._ \n\nSilakan ketik *${
+        text: `⚠️ _This command will delete the entire database stored on the bot._ \n\nPlease type *${
           prefix + command
-        } -y* untuk melanjutkan.`,
+        } -y* to continue.`,
       },
       { quoted: message }
     );
@@ -46,7 +46,7 @@ async function handle(sock, messageInfo) {
     console.error("Error during database reset:", error);
     await sock.sendMessage(
       remoteJid,
-      { text: "_❌ Maaf, an error occurred while resetting data._" },
+      { text: "_❌ Sorry, an error occurred while resetting data._" },
       { quoted: message }
     );
   }

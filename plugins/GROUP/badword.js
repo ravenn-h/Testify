@@ -2,43 +2,43 @@ import { addBadword, findBadword } from "../../lib/badword.js";
 
 async function handle(sock, messageInfo) {
   const { remoteJid, isGroup, message } = messageInfo;
-  if (!isGroup) return; // Hanya untuk grup
+  if (!isGroup) return; // Groups only
 
   try {
-    // Ambil data badword grup tertentu dan daftar global
+    // Retrieve bad word data for the specific group and global list
     const dataGrub = await ensureGroupData(remoteJid);
     const dataGrub2 = await ensureGroupData("global-badword");
 
-    // Format daftar badword grup
+    // Format group bad word list
     const badwordList =
       dataGrub.listBadword.length > 0
         ? dataGrub.listBadword.map((item) => `◧ ${item}`).join("\n")
         : "_(No bad words in this group)_";
 
-    // Format daftar badword global
+    // Format global bad word list
     const globalBadwordList =
       dataGrub2.listBadword.length > 0
         ? dataGrub2.listBadword.map((item) => `◧ ${item}`).join("\n")
         : "_(No global bad words)_";
 
-    // Format pesan akhir
+    // Format final response message
     const responseMessage =
       `*▧ 「 LIST BADWORDS 」*\n\n` +
       `*📌 Group Bad Word List:*\n${badwordList}\n\n` +
       `*🌍 Global Bad Word List:*\n${globalBadwordList}
             
-⚠️ _Noted_ ⚠️
+⚠️ _Note_ ⚠️
 .on badword (delete)
 .on badwordv2 (kick)
-.on badwordv3 (peringatan (4x) lalu kick)`;
+.on badwordv3 (warning (4x) then kick)`;
 
-    // Kirim respons ke grup
+    // Send response to the group
     return await sendResponse(sock, remoteJid, responseMessage, message);
   } catch (error) {
     return await sendResponse(
       sock,
       remoteJid,
-      "An error occurred while processing perintah.",
+      "An error occurred while processing the command.",
       message
     );
   }

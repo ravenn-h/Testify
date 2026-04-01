@@ -27,7 +27,7 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const SESSION_PATH = "./session/";
 
 async function startNewSession(masterSessions, senderId, type_connection) {
-  logWithTime("System", `Menjalankan startNewSession`, "merah");
+  logWithTime("System", `Running startNewSession`, "merah");
   const sessionFolder = path.join(SESSION_PATH, senderId);
 
   if (!fs.existsSync(sessionFolder)) {
@@ -51,7 +51,7 @@ async function startNewSession(masterSessions, senderId, type_connection) {
     const code = await sock.requestPairingCode(phoneNumber.trim());
     logWithTime("System", `Pairing Code : ${code}`);
     const textResponse = `⏳ _Jadibot ${senderId}_\n
-_Code Pairing :_ ${code}`;
+_Pairing Code :_ ${code}`;
     await masterSessions.sock.sendMessage(
       masterSessions.remoteJid,
       { text: textResponse },
@@ -65,10 +65,10 @@ _Code Pairing :_ ${code}`;
     const { connection, lastDisconnect, qr } = update;
 
     if (qr && type_connection === "qr") {
-      logWithTime("System", `Menampilkan QR`);
+      logWithTime("System", `Displaying QR`);
       await masterSessions.sock.sendMessage(
         masterSessions.remoteJid,
-        { text: "Menampilkan QR" },
+        { text: "Displaying QR" },
         { quoted: masterSessions.message }
       );
 
@@ -104,7 +104,7 @@ _Code Pairing :_ ${code}`;
           deleteFolderRecursive(sessionPath);
           await masterSessions.sock.sendMessage(
             masterSessions.remoteJid,
-            { text: `✅ _Perangkat Terkeluar, Silakan Ketik ulang .jadibot_` },
+            { text: `✅ _Device Logged Out, Please Type .jadibot again_` },
             { quoted: masterSessions.message }
           );
         }
@@ -112,7 +112,7 @@ _Code Pairing :_ ${code}`;
       if (reason === DisconnectReason.restartRequired) {
         logWithTime("System", message);
         if (sock) {
-          await sock.ws.close(); // Tutup WebSocket
+          await sock.ws.close(); // Close WebSocket
         }
 
         await connectToWhatsApp(`session/${senderId}`);
@@ -121,7 +121,7 @@ _Code Pairing :_ ${code}`;
         await masterSessions.sock.sendMessage(
           masterSessions.remoteJid,
           {
-            text: `⚠️ _Ada masalah saat terhubung ke socket_\n\n_Silakan Ketik *.stopjadibot* untuk berhenti lalu mencoba lagi_`,
+            text: `⚠️ _There was a problem connecting to the socket_\n\n_Please Type *.stopjadibot* to stop then try again_`,
           },
           { quoted: masterSessions.message }
         );
@@ -132,15 +132,15 @@ _Code Pairing :_ ${code}`;
     }
 
     if (connection === "open") {
-      success("System", "JADIBOT TERHUBUNG");
+      success("System", "JADIBOT CONNECTED");
       await updateJadibot(senderId, "active");
       await masterSessions.sock.sendMessage(
         masterSessions.remoteJid,
-        { text: `✅ _Successful! Nomor *${senderId}* telah menjadi bot._` },
+        { text: `✅ _Successful! Number *${senderId}* has become a bot._` },
         { quoted: masterSessions.message }
       );
       if (sock) {
-        await sock.ws.close(); // Tutup WebSocket
+        await sock.ws.close(); // Close WebSocket
         await connectToWhatsApp(`session/${senderId}`);
       }
     }
@@ -152,44 +152,44 @@ _Code Pairing :_ ${code}`;
 async function handle(sock, messageInfo) {
   const { remoteJid, message, sender, prefix, command, content } = messageInfo;
 
-  // Validasi input: Konten harus ada
+  // Validate input: Content must be present
   if (!content) {
     await sock.sendMessage(
       remoteJid,
       {
         text: `_⚠️ Usage format:_\n\n_💬 Example:_ _*${
           prefix + command
-        } 6285246154386*_\n\n_Ketik *${prefix}stopjadibot* untuk berhenti_`,
+        } 6285246154386*_\n\n_Type *${prefix}stopjadibot* to stop_`,
       },
       { quoted: message }
     );
     return;
   }
 
-  // Ekstrak nomor telepon dari input
-  let targetNumber = content.replace(/\D/g, ""); // Hanya angka
+  // Extract phone number from input
+  let targetNumber = content.replace(/\D/g, ""); // Numbers only
 
-  // Validasi panjang nomor telepon
+  // Validate phone number length
   if (targetNumber.length < 10 || targetNumber.length > 15) {
     await sock.sendMessage(
       remoteJid,
-      { text: `⚠️ Nomor not valid.` },
+      { text: `⚠️ Number not valid.` },
       { quoted: message }
     );
     return;
   }
 
-  // Tambahkan domain jika belum ada
+  // Add domain if not already present
   if (!targetNumber.endsWith("@s.whatsapp.net")) {
     targetNumber += "@s.whatsapp.net";
   }
 
-  // Validasi apakah nomor ada di WhatsApp
+  // Validate if number exists on WhatsApp
   const result = await sock.onWhatsApp(targetNumber);
   if (!result || result.length === 0 || !result[0].exists) {
     await sock.sendMessage(
       remoteJid,
-      { text: `⚠️ Nomor tidak terdaftar di WhatsApp.` },
+      { text: `⚠️ Number is not registered on WhatsApp.` },
       { quoted: message }
     );
     return;
@@ -198,24 +198,24 @@ async function handle(sock, messageInfo) {
   const type_connection = "pairing";
 
   try {
-    // Tampilkan reaksi "loading"
+    // Show "loading" reaction
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
-    // Make sure folder sesi ada
+    // Make sure session folder exists
     const senderId = targetNumber.replace("@s.whatsapp.net", "");
     const sessionPath = path.join(SESSION_PATH, senderId);
 
-    // Mulai sesi baru
+    // Start new session
     await updateJadibot(senderId, "inactive");
 
-    // Hapus sesi aktif
+    // Delete active session
     const sockSesi = sessions.get(`session/${senderId}`);
     if (sockSesi) {
       await updateJadibot(senderId, "stop");
-      await sockSesi.ws.close(); // Tutup WebSocket
-      sessions.delete(`session/${senderId}`); // Hapus dari daftar sesi
+      await sockSesi.ws.close(); // Close WebSocket
+      sessions.delete(`session/${senderId}`); // Remove from session list
     }
 
     if (fs.existsSync(sessionPath)) {
@@ -238,7 +238,7 @@ async function handle(sock, messageInfo) {
     await sock.sendMessage(
       remoteJid,
       {
-        text: `⚠️ An error occurred while processing perintah. Please try again.`,
+        text: `⚠️ An error occurred while processing command. Please try again.`,
       },
       { quoted: message }
     );

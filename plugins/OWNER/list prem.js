@@ -7,7 +7,7 @@ async function handle(sock, messageInfo) {
   try {
     const users = await readUsers();
 
-    // Ambil hanya user yang memiliki atribut premium dan tanggalnya masih berlaku
+    // Get only users with a valid (not expired) premium attribute
     const premiumUsers = Object.entries(users)
       .filter(
         ([docId, userData]) =>
@@ -23,28 +23,28 @@ async function handle(sock, messageInfo) {
     if (premiumUsers.length === 0) {
       return await sock.sendMessage(
         remoteJid,
-        { text: "⚠️ Tidak ada user yang premium at this time." },
+        { text: "⚠️ No users have premium at this time." },
         { quoted: message }
       );
     }
 
     function cleanJid(jid) {
-    return jid.replace(/@[\w.]+whatsapp\.net/i, "");
-  }
+      return jid.replace(/@[\w.]+whatsapp\.net/i, "");
+    }
 
-    // Format daftar user premium pakai username
-   const premiumList = premiumUsers
-  .map((user, index) => {
-    const uname = cleanJid(user.aliases[0]);
-    return `◧ *@${uname}* (Premium hingga: ${new Date(
-      user.premium
-    ).toLocaleDateString()})`;
-  })
-  .join("\n");
+    // Format premium user list using username
+    const premiumList = premiumUsers
+      .map((user, index) => {
+        const uname = cleanJid(user.aliases[0]);
+        return `◧ *@${uname}* (Premium until: ${new Date(
+          user.premium
+        ).toLocaleDateString()})`;
+      })
+      .join("\n");
 
     const textNotif = `📋 *LIST PREMIUM:*\n\n${premiumList}\n\n_Total:_ *${premiumUsers.length}*`;
 
-    // Kirim pesan (tidak perlu mention, atau jika mau mention ambil dari aliases)
+    // Send message (with or without mention based on aliases)
     await sendMessageWithMention(
       sock,
       remoteJid,
@@ -56,7 +56,7 @@ async function handle(sock, messageInfo) {
     console.error("Error fetching users:", error);
     await sock.sendMessage(
       remoteJid,
-      { text: "An error occurred while processing data user." },
+      { text: "An error occurred while processing user data." },
       { quoted: message }
     );
   }

@@ -19,10 +19,10 @@ function getGroupSchedule(filePath) {
 
 async function handle(sock, messageInfo) {
   const { remoteJid, isGroup, message } = messageInfo;
-  if (!isGroup) return; // Only Grub
+  if (!isGroup) return; // Groups only
 
   try {
-    // Mendapatkan metadata grup
+    // Get group metadata
     const groupMetadata = await getGroupMetadata(sock, remoteJid);
 
     const jsonPath = path.resolve(
@@ -34,20 +34,20 @@ async function handle(sock, messageInfo) {
     let response = await sock.groupInviteCode(remoteJid);
     let text = `┏━『 *${groupMetadata.subject}* 』━◧
 ┣
-┣» Anggota : ${groupMetadata.size}
+┣» Members : ${groupMetadata.size}
 ┣» ID  : ${groupMetadata.id}
 ┣» Link : https://chat.whatsapp.com/${response}
 ┣
 ┣ *SCHEDULED*
-┣» Open Grub  : ${openTime}
-┣» Close Grub  : ${closeTime}
+┣» Open Group  : ${openTime}
+┣» Close Group  : ${closeTime}
 ┗━━━━━━━━━━━━━◧
 `;
 
-    // Kirim pesan keberhasilan
+    // Send success message
     await sock.sendMessage(remoteJid, { text }, { quoted: message });
   } catch (error) {
-    // Kirim pesan kesalahan
+    // Send error message
     await sock.sendMessage(
       remoteJid,
       {

@@ -5,21 +5,21 @@ async function handle(sock, messageInfo) {
   const { remoteJid } = messageInfo;
 
   try {
-    // Ambil semua data sewa
+    // Get all subscription data
     const sewa = await listSewa();
 
-    // Ambil semua grup yang bot ikuti
+    // Get all groups the bot is in
     const allGroups = await groupFetchAllParticipating(sock);
 
     let count = 0;
-    let listMessage = "*▧ 「 LIST GRUP NON-SEWA 」*\n\n";
+    let listMessage = "*▧ 「 LIST NON-SUBSCRIPTION GROUPS 」*\n\n";
 
-    // Iterasi semua grup
+    // Iterate all groups
     for (const [groupId, groupData] of Object.entries(allGroups)) {
       if (!sewa[groupId]) {
         listMessage += `╭─
 │ Subject : ${groupData.subject}
-│ ID Grup : ${groupId}
+│ Group ID : ${groupId}
 ╰────────────────────────\n`;
         count++;
       }
@@ -28,7 +28,7 @@ async function handle(sock, messageInfo) {
     listMessage += `\n*Total : ${count}*`;
 
     if (count === 0) {
-      listMessage = "✅ _Semua grup merupakan grup sewa._";
+      listMessage = "✅ _All groups are subscription groups._";
     }
 
     await sock.sendMessage(remoteJid, {
@@ -36,7 +36,7 @@ async function handle(sock, messageInfo) {
     });
   } catch (error) {
     await sock.sendMessage(remoteJid, {
-      text: "_An error occurred while mengambil data grup non-sewa._",
+      text: "_An error occurred while retrieving non-subscription group data._",
     });
   }
 }

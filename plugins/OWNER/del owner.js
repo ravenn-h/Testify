@@ -4,7 +4,7 @@ import { delOwner } from "../../lib/users.js";
 async function handle(sock, messageInfo) {
   const { m, prefix, command, content } = messageInfo;
 
-  // Validasi input kosong
+  // Validate empty input
   if (!content || !content.trim()) {
     return await reply(
       m,
@@ -12,36 +12,36 @@ async function handle(sock, messageInfo) {
     );
   }
 
-  // Membersihkan input menjadi hanya angka
-  const ownerNumber = content.replace(/\D/g, ""); // Menghapus karakter non-angka
+  // Clean input to numbers only
+  const ownerNumber = content.replace(/\D/g, ""); // Remove non-numeric characters
 
-  // Validasi format nomor (10-15 digit)
+  // Validate number format (10-15 digits)
   if (!/^\d{10,15}$/.test(ownerNumber)) {
     return await reply(
       m,
-      `_Nomor not valid. Make sure formatnya benar_\n\n_Example: *${
+      `_Number not valid. Make sure the format is correct_\n\n_Example: *${
         prefix + command
       } 628xxx*_`
     );
   }
 
-  // Menambahkan nomor ke daftar owner
+  // Remove number from owner list
   try {
     const result = delOwner(ownerNumber);
     if (result) {
       return await reply(
         m,
-        `_Nomor ${ownerNumber} successful dihapus dari daftar owner._`
+        `_Number ${ownerNumber} successfully removed from owner list._`
       );
     } else {
       return await reply(
         m,
-        `_Nomor ${ownerNumber} sudah dihapus dari daftar owner._`
+        `_Number ${ownerNumber} has already been removed from owner list._`
       );
     }
   } catch (error) {
-    console.error("Error saat deleting owner:", error);
-    return await reply(m, `_An error occurred while processing permintaan._`);
+    console.error("Error while deleting owner:", error);
+    return await reply(m, `_An error occurred while processing request._`);
   }
 }
 

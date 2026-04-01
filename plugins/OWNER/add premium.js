@@ -15,7 +15,7 @@ async function handle(sock, messageInfo) {
   } = messageInfo;
 
   try {
-    // Validasi input
+    // Validate input
     if (!content?.trim()) {
       const tex =
         `_⚠️ Format: *${prefix + command} id 30*_\n\n` +
@@ -26,9 +26,9 @@ async function handle(sock, messageInfo) {
 
     let [nomorHp, jumlahHariPremium] = content.split(" ");
 
-    // Validasi input lebih lanjut
+    // Further input validation
     if (!nomorHp || !jumlahHariPremium || isNaN(jumlahHariPremium)) {
-      const tex = "⚠️ _Make sure format yang benar : .addprem username/id 30_";
+      const tex = "⚠️ _Make sure the correct format: .addprem username/id 30_";
       return await sock.sendMessage(
         remoteJid,
         { text: tex },
@@ -36,46 +36,46 @@ async function handle(sock, messageInfo) {
       );
     }
 
-      // --- Cek user single function ---
-  let dataUsers = await findUser(nomorHp);
-  let userJid = nomorHp;
-
-  if (!dataUsers) {
-    // Jika tidak ketemu, coba dengan JID
-    const r = await convertToJid(sock, nomorHp);
-    userJid = r;
-    dataUsers = await findUser(r);
+    // --- Check user with single function ---
+    let dataUsers = await findUser(nomorHp);
+    let userJid = nomorHp;
 
     if (!dataUsers) {
-      return sock.sendMessage(
-        remoteJid,
-        {
-          text: `⚠️ _Pengguna dengan username/id ${nomorHp} not found._`,
-        },
-        { quoted: message }
-      );
+      // If not found, try with JID
+      const r = await convertToJid(sock, nomorHp);
+      userJid = r;
+      dataUsers = await findUser(r);
+
+      if (!dataUsers) {
+        return sock.sendMessage(
+          remoteJid,
+          {
+            text: `⚠️ _User with username/id ${nomorHp} not found._`,
+          },
+          { quoted: message }
+        );
+      }
     }
-  }
 
     const [docId, userData] = dataUsers;
 
-    // Hitung waktu premium baru dari hari ini
+    // Calculate new premium time from today
     const currentDate = new Date();
     const addedPremiumTime = currentDate.setDate(
       currentDate.getDate() + parseInt(jumlahHariPremium)
-    ); // Menambahkan hari
+    ); // Add days
 
-    // Update data premium user
-    userData.premium = new Date(addedPremiumTime).toISOString(); // Simpan dalam format ISO 8601
+    // Update user premium data
+    userData.premium = new Date(addedPremiumTime).toISOString(); // Store in ISO 8601 format
 
-    // Update data user di database
+    // Update user data in database
     await updateUser(userJid, userData);
 
-    // Tampilkan pesan bahwa premium sudah ditambahkan
+    // Display message that premium has been added
     const premiumEndDate = new Date(addedPremiumTime);
-    const responseText = `_Masa Premium user_ ${userJid} _telah diperpanjang hingga:_ ${premiumEndDate.toLocaleString()}`;
+    const responseText = `_Premium period for user_ ${userJid} _has been extended until:_ ${premiumEndDate.toLocaleString()}`;
 
-    // Kirim pesan dengan mention
+    // Send message with mention
     await sendMessageWithMention(
       sock,
       remoteJid,
@@ -86,11 +86,11 @@ async function handle(sock, messageInfo) {
   } catch (error) {
     console.error("Error processing premium addition:", error);
 
-    // Kirim pesan kesalahan ke user
+    // Send error message to user
     await sock.sendMessage(
       remoteJid,
       {
-        text: "An error occurred while processing data. Please try again nanti.",
+        text: "An error occurred while processing data. Please try again later.",
       },
       { quoted: message }
     );
@@ -101,5 +101,5 @@ export default {
   handle,
   Commands: ["addprem", "addpremium"],
   OnlyPremium: false,
-  OnlyOwner: true, // Hanya owner yang bisa akses
+  OnlyOwner: true, // Only owner can access
 };

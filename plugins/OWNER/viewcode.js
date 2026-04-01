@@ -8,36 +8,36 @@ async function handle(sock, messageInfo) {
   if (!content) {
     return await reply(
       m,
-      `_Masukkan format yang valid_\n\n_Example:_ *${
+      `_Please enter a valid format_\n\n_Example:_ *${
         prefix + command
       } plugins/menu.js*`
     );
   }
 
-  // Batas direktori: folder kerja bot
+  // Directory limit: bot working folder
   const baseDir = path.resolve(process.cwd());
   const targetPath = path.resolve(baseDir, content);
 
-  // Proteksi agar tidak bisa keluar dari folder kerja
+  // Protection to prevent path traversal outside working folder
   if (!targetPath.startsWith(baseDir)) {
-    return await reply(m, "_Akses file ditolak: path not valid._");
+    return await reply(m, "_File access denied: path not valid._");
   }
 
-  // Validasi file
+  // Validate file
   if (!fs.existsSync(targetPath)) {
     return await reply(m, `_File not found:_ *${content}*`);
   }
 
   if (path.extname(targetPath) !== ".js") {
-    return await reply(m, `_Hanya file .js yang diperbolehkan_`);
+    return await reply(m, `_Only .js files are allowed_`);
   }
 
   try {
     const fileContent = fs.readFileSync(targetPath, "utf-8");
 
-    // Jika isi file terlalu panjang, kirim sebagai dokumen
+    // If file content is too long, send as document
     if (fileContent.length > 4000) {
-      await reply(m, "_Isi file terlalu panjang, dikirim sebagai dokumen..._");
+      await reply(m, "_File content is too long, sending as document..._");
       return await sock.sendMessage(
         m.key.remoteJid,
         {
@@ -49,14 +49,14 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Kirim isi file sebagai teks
+    // Send file content as text
     return await reply(
       m,
-      `📄 *Isi file:* _${content}_\n\n` + "```js\n" + fileContent + "\n```"
+      `📄 *File contents:* _${content}_\n\n` + "```js\n" + fileContent + "\n```"
     );
   } catch (err) {
     console.error(err);
-    return await reply(m, "_Gagal membaca file._");
+    return await reply(m, "_Failed to read file._");
   }
 }
 

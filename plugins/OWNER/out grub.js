@@ -2,12 +2,12 @@ async function handle(sock, messageInfo) {
   const { remoteJid, message, content, prefix, command, sender } = messageInfo;
 
   try {
-    // Validasi format input
+    // Validate input format
     if (!content.trim() || !content.includes("@g.us")) {
       await sock.sendMessage(
         remoteJid,
         {
-          text: `⚠️ _Format not valid._\n\nSilakan ketik: *.${command} IDGRUB*\n\nExample: ${
+          text: `⚠️ _Format not valid._\n\nPlease type: *.${command} GROUPID*\n\nExample: ${
             prefix + command
           } 120363204743427585@g.us`,
         },
@@ -16,18 +16,18 @@ async function handle(sock, messageInfo) {
       return;
     }
 
-    // Mencoba keluar dari grup
+    // Attempt to leave the group
     try {
       await sock.groupLeave(content);
       await sock.sendMessage(
         remoteJid,
         {
-          text: `✅ _Successful keluar dari grup dengan ID: *${content}*_`,
+          text: `✅ _Successfully left the group with ID: *${content}*_`,
         },
         { quoted: message }
       );
     } catch (err) {
-      console.error("Gagal keluar dari grup:", err);
+      console.error("Failed to leave group:", err);
       await sock.sendMessage(
         remoteJid,
         {
@@ -37,7 +37,7 @@ async function handle(sock, messageInfo) {
       );
     }
   } catch (error) {
-    // Kirim pesan kesalahan umum
+    // Send general error message
     await sock.sendMessage(
       remoteJid,
       {

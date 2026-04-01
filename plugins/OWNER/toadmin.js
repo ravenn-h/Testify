@@ -4,7 +4,7 @@ async function handle(sock, messageInfo) {
   const { remoteJid, message, content, sender, prefix, command } = messageInfo;
 
   try {
-    // Validasi input awal
+    // Validate initial input
     if (!content || !content.includes("chat.whatsapp.com")) {
       return await sock.sendMessage(
         remoteJid,
@@ -17,12 +17,12 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Kirim reaksi ⏰ untuk proses
+    // Send ⏰ reaction for processing
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
-    // Ekstrak link dan nomor target
+    // Extract link and target number
     const parts = content.trim().split(/\s+/);
     const link = parts[0];
     const number = parts[1];
@@ -31,7 +31,7 @@ async function handle(sock, messageInfo) {
     if (!groupId || !number) {
       return await sock.sendMessage(
         remoteJid,
-        { text: `⚠️ Format not valid. Make sure menyertakan link dan nomor.` },
+        { text: `⚠️ Format not valid. Make sure to include the link and number.` },
         { quoted: message }
       );
     }
@@ -41,17 +41,17 @@ async function handle(sock, messageInfo) {
       groupJid = await sock.groupAcceptInvite(groupId);
     } catch (e) {
       if (e.message.includes("conflict")) {
-        groupJid = `${groupId}@g.us`; // Sudah join
+        groupJid = `${groupId}@g.us`; // Already joined
       } else {
         return await sock.sendMessage(
           remoteJid,
-          { text: `⚠️ Gagal join grup: ${e.message}` },
+          { text: `⚠️ Failed to join group: ${e.message}` },
           { quoted: message }
         );
       }
     }
 
-    // ✅ Baru di sini ambil metadata
+    // Now fetch metadata
     const groupMetadata = await getGroupMetadata(sock, groupJid);
     const participants = groupMetadata.participants;
 
@@ -64,17 +64,17 @@ async function handle(sock, messageInfo) {
     if (!isInGroup) {
       return await sock.sendMessage(
         remoteJid,
-        { text: `⚠️ Nomor belum bergabung di grup.` },
+        { text: `⚠️ Number has not joined the group.` },
         { quoted: message }
       );
     }
 
-    // Jadikan admin
+    // Promote to admin
     await sock.groupParticipantsUpdate(groupJid, [targetJid], "promote");
 
     return await sock.sendMessage(
       remoteJid,
-      { text: `✅ Nomor ${number} telah dijadikan admin di grup.` },
+      { text: `✅ Number ${number} has been made admin in the group.` },
       { quoted: message }
     );
   } catch (error) {

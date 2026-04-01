@@ -18,7 +18,7 @@ async function handle(sock, messageInfo) {
     console.error("Error during database reset:", error);
     await sock.sendMessage(
       remoteJid,
-      { text: "_❌ Maaf, an error occurred while resetting data._" },
+      { text: "_❌ Sorry, an error occurred while resetting data._" },
       { quoted: message }
     );
   }

@@ -6,48 +6,48 @@ async function handle(sock, messageInfo) {
   const { remoteJid, sender, message } = messageInfo;
 
   try {
-    // Ambil data list berdasarkan grup
+    // Get list data by group
     const sewa = await listSewa();
 
-    // Jika none list
+    // If no list found
     if (!sewa || Object.keys(sewa).length === 0) {
       await sock.sendMessage(remoteJid, {
-        text: "⚠️ _Tidak Ada daftar sewa ditemukan_",
+        text: "⚠️ _No subscription list found_",
       });
       return;
     }
 
-    // Konversi objek ke array dan urutkan berdasarkan waktu expired terbaru
+    // Convert object to array and sort by earliest expired time
     const sortedSewa = Object.entries(sewa).sort(
       ([, a], [, b]) => a.expired - b.expired
     );
 
     const allGroups = await groupFetchAllParticipating(sock);
 
-    // Buat daftar untuk ditampilkan
+    // Build list to display
     let listMessage = "*▧ 「 LIST SEWA* 」\n\n";
     sortedSewa.forEach(([groupId, data], index) => {
-      // Ambil subject dari allGroups jika ada
+      // Get subject from allGroups if available
       const subject = allGroups[groupId]
         ? allGroups[groupId].subject
-        : "Nama Grup Tidak Ditemukan";
+        : "Group Name Not Found";
 
       listMessage += `╭─
 │ Subject : ${subject}
-│ ID Grup : ${groupId}
+│ Group ID : ${groupId}
 │ Expired : ${selisihHari(data.expired)}
 ╰────────────────────────\n`;
     });
 
     listMessage += `\n*Total : ${sortedSewa.length}*`;
 
-    // Kirim pesan daftar sewa
+    // Send subscription list message
     await sock.sendMessage(remoteJid, {
       text: listMessage,
     });
   } catch (error) {
     await sock.sendMessage(remoteJid, {
-      text: "_An error occurred while mengambil daftar sewa_",
+      text: "_An error occurred while retrieving the subscription list_",
     });
   }
 }

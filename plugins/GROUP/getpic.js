@@ -28,10 +28,10 @@ async function handle(sock, messageInfo) {
         mentionedJid && mentionedJid.length > 0 ? mentionedJid[0] : sender;
     }
 
-    // Dapatkan URL gambar profil
+    // Get profile picture URL
     const profilePictureUrl = await getProfilePictureUrl(sock, target);
 
-    // Kirim pesan dengan gambar profil
+    // Send message with profile picture
     await sock.sendMessage(
       remoteJid,
       {
@@ -46,7 +46,7 @@ async function handle(sock, messageInfo) {
     await sock.sendMessage(
       remoteJid,
       {
-        text: "⚠️ _An error occurred while displaying gambar profile._",
+        text: "⚠️ _An error occurred while displaying the profile picture._",
       },
       { quoted: message }
     );

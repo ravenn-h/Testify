@@ -7,45 +7,45 @@ async function handle(sock, messageInfo) {
   const extSender = senderType === "user" ? "@whatsapp.net" : "@lid";
 
   try {
-    // Validasi input kosong
+    // Validate empty input
     if (!content || !content.trim()) {
       return await reply(
         m,
         `_⚠️ Usage format:_ \n\n_💬 Example:_ _*${prefix + command} 628xxx*_
                 
-_Fitur *block* akan membuat user cannot menggunakan bot di semua group dan chat pribadi_
+_The *block* feature will prevent the user from using the bot in all groups and private chats_
 
-_gunakan fitur *ban* untuk memblokir user di group ini saja_`
+_use the *ban* feature to block the user in this group only_`
       );
     }
 
-    // Tentukan nomor target
+    // Determine target number
     let targetNumber = (mentionedJid?.[0] || content).replace(/\D/g, "");
     const originalNumber = targetNumber;
 
-    // Ambil data user dari database
+    // Get user data from database
     const dataUsers = await findUser(originalNumber);
 
     if (!dataUsers) {
       return await reply(
         m,
-        `_⚠️ Nomor ${originalNumber} not found di database._\n\n` +
-          `_Make sure nomor yang dimasukkan benar dan terdaftar dalam database._`
+        `_⚠️ Number ${originalNumber} not found in database._\n\n` +
+          `_Make sure the number entered is correct and registered in the database._`
       );
     }
-    // Perbarui status user menjadi "block"
+    // Update user status to "block"
     await updateUser(originalNumber, { status: "block" });
     await sock.updateBlockStatus(`${targetNumber}${extSender}`, "block");
     return await reply(
       m,
-      `_✅ Nomor ${originalNumber} successful diblokir!_\n\n` +
-        `_⚠️ Info: Nomor yang telah diblokir cannot menggunakan semua fitur bot hingga proses pembukaan blokir dilakukan melalui perintah *${prefix}unblock*._`
+      `_✅ Number ${originalNumber} successfully blocked!_\n\n` +
+        `_⚠️ Info: Blocked numbers cannot use any bot features until unblocked via the *${prefix}unblock* command._`
     );
   } catch (error) {
     console.error("Error handling command:", error);
     return await reply(
       m,
-      `_An error occurred while processing permintaan. Please try again nanti._`
+      `_An error occurred while processing request. Please try again later._`
     );
   }
 }

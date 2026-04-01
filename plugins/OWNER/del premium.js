@@ -6,7 +6,7 @@ async function handle(sock, messageInfo) {
     messageInfo;
 
   try {
-    // Validasi input
+    // Validate input
     if (!content || content.trim() === "") {
       const tex = `_⚠️ Usage format:_ \n\n_💬 Example:_ _*${
         prefix + command
@@ -20,9 +20,9 @@ async function handle(sock, messageInfo) {
 
     let nomorHp = content;
 
-    // Validasi input lebih lanjut
+    // Further input validation
     if (!nomorHp) {
-      const tex = "_Make sure format yang benar : .delprem 6285246154386_";
+      const tex = "_Make sure the correct format: .delprem 6285246154386_";
       return await sock.sendMessage(
         remoteJid,
         { text: tex },
@@ -32,14 +32,14 @@ async function handle(sock, messageInfo) {
 
     nomorHp = nomorHp.replace(/\D/g, "");
 
-    // Ambil data user
+    // Get user data
     let dataUsers = await findUser(nomorHp);
 
-    // Jika user not found, tambahkan user baru
+    // If user not found
     if (!dataUsers) {
       return await sock.sendMessage(
         remoteJid,
-        { text: "none user di temukan" },
+        { text: "no user found" },
         { quoted: message }
       );
     }
@@ -48,14 +48,14 @@ async function handle(sock, messageInfo) {
 
     userData.premium = null;
 
-    // Update data user di database
+    // Update user data in database
     await updateUser(nomorHp, userData);
 
-    const responseText = `_Pengguna_ @${
+    const responseText = `_User_ @${
       nomorHp.split("@")[0]
-    } _telah di hapus dari premium:_`;
+    } _has been removed from premium:_`;
 
-    // Kirim pesan dengan mention
+    // Send message with mention
     await sendMessageWithMention(
       sock,
       remoteJid,
@@ -64,13 +64,13 @@ async function handle(sock, messageInfo) {
       senderType
     );
   } catch (error) {
-    console.error("Error processing premium addition:", error);
+    console.error("Error processing premium removal:", error);
 
-    // Kirim pesan kesalahan ke user
+    // Send error message to user
     await sock.sendMessage(
       remoteJid,
       {
-        text: "An error occurred while processing data. Please try again nanti.",
+        text: "An error occurred while processing data. Please try again later.",
       },
       { quoted: message }
     );
@@ -81,5 +81,5 @@ export default {
   handle,
   Commands: ["delprem", "delpremium"],
   OnlyPremium: false,
-  OnlyOwner: true, // Hanya owner yang bisa akses
+  OnlyOwner: true, // Only owner can access
 };

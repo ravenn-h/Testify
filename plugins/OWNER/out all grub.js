@@ -4,23 +4,23 @@ async function handle(sock, messageInfo) {
   const { remoteJid, message, content, command, sender } = messageInfo;
 
   try {
-    // Jika perintah hanya kosong atau hanya spasi
+    // If command is empty or only spaces
     if (!content.trim()) {
       await sock.sendMessage(
         remoteJid,
         {
-          text: `⚠️ _Perintah ini akan removing seluruh grup WhatsApp pada bot._ \n\nSilakan ketik *.${command} -y* untuk melanjutkan.`,
+          text: `⚠️ _This command will remove the bot from all WhatsApp groups._ \n\nPlease type *.${command} -y* to continue.`,
         },
         { quoted: message }
       );
       return;
     }
 
-    // Jika user menyetujui dengan "-y"
+    // If user confirms with "-y"
     if (content.trim() === "-y") {
       const allGroups = await groupFetchAllParticipating(sock);
 
-      // Looping untuk keluar dari semua grup
+      // Loop to leave all groups
       const leavePromises = Object.values(allGroups).map((group) => {
         if (group.id !== remoteJid) {
           return sock.groupLeave(group.id);
@@ -28,7 +28,7 @@ async function handle(sock, messageInfo) {
         return null;
       });
 
-      // Tunggu semua grup selesai diproses
+      // Wait for all groups to be processed
       await Promise.all(leavePromises);
 
       await sock.sendMessage(
@@ -40,7 +40,7 @@ async function handle(sock, messageInfo) {
   } catch (error) {
     console.error("An error occurred:", error);
 
-    // Kirim pesan kesalahan
+    // Send error message
     await sock.sendMessage(
       remoteJid,
       { text: "⚠️ An error occurred while processing your request." },

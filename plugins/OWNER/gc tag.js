@@ -16,12 +16,12 @@ async function handle(sock, messageInfo) {
   } = messageInfo;
 
   try {
-    // Validasi input kosong atau tidak sesuai format
+    // Validate empty or invalid format input
     if (!content || content.trim() === "") {
       return sendErrorMessage(sock, remoteJid, message, prefix, command);
     }
 
-    // Pisahkan ID Group dan pesan dari konten
+    // Separate Group ID and message from content
     const [idgc, pesangc] = content
       .trim()
       .split("|")
@@ -31,27 +31,27 @@ async function handle(sock, messageInfo) {
       return sendErrorMessage(sock, remoteJid, message, prefix, command);
     }
 
-    // Tampilkan reaksi sementara untuk processing
+    // Show temporary reaction for processing
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
-    // Ambil metadata grup
+    // Get group metadata
     const groupMetadata = await getGroupMetadata(sock, idgc).catch(() => null);
     if (!groupMetadata) {
       return await sock.sendMessage(
         remoteJid,
-        { text: `⚠️ ID Group not valid atau grup not found.` },
+        { text: `⚠️ Group ID not valid or group not found.` },
         { quoted: message }
       );
     }
 
     const participants = groupMetadata.participants;
 
-    // ambil informasi pesan
+    // Get message info
     const mediaType = isQuoted ? `${isQuoted.type}Message` : `${type}Message`;
 
-    // kirim dengan media
+    // Send with media
     if (mediaType == "imageMessage") {
       const media = isQuoted
         ? await downloadQuotedMedia(message)
@@ -59,7 +59,7 @@ async function handle(sock, messageInfo) {
       const mediaPath = path.join("tmp", media);
 
       if (!fs.existsSync(mediaPath)) {
-        throw new Error("File media not found setelah diunduh.");
+        throw new Error("Media file not found after download.");
       }
       const buffer = fs.readFileSync(mediaPath);
       await sock.sendMessage(idgc, {
@@ -78,7 +78,7 @@ async function handle(sock, messageInfo) {
     console.error("An error occurred:", error);
     await sock.sendMessage(
       remoteJid,
-      { text: `⚠️ An error occurred while processing perintah.` },
+      { text: `⚠️ An error occurred while processing command.` },
       { quoted: message }
     );
   }
@@ -88,10 +88,10 @@ function sendErrorMessage(sock, remoteJid, message, prefix, command) {
   return sock.sendMessage(
     remoteJid,
     {
-      text: `Masukkan ID Group dengan format yang benar.
+      text: `Enter the Group ID with the correct format.
 
 Example:
-${prefix + command} 1234567889@g.us | Pesan yang ingin dikirim`,
+${prefix + command} 1234567889@g.us | Message to send`,
     },
     { quoted: message }
   );

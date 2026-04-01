@@ -13,14 +13,14 @@ async function handle(sock, messageInfo) {
       await sendMessageWithMention(
         sock,
         remoteJid,
-        `_Proses is in progress, silakan tunggu hingga selesai_`,
+        `_Process is in progress, please wait until it finishes_`,
         message,
         senderType
       );
       return;
     }
 
-    // Validasi input
+    // Validate input
     if (!content || !content.includes("chat.whatsapp.com")) {
       const tex = `_⚠️ Usage format:_ \n\n_💬 Example:_ \n_*${
         prefix + command
@@ -47,7 +47,7 @@ async function handle(sock, messageInfo) {
     });
 
     if (!res.content[0]?.attrs?.id) {
-      const tex = `⚠️ _Link Grup not valid atau make sure bot already joined_`;
+      const tex = `⚠️ _Group Link not valid or make sure bot has already joined_`;
       inProccess = false;
       return await sock.sendMessage(
         remoteJid,
@@ -63,7 +63,6 @@ async function handle(sock, messageInfo) {
 
     let successCount = 0;
     let failedCount = 0;
-  
 
     for (const member of participants) {
       try {
@@ -73,19 +72,19 @@ async function handle(sock, messageInfo) {
         const [docId, userData] = dataUsers;
 
         if (userData && userData.premium) {
-          userData.premium = null; // Hapus masa premium
+          userData.premium = null; // Remove premium period
           await updateUser(id_users, userData);
           successCount++;
         }
       } catch (error) {
-        console.error(`Gagal deleting premium untuk ${member.id}:`, error);
+        console.error(`Failed to delete premium for ${member.id}:`, error);
         failedCount++;
       }
     }
 
     inProccess = false;
 
-    const responseText = `✅ Successful deleting premium dari ${successCount} user.\n❌ Gagal: ${failedCount}`;
+    const responseText = `✅ Successfully removed premium from ${successCount} users.\n❌ Failed: ${failedCount}`;
     await sendMessageWithMention(
       sock,
       remoteJid,

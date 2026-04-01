@@ -13,12 +13,12 @@ async function handle(sock, messageInfo) {
   let updateInfo = "";
 
   try {
-    // Dapatkan versi lama Baileys
+    // Get old Baileys version
     const pkgPath = require.resolve("baileys/package.json");
     const pkg = require(pkgPath);
     oldVersion = pkg.version;
   } catch (error) {
-    console.warn("[!] Gagal membaca versi lama Baileys:", error.message);
+    console.warn("[!] Failed to read old Baileys version:", error.message);
   }
 
   try {
@@ -28,7 +28,7 @@ async function handle(sock, messageInfo) {
 
     execSync("npm install baileys", { stdio: "ignore" });
 
-    // Hapus cache require supaya bisa baca versi baru
+    // Clear require cache to read new version
     const resolvedPath = require.resolve("baileys/package.json");
     delete require.cache[resolvedPath];
 
@@ -36,12 +36,12 @@ async function handle(sock, messageInfo) {
     newVersion = newPkg.version || "Not found";
 
     if (newVersion !== oldVersion) {
-      updateInfo = `✅ *baileys* successful diperbarui dari v${oldVersion} ke v${newVersion}`;
+      updateInfo = `✅ *baileys* successfully updated from v${oldVersion} to v${newVersion}`;
     } else {
-      updateInfo = `✅ *baileys* sudah versi terbaru: v${newVersion}`;
+      updateInfo = `✅ *baileys* is already the latest version: v${newVersion}`;
     }
   } catch (err) {
-    console.error("[!] Gagal update baileys:", err.message);
+    console.error("[!] Failed to update baileys:", err.message);
     updateInfo = "❌ An error occurred while updating *baileys*";
   }
 

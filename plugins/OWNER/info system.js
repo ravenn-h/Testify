@@ -5,12 +5,12 @@ async function handle(sock, messageInfo) {
   const { remoteJid, message, sender, command } = messageInfo;
 
   try {
-    // Kirim reaksi ⏰ untuk menunjukkan sedang processing
+    // Send ⏰ reaction to indicate processing
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
-    // Ambil spesifikasi server
+    // Get server specifications
     const {
       hostname,
       platform,
@@ -21,11 +21,11 @@ async function handle(sock, messageInfo) {
       mode,
     } = await getServerSpecs();
 
-    // Ambil IP publik
+    // Get public IP
     const response = await axios.get("https://api.ipify.org?format=json");
     const publicIp = response.data.ip;
 
-    // Buat pesan informasi sistem
+    // Build system info message
     const data = `◧ Hostname: ${hostname}
 ◧ Platform: ${platform}
 ◧ Architecture: ${architecture || "-"}
@@ -35,15 +35,15 @@ async function handle(sock, messageInfo) {
 ◧ Public IP: ${publicIp}
 ◧ Mode: ${mode}`;
 
-    // Kirim pesan informasi
+    // Send info message
     await sock.sendMessage(remoteJid, { text: data }, { quoted: message });
   } catch (error) {
-    console.error("Error saat menangani perintah:", error.message);
+    console.error("Error while handling command:", error.message);
 
-    // Kirim pesan error ke user
+    // Send error message to user
     await sock.sendMessage(
       remoteJid,
-      { text: "❌ An error occurred while processing permintaan." },
+      { text: "❌ An error occurred while processing request." },
       { quoted: message }
     );
   }

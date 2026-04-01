@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import levenshtein from "fast-levenshtein"; // Make sure untuk menginstal package ini dengan `npm install fast-levenshtein`
+import levenshtein from "fast-levenshtein"; // Make sure to install this package with `npm install fast-levenshtein`
 
 async function handle(sock, messageInfo) {
   const { m, prefix, command, content, remoteJid, message } = messageInfo;
@@ -20,7 +20,7 @@ async function handle(sock, messageInfo) {
   const fileName = content.trim();
   const folderPath = path.join(process.cwd(), "./plugins/");
 
-  // Fungsi untuk mencari file dalam folder dan sub-folder
+  // Function for finding file in folder and sub-folders
   function findFileAndClosestMatch(dir, targetFileName) {
     let foundFile = null;
     let closestMatch = null;
@@ -59,12 +59,12 @@ async function handle(sock, messageInfo) {
   );
 
   if (foundFile) {
-    // Menghapus file yang ditemukan
+    // Delete the found file
     fs.unlinkSync(foundFile);
     return await sock.sendMessage(
       remoteJid,
       {
-        text: `_✅ Plugin dengan nama *${fileName}* successful dihapus!_ \n\n_Restart server untuk menerapkan perubahan_`,
+        text: `_✅ Plugin named *${fileName}* successfully deleted!_ \n\n_Restart server to apply changes_`,
       },
       { quoted: message }
     );
@@ -72,7 +72,7 @@ async function handle(sock, messageInfo) {
     return await sock.sendMessage(
       remoteJid,
       {
-        text: `_❌ Plugin dengan nama *${fileName}* not found!_\n\n🔍 _Apakah maksud Anda: *${path.basename(
+        text: `_❌ Plugin named *${fileName}* not found!_\n\n🔍 _Did you mean: *${path.basename(
           closestMatch
         )}*?_`,
       },
@@ -82,7 +82,7 @@ async function handle(sock, messageInfo) {
     return await sock.sendMessage(
       remoteJid,
       {
-        text: `_❌ Plugin dengan nama *${fileName}* not found dan none file yang mirip._`,
+        text: `_❌ Plugin named *${fileName}* not found and no similar file exists._`,
       },
       { quoted: message }
     );
