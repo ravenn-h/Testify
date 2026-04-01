@@ -10,12 +10,12 @@ async function sendMessageWithQuote(sock, remoteJid, message, text) {
   await sock.sendMessage(remoteJid, { text }, { quoted: message });
 }
 
-// Fungsi helper untuk delay (jeda)
+// Helper delay function
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// Fungsi untuk mencoba request API hingga 3 kali
+// Function to retry API request up to 3 times
 async function fetchWithRetry(api, endpoint, params, maxRetries = 3, delayMs = 5000) {
   let lastError;
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -25,9 +25,9 @@ async function fetchWithRetry(api, endpoint, params, maxRetries = 3, delayMs = 5
       throw new Error(`API response invalid (attempt ${attempt})`);
     } catch (err) {
       lastError = err;
-      console.warn(`Percobaan ke-${attempt} gagal: ${err.message}`);
+      console.warn(`Attempt ${attempt} failed: ${err.message}`);
       if (attempt < maxRetries) {
-        console.log(`Waiting for ${delayMs / 1000} detik sebelum mencoba lagi...`);
+        console.log(`Waiting ${delayMs / 1000} seconds before retrying...`);
         await delay(delayMs);
       }
     }
@@ -57,7 +57,7 @@ async function handle(sock, messageInfo) {
 
     const api = new ApiAutoresbot(config.APIKEY);
 
-    // Gunakan fetchWithRetry agar mencoba 3x dengan jeda 5 detik
+    // Use fetchWithRetry to attempt 3 times with a 5 second delay
     const response = await fetchWithRetry(api, "/api/downloader/ytmp4", { url: validLink }, 3, 5000);
 
     if (response.status) {
@@ -83,7 +83,7 @@ async function handle(sock, messageInfo) {
     }
   } catch (error) {
     logCustom("info", content, `ERROR-COMMAND-${command}.txt`);
-    const errorMessage = `Maaf, an error occurred while processing your request. Please try again later.\n\nDetail Error: ${
+    const errorMessage = `Sorry, an error occurred while processing your request. Please try again later.\n\nError Details: ${
       error.message || error
     }`;
     await sendMessageWithQuote(sock, remoteJid, message, errorMessage);

@@ -3,17 +3,17 @@ import yts from "yt-search";
 
 import { logCustom } from "../../lib/logger.js";
 
-// Fungsi untuk sending pesan dengan kutipan (quote)
+// Function to send message with quote
 async function sendMessageWithQuote(sock, remoteJid, message, text) {
   await sock.sendMessage(remoteJid, { text }, { quoted: message });
 }
 
-// Fungsi untuk menangani pencarian YouTube
+// Function to handle YouTube search
 async function handle(sock, messageInfo) {
   const { remoteJid, message, content, prefix, command } = messageInfo;
 
   try {
-    // Validasi input
+    // Validate input
     if (!content.trim() || content.trim() == "") {
       return sendMessageWithQuote(
         sock,
@@ -21,19 +21,19 @@ async function handle(sock, messageInfo) {
         message,
         `_⚠️ Usage format:_ \n\n_💬 Example:_ _*${
           prefix + command
-        } matahariku*_`
+        } sunflower*_`
       );
     }
 
-    // Tampilkan reaksi "Loading"
+    // Show loading reaction
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
-    // Melakukan pencarian menggunakan yts
+    // Perform search using yts
     const search = await yts(content);
 
-    // Menyusun teks hasil pencarian
+    // Build search result text
     let teks = `*YouTube Search*\n\nResult for: _${content}_\n\n`;
     let no = 1;
 
@@ -50,7 +50,7 @@ async function handle(sock, messageInfo) {
         `─────────────────\n\n`;
     }
 
-    // Mengirim hasil pencarian
+    // Send search results
     await sock.sendMessage(
       remoteJid,
       {
@@ -63,8 +63,8 @@ async function handle(sock, messageInfo) {
     console.error("Error while searching YouTube:", error);
     logCustom("info", content, `ERROR-COMMAND-${command}.txt`);
 
-    // Menangani kesalahan dan sending pesan ke user
-    const errorMessage = `Maaf, an error occurred while processing your request. Please try again later.\n\nDetail Error: ${
+    // Handle error and send message to user
+    const errorMessage = `Sorry, an error occurred while processing your request. Please try again later.\n\nError Details: ${
       error.message || error
     }`;
     await sendMessageWithQuote(sock, remoteJid, message, errorMessage);

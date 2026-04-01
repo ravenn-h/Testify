@@ -3,29 +3,29 @@ import { tiktok } from "../../lib/scrape/tiktok.js";
 import { logCustom } from "../../lib/logger.js";
 import { extractLink, downloadToBuffer } from "../../lib/utils.js";
 /**
- * Mengirim pesan dengan kutipan (quoted message)
- * @param {object} sock - Instance koneksi WhatsApp
- * @param {string} remoteJid - ID pengirim pesan
- * @param {object} message - Pesan yang dikutip
- * @param {string} text - Teks the message that akan dikirim
+ * Send message with quote
+ * @param {object} sock - WhatsApp connection instance
+ * @param {string} remoteJid - Sender message ID
+ * @param {object} message - Quoted message
+ * @param {string} text - Text message to send
  */
 async function sendMessageWithQuote(sock, remoteJid, message, text) {
   await sock.sendMessage(remoteJid, { text }, { quoted: message });
 }
 
 /**
- * Memvalidasi apakah URL yang diberikan adalah URL TikTok yang valid
- * @param {string} url - URL yang akan divalidasi
- * @returns {boolean} True jika valid, false jika tidak
+ * Validate whether the given URL is a valid TikTok URL
+ * @param {string} url - URL to validate
+ * @returns {boolean} True if valid, false otherwise
  */
 function isTikTokUrl(url) {
   return /tiktok\.com/i.test(url);
 }
 
 /**
- * Fungsi utama untuk menangani perintah TikTok
- * @param {object} sock - Instance koneksi WhatsApp
- * @param {object} messageInfo - Informasi the message that diterima
+ * Main function to handle TikTok commands
+ * @param {object} sock - WhatsApp connection instance
+ * @param {object} messageInfo - Information about the received message
  */
 async function handle(sock, messageInfo) {
   const { remoteJid, message, content, prefix, command } = messageInfo;
@@ -33,7 +33,7 @@ async function handle(sock, messageInfo) {
   const validLink = extractLink(content);
 
   try {
-    // Validasi input: make sure konten ada
+    // Validate input: ensure content exists
     if (!content.trim() || content.trim() == "") {
       return sendMessageWithQuote(
         sock,
@@ -41,11 +41,11 @@ async function handle(sock, messageInfo) {
         message,
         `_⚠️ Usage format:_ \n\n_💬 Example:_ _*${
           prefix + command
-        } linknya*_`
+        } link*_`
       );
     }
 
-    // Validasi URL TikTok
+    // Validate TikTok URL
     if (!isTikTokUrl(validLink)) {
       return sendMessageWithQuote(
         sock,
@@ -55,18 +55,18 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Tampilkan reaksi "Loading"
+    // Show loading reaction
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
-    // Memanggil API untuk getting data video TikTok
+    // Call API to get TikTok video data
     const response = await tiktok(validLink);
 
-    // Download file ke buffer
+    // Download file to buffer
     const audioBuffer = await downloadToBuffer(response.no_watermark, "mp4");
 
-    // Mengirim video tanpa watermark dan caption
+    // Send video without watermark and caption
     await sock.sendMessage(
       remoteJid,
       {
@@ -76,11 +76,11 @@ async function handle(sock, messageInfo) {
       { quoted: message }
     );
   } catch (error) {
-    console.error("Kesalahan saat processing perintah TikTok:", error);
+    console.error("Error processing TikTok command:", error);
     logCustom("info", content, `ERROR-COMMAND-${command}.txt`);
 
-    // Kirim pesan kesalahan yang lebih informatif
-    const errorMessage = `Maaf, an error occurred while processing your request. Please try again later.\n\n*Error Details:* ${
+    // Send a more informative error message
+    const errorMessage = `Sorry, an error occurred while processing your request. Please try again later.\n\n*Error Details:* ${
       error.message || error
     }`;
     await sendMessageWithQuote(sock, remoteJid, message, errorMessage);
@@ -89,7 +89,7 @@ async function handle(sock, messageInfo) {
 
 export default {
   handle,
-  Commands: ["tt", "tiktok"], // Menentukan perintah yang diproses oleh handler ini
+  Commands: ["tt", "tiktok"], // Commands handled by this handler
   OnlyPremium: false,
   OnlyOwner: false,
 };

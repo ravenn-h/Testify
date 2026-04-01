@@ -20,14 +20,14 @@ async function handle(sock, messageInfo) {
     type,
   } = messageInfo;
 
-  // Periksa apakah pesan berasal dari grup
+  // Check if message comes from a group
   if (!isGroup) return;
 
-  // Mendapatkan metadata grup
+  // Get group metadata
   const groupMetadata = await getGroupMetadata(sock, remoteJid);
   const participants = groupMetadata.participants;
 
-  // Periksa apakah pengirim adalah admin
+  // Check if sender is an admin
   const isAdmin = participants.some(
     (p) => (p.phoneNumber === sender || p.id === sender) && p.admin
   );
@@ -49,14 +49,14 @@ async function handle(sock, messageInfo) {
     const mediaPath = path.join("database", "media", media);
 
     if (!fs.existsSync(mediaPath)) {
-      throw new Error("File media not found setelah diunduh.");
+      throw new Error("Media file not found after download.");
     }
     await setDone(remoteJid, mediaPath);
 
-    // Kirim pesan sukses
-    const successMessage = `✅ _Set done Successful Diatur_
+    // Send success message
+    const successMessage = `✅ _Set done Successfully Configured_
 
-_Ketik .setdone reset untuk mengembalikan ke semula_`;
+_Type .setdone reset to revert to default_`;
     await sock.sendMessage(
       remoteJid,
       { text: successMessage },
@@ -65,19 +65,19 @@ _Ketik .setdone reset untuk mengembalikan ke semula_`;
     return;
   }
 
-  // Validasi input kosong
+  // Validate empty input
   if (!content || !content.trim()) {
     const usageMessage = `⚠️ *Usage format:*
 
 💬 *Example:* 
 _${prefix}${command} SUCCESS_
 
-Jam : @time
-Tanggal : @tanggal
-Grub : @group
-Catatan : @catatan
+Time   : @time
+Date   : @tanggal
+Group  : @group
+Note   : @catatan
 
-@sender Terima kasih sudah order
+@sender Thank you for your order
 `;
 
     await sock.sendMessage(
@@ -88,22 +88,22 @@ Catatan : @catatan
     return;
   }
 
-  // Atur template list
+  // Set list template
   await setDone(remoteJid, content);
 
   if (content.toLowerCase() == "reset") {
     await deleteMessage(remoteJid, "setdone");
     await sock.sendMessage(
       remoteJid,
-      { text: "_✅ Successful reset Setdone_" },
+      { text: "_✅ Setdone successfully reset_" },
       { quoted: message }
     );
     return;
   }
-  // Kirim pesan sukses
-  const successMessage = `✅ _Set done Successful Diatur_
+  // Send success message
+  const successMessage = `✅ _Set done Successfully Configured_
 
-_Ketik .setdone reset untuk mengembalikan ke semula_`;
+_Type .setdone reset to revert to default_`;
 
   await sock.sendMessage(
     remoteJid,

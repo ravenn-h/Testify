@@ -11,10 +11,10 @@ async function handle(sock, messageInfo) {
     let idList = remoteJid;
 
     if (!isGroup) {
-      // Chat Pribadi
+      // Private Chat
       idList = "owner";
     } else {
-      // Mendapatkan metadata grup
+      // Get group metadata
       const groupMetadata = await getGroupMetadata(sock, remoteJid);
       const participants = groupMetadata.participants;
       const isAdmin = participants.some(
@@ -30,7 +30,7 @@ async function handle(sock, messageInfo) {
       }
     }
 
-    // Validasi input konten
+    // Validate content input
     if (!content) {
       await sock.sendMessage(
         remoteJid,
@@ -41,10 +41,10 @@ async function handle(sock, messageInfo) {
         },
         { quoted: message }
       );
-      return; // Hentikan eksekusi jika none konten
+      return; // Stop execution if no content
     }
 
-    // Cek apakah keyword already exists
+    // Check if keyword already exists
     const currentList = await getDataByGroupId(idList);
     const lowercaseKeyword = content.trim().toLowerCase();
 
@@ -54,7 +54,7 @@ async function handle(sock, messageInfo) {
       return sendMessageWithTemplate(
         sock,
         remoteJid,
-        `Keyword *${lowercaseKeyword}* successful dihapus.`,
+        `Keyword *${lowercaseKeyword}* successfully deleted.`,
         message
       );
     } else {
@@ -70,13 +70,13 @@ async function handle(sock, messageInfo) {
     return sendMessageWithTemplate(
       sock,
       remoteJid,
-      "_❌ Maaf, an error occurred while processing data._",
+      "_❌ Sorry, an error occurred while processing data._",
       message
     );
   }
 }
 
-// Fungsi untuk sending pesan dengan template
+// Function to send message with template
 function sendMessageWithTemplate(sock, remoteJid, text, quoted) {
   return sock.sendMessage(remoteJid, { text }, { quoted });
 }

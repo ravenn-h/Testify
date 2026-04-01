@@ -7,7 +7,7 @@ async function handle(sock, messageInfo) {
   const { remoteJid, message, sender, content, prefix, command } = messageInfo;
 
   try {
-    // Mendapatkan metadata grup
+    // Get group metadata
     const groupMetadata = await getGroupMetadata(sock, remoteJid);
     const participants = groupMetadata.participants;
     const isAdmin = participants.some(
@@ -22,14 +22,14 @@ async function handle(sock, messageInfo) {
       return;
     }
 
-    // Jika perintah hanya kosong atau hanya spasi
+    // If command is empty or just spaces
     if (!content.trim()) {
       await sock.sendMessage(
         remoteJid,
         {
-          text: `⚠️ _Perintah ini akan deleting semua list di group ini_ \n\nSilakan ketik *${
+          text: `⚠️ _This command will delete all lists in this group_ \n\nType *${
             prefix + command
-          } -y* untuk melanjutkan.`,
+          } -y* to proceed.`,
         },
         { quoted: message }
       );
@@ -38,17 +38,17 @@ async function handle(sock, messageInfo) {
 
     if (content.trim() === "-y") {
       await resetGroupData(remoteJid);
-      deleteCache(`list-group`); // reset cache
+      deleteCache(`list-group`); // Reset cache
       await sock.sendMessage(
         remoteJid,
-        { text: "_Semua list di group ini successful di reset_" },
+        { text: "_All lists in this group have been successfully reset_" },
         { quoted: message }
       );
     }
   } catch (error) {
     await sock.sendMessage(
       remoteJid,
-      { text: "_❌ Maaf, an error occurred while processing data._" },
+      { text: "_❌ Sorry, an error occurred while processing data._" },
       { quoted: message }
     );
   }

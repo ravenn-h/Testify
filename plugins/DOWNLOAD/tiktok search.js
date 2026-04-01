@@ -10,7 +10,7 @@ async function handle(sock, messageInfo) {
   const { remoteJid, message, content, prefix, command } = messageInfo;
 
   try {
-    // Validasi input: make sure konten ada
+    // Validate input: ensure content exists
     if (!content.trim() || content.trim() == "") {
       return sendMessageWithQuote(
         sock,
@@ -18,22 +18,22 @@ async function handle(sock, messageInfo) {
         message,
         `_⚠️ Usage format:_ \n\n_💬 Example:_ _*${
           prefix + command
-        } kucing lucu*_`
+        } cute cat*_`
       );
     }
 
-    // Tampilkan reaksi "Loading"
+    // Show loading reaction
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
-    // Memanggil API untuk getting data video TikTok
+    // Call API to get TikTok video data
     const response = await tiktokSearch(content);
 
-    // Download file ke buffer
+    // Download file to buffer
     const audioBuffer = await downloadToBuffer(response.no_watermark, "mp4");
 
-    // Mengirim video tanpa watermark dan caption
+    // Send video without watermark and caption
     await sock.sendMessage(
       remoteJid,
       {
@@ -43,10 +43,10 @@ async function handle(sock, messageInfo) {
       { quoted: message }
     );
   } catch (error) {
-    console.error("Kesalahan saat processing perintah TikTok:", error);
+    console.error("Error processing TikTok command:", error);
     logCustom("info", content, `ERROR-COMMAND-${command}.txt`);
-    // Kirim pesan kesalahan yang lebih informatif
-    const errorMessage = `Maaf, an error occurred while processing your request. Please try again later.\n\n*Error Details:* ${
+    // Send a more informative error message
+    const errorMessage = `Sorry, an error occurred while processing your request. Please try again later.\n\n*Error Details:* ${
       error.message || error
     }`;
     await sendMessageWithQuote(sock, remoteJid, message, errorMessage);
@@ -55,7 +55,7 @@ async function handle(sock, messageInfo) {
 
 export default {
   handle,
-  Commands: ["tiktoksearch", "ttsearch", "tts"], // Menentukan perintah yang diproses oleh handler ini
+  Commands: ["tiktoksearch", "ttsearch", "tts"], // Commands handled by this handler
   OnlyPremium: false,
   OnlyOwner: false,
 };

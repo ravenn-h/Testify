@@ -7,14 +7,14 @@ import {
 } from "../../lib/utils.js";
 
 /**
- * Mengirim pesan teks dengan quote
+ * Send text message with quote
  */
 async function sendMessageWithQuote(sock, remoteJid, message, text) {
   await sock.sendMessage(remoteJid, { text }, { quoted: message });
 }
 
 /**
- * Validasi apakah URL berasal dari TikTok
+ * Validate whether URL is from TikTok
  */
 function isTikTokUrl(url) {
   return /tiktok\.com/i.test(url);
@@ -26,19 +26,19 @@ async function handle(sock, messageInfo) {
   try {
     const trimmedContent = content.trim();
 
-    // Validasi input kosong
+    // Validate empty input
     if (!trimmedContent) {
       return sendMessageWithQuote(
         sock,
         remoteJid,
         message,
-        `_⚠️ Usage format:_\n_💬 Example:_ _*${prefix + command} linknya*_`
+        `_⚠️ Usage format:_\n_💬 Example:_ _*${prefix + command} link*_`
       );
     }
 
     const validLink = extractLink(trimmedContent);
 
-    // Validasi URL TikTok
+    // Validate TikTok URL
     if (!isTikTokUrl(validLink)) {
       return sendMessageWithQuote(
         sock,
@@ -48,15 +48,15 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Tampilkan reaksi "Loading"
+    // Show loading reaction
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
-    // Ambil data TikTok
+    // Get TikTok data
     const response = await tiktok(validLink);
 
-    // Validasi response.music
+    // Validate response.music
     if (!response?.music) {
       console.error(
         "Error: No music URL found in the response."
@@ -66,14 +66,14 @@ async function handle(sock, messageInfo) {
         sock,
         remoteJid,
         message,
-        "Gagal mengambil audio dari TikTok. Try again later."
+        "Failed to retrieve audio from TikTok. Please try again later."
       );
     }
 
     let outputUrl = response.music;
 
     try {
-      // Konversi ke M4A jika memungkinkan
+      // Convert to M4A if possible
       outputUrl = await forceConvertToM4a({ url: response.music });
       const audioBuffer = await downloadToBuffer(outputUrl, "mp3");
 
@@ -100,7 +100,7 @@ async function handle(sock, messageInfo) {
   } catch (error) {
     logCustom("info", content, `ERROR-COMMAND-${command}.txt`);
 
-    const errorMessage = `Sorry, an error occurred saat processing permintaan Anda.\n\n*Error Details:* ${
+    const errorMessage = `Sorry, an error occurred while processing your request.\n\n*Error Details:* ${
       error.message || error
     }`;
     await sendMessageWithQuote(sock, remoteJid, message, errorMessage);

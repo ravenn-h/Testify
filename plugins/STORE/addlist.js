@@ -20,10 +20,10 @@ async function handle(sock, messageInfo) {
     let idList = remoteJid;
 
     if (!isGroup) {
-      // Chat Pribadi
+      // Private Chat
       idList = "owner";
     } else {
-      // Mendapatkan metadata grup
+      // Get group metadata
       const groupMetadata = await getGroupMetadata(sock, remoteJid);
       const participants = groupMetadata.participants;
 
@@ -41,14 +41,14 @@ async function handle(sock, messageInfo) {
       }
     }
 
-    // Validasi isi pesan
+    // Validate message content
     if (!content.trim()) {
       return sendMessageWithTemplate(
         sock,
         remoteJid,
-        `_⚠️ Usage format:_\n\n_Contoh :_ *${
+        `_⚠️ Usage format:_\n\n_Example:_ *${
           prefix + command
-        } payment | Halo @name Untuk Pembayaran Hanya Melalui Dana ...*\n\n_Apabila ingin menambah list dan gambar, silakan kirim/reply gambarnya dengan caption_ *${
+        } payment | Hello @name Payment is only via Dana ...*\n\n_To add a list with an image, send/reply with the image as caption_ *${
           prefix + command
         }*
                 
@@ -63,10 +63,10 @@ ${global.group.variable}`,
     let keyword = "";
 
     const parts = content.split("|");
-    keyword = parts.shift().trim(); // Keyword tetap di-trim untuk membersihkan spasi ekstra di awal & akhir
-    text = parts.join("|"); // Gabungkan sisa elemen tanpa changing spasi asli
+    keyword = parts.shift().trim(); // Keyword is trimmed to remove extra spaces at start & end
+    text = parts.join("|"); // Join remaining elements without altering original spaces
 
-    // Memeriksa apakah isQuoted didefinisikan
+    // Check if isQuoted is defined
     if (isQuoted) {
       switch (isQuoted.type) {
         case "text":
@@ -90,41 +90,41 @@ ${global.group.variable}`,
       }
     }
 
-    // Make sure keyword memiliki nilai untuk menghindari error saat trim()
+    // Ensure keyword has a value to avoid error on trim()
     const lowercaseKeyword = (keyword || "").trim().toLowerCase();
 
     if (!keyword || !text) {
       return sendMessageWithTemplate(
         sock,
         remoteJid,
-        `⚠️ _Format not valid!_\n\nContoh : ${
+        `⚠️ _Format not valid!_\n\nExample: ${
           prefix + command
-        } payment | Pembayaran Hanya Melalui Dana ...\n\n_Apabila ingin menambah list dan gambar, silakan kirim/reply gambarnya dengan caption_ *${
+        } payment | Payment is only via Dana ...\n\n_To add a list with an image, send/reply with the image as caption_ *${
           prefix + command
         }*`,
         message
       );
     }
 
-    // Cek apakah keyword already exists
+    // Check if keyword already exists
     const currentList = await getDataByGroupId(idList);
 
     if (currentList?.list?.[lowercaseKeyword]) {
       return sendMessageWithTemplate(
         sock,
         remoteJid,
-        `⚠️ _Keyword *${lowercaseKeyword}* already exists sebelumnya!_\n\n_Silakan gunakan keyword lain atau updatelist._`,
+        `⚠️ _Keyword *${lowercaseKeyword}* already exists!_\n\n_Please use a different keyword or use updatelist._`,
         message
       );
     }
 
-    // reset cache
+    // Reset cache
     deleteCache(`list-${idList}`);
 
-    // Tangani media jika ada
+    // Handle media if any
     const mediaUrl = await handleMedia(messageInfo);
 
-    // Tambahkan ke database
+    // Add to database
     const result = await addList(idList, lowercaseKeyword, {
       text,
       media: mediaUrl,
@@ -133,7 +133,7 @@ ${global.group.variable}`,
       return sendMessageWithTemplate(
         sock,
         remoteJid,
-        `${lowercaseKeyword} _sudah ditambahkan ke daftar list_\n\n_Ketik *list* untuk melihat daftar list._`,
+        `${lowercaseKeyword} _has been added to the list_\n\n_Type *list* to view the list._`,
         message
       );
     }
@@ -149,18 +149,18 @@ ${global.group.variable}`,
     return sendMessageWithTemplate(
       sock,
       remoteJid,
-      "_❌ Maaf, an error occurred while processing data._",
+      "_❌ Sorry, an error occurred while processing data._",
       message
     );
   }
 }
 
-// Fungsi untuk sending pesan dengan template
+// Function to send message with template
 function sendMessageWithTemplate(sock, remoteJid, text, quoted) {
   return sock.sendMessage(remoteJid, { text }, { quoted });
 }
 
-// Fungsi untuk menangani unduhan media
+// Function to handle media download
 async function handleMedia({ isQuoted, type, message }) {
   const supportedMediaTypes = [
     "image",

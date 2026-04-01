@@ -18,14 +18,14 @@ async function handle(sock, messageInfo) {
     type,
   } = messageInfo;
 
-  // Periksa apakah pesan berasal dari grup
+  // Check if message comes from a group
   if (!isGroup) return;
 
-  // Mendapatkan metadata grup
+  // Get group metadata
   const groupMetadata = await getGroupMetadata(sock, remoteJid);
   const participants = groupMetadata.participants;
 
-  // Periksa apakah pengirim adalah admin
+  // Check if sender is an admin
   const isAdmin = participants.some(
     (p) => (p.phoneNumber === sender || p.id === sender) && p.admin
   );
@@ -47,14 +47,14 @@ async function handle(sock, messageInfo) {
     const mediaPath = path.join("database", "media", media);
 
     if (!fs.existsSync(mediaPath)) {
-      throw new Error("File media not found setelah diunduh.");
+      throw new Error("Media file not found after download.");
     }
     await setProses(remoteJid, mediaPath);
 
-    // Kirim pesan sukses
-    const successMessage = `✅ _Set proses Successful Diatur_
+    // Send success message
+    const successMessage = `✅ _Set Process Successfully Configured_
 
-_Ketik .setproses reset untuk mengembalikan ke semula_`;
+_Type .setproses reset to revert to default_`;
     await sock.sendMessage(
       remoteJid,
       { text: successMessage },
@@ -63,19 +63,19 @@ _Ketik .setproses reset untuk mengembalikan ke semula_`;
     return;
   }
 
-  // Validasi input kosong
+  // Validate empty input
   if (!content || !content.trim()) {
     const usageMessage = `⚠️ *Usage format:*
 
 💬 *Example:* 
 _${prefix}${command} PROCESS_
 
-Jam : @time
-Tanggal : @tanggal
-Grub : @group
-Catatan : @catatan
+Time   : @time
+Date   : @tanggal
+Group  : @group
+Note   : @catatan
 
-@sender Pesanan sedang di proses
+@sender Your order is being processed
 `;
 
     await sock.sendMessage(
@@ -86,22 +86,22 @@ Catatan : @catatan
     return;
   }
 
-  // Atur template list
+  // Set template
   await setProses(remoteJid, content);
 
   if (content.toLowerCase() == "reset") {
     await deleteMessage(remoteJid, "setproses");
     await sock.sendMessage(
       remoteJid,
-      { text: "_✅ Successful reset Setproses_" },
+      { text: "_✅ Setproses successfully reset_" },
       { quoted: message }
     );
     return;
   }
-  // Kirim pesan sukses
-  const successMessage = `✅ _Set Proses Successful Diatur_
+  // Send success message
+  const successMessage = `✅ _Set Process Successfully Configured_
 
-_Ketik .setproses reset untuk mengembalikan ke semula_`;
+_Type .setproses reset to revert to default_`;
 
   await sock.sendMessage(
     remoteJid,

@@ -15,7 +15,7 @@ async function handle(sock, messageInfo) {
   const { m, remoteJid, sender, message, isQuoted, senderType } = messageInfo;
 
   try {
-    // Mendapatkan metadata grup
+    // Get group metadata
     const groupMetadata = await getGroupMetadata(sock, remoteJid);
     const participants = groupMetadata.participants;
     const isAdmin = participants.some(
@@ -30,21 +30,21 @@ async function handle(sock, messageInfo) {
       return;
     }
 
-    // Validasi the message that dibalas
+    // Validate the replied message
     if (!isQuoted) {
-      return await reply(m, "⚠️ _Balas sebuah pesanan berupa teks._");
+      return await reply(m, "⚠️ _Reply to an order in text form._");
     }
 
     const first_checksetdone = await checkMessage(remoteJid, "setproses");
 
-    // Mendapatkan tanggal dan waktu at this time
+    // Get current date and time
     const date = getCurrentDate();
     const time = getCurrentTime();
 
-    // Mendapatkan metadata grup
-    const groupName = groupMetadata.subject || "Grup";
+    // Get group metadata
+    const groupName = groupMetadata.subject || "Group";
 
-    // Menyiapkan catatan dari the message that dikutip
+    // Prepare note from the quoted message
     const note = isQuoted.content?.caption
       ? isQuoted.content.caption
       : isQuoted.text;
@@ -52,10 +52,10 @@ async function handle(sock, messageInfo) {
     const quotedSender = `@${isQuoted.sender.split("@")[0]}`;
 
     if (first_checksetdone) {
-      // Jika ada setingan set done
+      // If set process configuration exists
       try {
         if (first_checksetdone.endsWith(".webp")) {
-          // Kirim sticker
+          // Send sticker
           const buffer = fs.readFileSync(first_checksetdone);
 
           const options = {
@@ -66,7 +66,7 @@ async function handle(sock, messageInfo) {
           await sendImageAsSticker(sock, remoteJid, buffer, options, message);
           return;
         } else {
-          // Ganti placeholder dengan nilai sebenarnya
+          // Replace placeholders with actual values
           const messageSetdone = first_checksetdone
             .replace(/@time/g, time)
             .replace(/@tanggal/g, date)
@@ -88,17 +88,17 @@ async function handle(sock, messageInfo) {
       }
     }
 
-    // Default pesan transaksi pending
-    const templateMessage = `_*TRANSAKSI PENDING ✅ 」*_
+    // Default pending transaction message
+    const templateMessage = `_*TRANSACTION PENDING ✅ 」*_
 
-⏰ Jam      : ${time} WIB
-📅 Tanggal  : ${date}
-📂 Grup     : ${groupName}
-📝 Catatan  : ${note}
+⏰ Time     : ${time} WIB
+📅 Date     : ${date}
+📂 Group    : ${groupName}
+📝 Note     : ${note}
 
-${quotedSender} _Terima kasih sudah order!_`;
+${quotedSender} _Thank you for your order!_`;
 
-    // Mengirim pesan dengan mention
+    // Send message with mention
     await sendMessageWithMention(
       sock,
       remoteJid,

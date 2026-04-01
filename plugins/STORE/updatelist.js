@@ -12,10 +12,10 @@ async function handle(sock, messageInfo) {
     let idList = remoteJid;
 
     if (!isGroup) {
-      // Chat Pribadi
+      // Private Chat
       idList = "owner";
     } else {
-      // Mendapatkan metadata grup
+      // Get group metadata
       const groupMetadata = await getGroupMetadata(sock, remoteJid);
       const participants = groupMetadata.participants;
       const isAdmin = participants.some(
@@ -30,29 +30,29 @@ async function handle(sock, messageInfo) {
         return;
       }
     }
-    // Validasi isi pesan
+    // Validate message content
     if (!content.trim()) {
       return sendMessageWithTemplate(
         sock,
         remoteJid,
         `_⚠️ Usage format:_ \n\n_💬 Example:_ _*${
           prefix + command
-        } payment | Pembayaran  Hanya Melalui Dana ...*_ \n\n_Apabila ingin menambah list dan gambar, silakan kirim/reply gambarnya dengan caption_ *${
+        } payment | Payment is only via Dana ...*_ \n\n_To add a list with an image, send/reply with the image as caption_ *${
           prefix + command
         }*`,
         message
       );
     }
 
-    // Pisahkan keyword dan teks
+    // Separate keyword and text
     //const [keyword, text] = content.split('|').map(item => item.trim());
 
     let text = "";
     let keyword = "";
 
     const parts = content.split("|");
-    keyword = parts.shift().trim(); // Keyword tetap di-trim untuk membersihkan spasi ekstra di awal & akhir
-    text = parts.join("|"); // Gabungkan sisa elemen tanpa changing spasi asl
+    keyword = parts.shift().trim(); // Keyword is trimmed to remove extra spaces at start & end
+    text = parts.join("|"); // Join remaining elements without altering original spaces
 
     const lowercaseKeyword = keyword.trim().toLowerCase();
 
@@ -62,14 +62,14 @@ async function handle(sock, messageInfo) {
         remoteJid,
         `_⚠️ Usage format:_ \n\n_💬 Example:_ _*${
           prefix + command
-        } payment | Pembayaran  Hanya Melalui Dana ...*_ \n\n_Apabila ingin menambah list dan gambar, silakan kirim/reply gambarnya dengan caption_ *${
+        } payment | Payment is only via Dana ...*_ \n\n_To add a list with an image, send/reply with the image as caption_ *${
           prefix + command
         }*`,
         message
       );
     }
 
-    // Cek apakah keyword already exists
+    // Check if keyword already exists
     const currentList = await getDataByGroupId(idList);
     if (!currentList?.list?.[lowercaseKeyword]) {
       return sendMessageWithTemplate(
@@ -80,13 +80,13 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // reset cache
+    // Reset cache
     deleteCache(`list-${idList}`);
 
-    // Tangani media jika ada
+    // Handle media if any
     const mediaUrl = await handleMedia(messageInfo);
 
-    // Tambahkan ke database
+    // Add to database
     const result = await updateList(idList, lowercaseKeyword, {
       text,
       media: mediaUrl,
@@ -95,7 +95,7 @@ async function handle(sock, messageInfo) {
       return sendMessageWithTemplate(
         sock,
         remoteJid,
-        `${lowercaseKeyword} _successful di perbarui_\n\n_Ketik *list* untuk melihat daftar list._`,
+        `${lowercaseKeyword} _successfully updated_\n\n_Type *list* to view the list._`,
         message
       );
     }
@@ -111,18 +111,18 @@ async function handle(sock, messageInfo) {
     return sendMessageWithTemplate(
       sock,
       remoteJid,
-      "_❌ Maaf, an error occurred while processing data._",
+      "_❌ Sorry, an error occurred while processing data._",
       message
     );
   }
 }
 
-// Fungsi untuk sending pesan dengan template
+// Function to send message with template
 function sendMessageWithTemplate(sock, remoteJid, text, quoted) {
   return sock.sendMessage(remoteJid, { text }, { quoted });
 }
 
-// Fungsi untuk menangani unduhan media
+// Function to handle media download
 async function handleMedia({ isQuoted, type, message }) {
   const supportedMediaTypes = [
     "image",

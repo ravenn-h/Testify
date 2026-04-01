@@ -5,32 +5,32 @@ import config from "../../config.js";
 import { logCustom } from "../../lib/logger.js";
 import { extractLink, downloadToBuffer } from "../../lib/utils.js";
 
-// Fungsi kirim pesan dengan quote
+// Function to send message with quote
 async function sendMessageWithQuote(sock, remoteJid, message, text) {
   await sock.sendMessage(remoteJid, { text }, { quoted: message });
 }
 
-// Fungsi delay (jeda)
+// Delay function
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// Fungsi untuk mencoba request API hingga 3 kali
+// Function to retry API request up to 3 times
 async function fetchWithRetry(api, endpoint, params, maxRetries = 3, delayMs = 5000) {
   let lastError;
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const response = await api.get(endpoint, params);
       if (response && response.status) {
-        console.log(`✅ Berhasil pada percobaan ke-${attempt}`);
+        console.log(`✅ Succeeded on attempt ${attempt}`);
         return response;
       }
-      throw new Error(`API response invalid (percobaan ${attempt})`);
+      throw new Error(`API response invalid (attempt ${attempt})`);
     } catch (err) {
       lastError = err;
-      console.warn(`❌ Percobaan ke-${attempt} gagal: ${err.message}`);
+      console.warn(`❌ Attempt ${attempt} failed: ${err.message}`);
       if (attempt < maxRetries) {
-        console.log(`⏳ Waiting for ${delayMs / 1000} detik sebelum mencoba lagi...`);
+        console.log(`⏳ Waiting ${delayMs / 1000} seconds before retrying...`);
         await delay(delayMs);
       }
     }
@@ -38,7 +38,7 @@ async function fetchWithRetry(api, endpoint, params, maxRetries = 3, delayMs = 5
   throw lastError;
 }
 
-// Fungsi utama handler
+// Main handler function
 async function handle(sock, messageInfo) {
   const { remoteJid, message, content, prefix, command } = messageInfo;
 
@@ -56,14 +56,14 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Kirim reaksi "Loading"
+    // Send loading reaction
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
     const api = new ApiAutoresbot(config.APIKEY);
 
-    // Coba request API maksimal 3x
+    // Try API request up to 3 times
     const response = await fetchWithRetry(
       api,
       "/api/downloader/ytplay",
@@ -96,7 +96,7 @@ async function handle(sock, messageInfo) {
     }
   } catch (error) {
     logCustom("info", content, `ERROR-COMMAND-${command}.txt`);
-    const errorMessage = `Maaf, an error occurred while processing your request. Please try again later.\n\nDetail Error: ${
+    const errorMessage = `Sorry, an error occurred while processing your request. Please try again later.\n\nError Details: ${
       error.message || error
     }`;
     await sendMessageWithQuote(sock, remoteJid, message, errorMessage);

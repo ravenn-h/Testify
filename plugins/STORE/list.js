@@ -19,7 +19,7 @@ async function handle(sock, messageInfo) {
   let idList = remoteJid;
 
   if (!isGroup) {
-    // Chat Pribadi
+    // Private Chat
     idList = "owner";
   } else {
   }
@@ -38,7 +38,7 @@ async function handle(sock, messageInfo) {
   let desc = "";
 
   if (isGroup) {
-    // Mendapatkan metadata grup
+    // Get group metadata
     const groupMetadata = await getGroupMetadata(sock, remoteJid);
     nameGrub = groupMetadata.subject || "";
     size = groupMetadata.size || "";
@@ -46,10 +46,10 @@ async function handle(sock, messageInfo) {
   }
 
   try {
-    // Ambil data list berdasarkan grup
+    // Get list data by group
     const currentList = await getDataByGroupId(idList);
 
-    // Jika none list
+    // If no list
     if (!currentList || !currentList.list) {
       await sock.sendMessage(remoteJid, {
         text: "_No list in this group, type *addlist* to create one_\n\n_Only *admins* can add/delete lists_",
@@ -74,7 +74,7 @@ async function handle(sock, messageInfo) {
         : false;
 
     if (!firstElement) {
-      // Data dinamis yang kita masukkan
+      // Dynamic data to insert
       const data = {
         name: `@${sender.split("@")[0]}`,
         date: getCurrentDate(),
@@ -88,24 +88,24 @@ async function handle(sock, messageInfo) {
       };
 
       if (first_checksetlist) {
-        // jika ada setingan set list
+        // If set list configuration exists
 
-        let lines = first_checksetlist.split("\n"); // Pecah teks menjadi array per baris
-        let formattedList = []; // Array untuk menyimpan teks hasil
+        let lines = first_checksetlist.split("\n"); // Split text into array per line
+        let formattedList = []; // Array to store formatted text
 
         for (let line of lines) {
           if (line.includes("@x")) {
-            let template = line.replace("@x", "").trim(); // Ambil simbol sebelum @x
+            let template = line.replace("@x", "").trim(); // Get symbol before @x
             let listItems = keywordList2
               .map((item) => `${template} ${item}`)
-              .join("\n"); // Buat daftar
-            formattedList.push(listItems); // Masukkan daftar yang sudah diformat
+              .join("\n"); // Build list
+            formattedList.push(listItems); // Insert formatted list
           } else {
-            formattedList.push(line); // Jika bukan @x, tambahkan langsung
+            formattedList.push(line); // If not @x, add directly
           }
         }
 
-        let message2 = formattedList.join("\n"); // Gabungkan kembali jadi teks utuh
+        let message2 = formattedList.join("\n"); // Join back into full text
 
         message2 = message2
           .replace(/@name/g, data.name)
@@ -155,7 +155,7 @@ async function handle(sock, messageInfo) {
           console.error(`Media not found or failed to read: ${media}`);
         }
       } else {
-        // Kirim pesan dengan mention
+        // Send message with mention
         await sendMessageWithMention(
           sock,
           remoteJid,

@@ -1,4 +1,4 @@
-const limit = 4; // jumlah gambar yang di kirim
+const limit = 4; // number of images to send
 
 import ApiAutoresbotModule from "api-autoresbot";
 const ApiAutoresbot = ApiAutoresbotModule.default || ApiAutoresbotModule;
@@ -22,7 +22,7 @@ async function handle(sock, messageInfo) {
   try {
     const validLink = extractLink(content);
 
-    // Validasi input
+    // Validate input
     if (!content?.trim() || !isTikTokUrl(content)) {
       return sendMessageWithQuote(
         sock,
@@ -34,25 +34,25 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Tampilkan reaksi "Loading"
+    // Show loading reaction
     await sock.sendMessage(remoteJid, {
       react: { text: "⏳", key: message.key },
     });
 
-    // Inisialisasi API dengan APIKEY dari config
+    // Initialize API with APIKEY from config
     const api = new ApiAutoresbot(config.APIKEY);
 
-    // Memanggil API untuk downloading audio
+    // Call API to download images
     const response = await api.get("/api/downloader/tiktok-slide", {
       url: validLink,
     });
 
-    // Validasi respons
+    // Validate response
     if (!response || !response.data || response.data.length === 0) {
       throw new Error("No images found at that URL.");
     }
 
-    // Kirim gambar sesuai limit
+    // Send images up to the limit
     const imagesToSend = response.data.slice(0, limit);
     for (const imageUrl of imagesToSend) {
       await sock.sendMessage(remoteJid, {
@@ -61,11 +61,11 @@ async function handle(sock, messageInfo) {
       });
     }
   } catch (error) {
-    console.error("Kesalahan saat processing perintah TikTok:", error);
+    console.error("Error processing TikTok command:", error);
     logCustom("info", content, `ERROR-COMMAND-${command}.txt`);
 
-    // Kirim pesan kesalahan yang lebih deskriptif
-    const errorMessage = `Maaf, an error occurred while processing your request. Please try again later.\n\n*Error Details:* ${
+    // Send a more descriptive error message
+    const errorMessage = `Sorry, an error occurred while processing your request. Please try again later.\n\n*Error Details:* ${
       error.message || "Unknown error"
     }`;
     await sendMessageWithQuote(sock, remoteJid, message, errorMessage);
@@ -74,7 +74,7 @@ async function handle(sock, messageInfo) {
 
 export default {
   handle,
-  Commands: ["ttslide", "tiktokslide"], // Perintah yang didukung
+  Commands: ["ttslide", "tiktokslide"], // Supported commands
   OnlyPremium: false,
   OnlyOwner: false,
 };

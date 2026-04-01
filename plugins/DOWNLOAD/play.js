@@ -6,19 +6,19 @@ import config from "../../config.js";
 import { logCustom } from "../../lib/logger.js";
 import { downloadToBuffer } from "../../lib/utils.js";
 
-// Fungsi kirim pesan dengan quote
+// Function to send message with quote
 async function sendMessageWithQuote(sock, remoteJid, message, text) {
   return sock.sendMessage(remoteJid, { text }, { quoted: message });
 }
 
-// Fungsi kirim reaksi
+// Function to send reaction
 async function sendReaction(sock, message, reaction) {
   return sock.sendMessage(message.key.remoteJid, {
     react: { text: reaction, key: message.key },
   });
 }
 
-// Fungsi pencarian YouTube
+// YouTube search function
 async function searchYouTube(query) {
   const searchResults = await yts(query);
   return (
@@ -27,27 +27,27 @@ async function searchYouTube(query) {
   );
 }
 
-// Fungsi delay (jeda)
+// Delay function
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// Fungsi untuk memanggil API dengan retry (maksimal 3x, jeda 5 detik)
+// Function to call API with retry (max 3x, 5 second delay)
 async function fetchWithRetry(api, endpoint, params, maxRetries = 3, delayMs = 5000) {
   let lastError;
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const response = await api.get(endpoint, params);
       if (response && response.status) {
-        console.log(`✅ API berhasil pada percobaan ke-${attempt}`);
+        console.log(`✅ API succeeded on attempt ${attempt}`);
         return response;
       }
-      throw new Error(`Response not valid (percobaan ${attempt})`);
+      throw new Error(`Response not valid (attempt ${attempt})`);
     } catch (err) {
       lastError = err;
-      console.warn(`❌ Percobaan ke-${attempt} gagal: ${err.message}`);
+      console.warn(`❌ Attempt ${attempt} failed: ${err.message}`);
       if (attempt < maxRetries) {
-        console.log(`⏳ Waiting for ${delayMs / 1000} detik sebelum mencoba lagi...`);
+        console.log(`⏳ Waiting ${delayMs / 1000} seconds before retrying...`);
         await delay(delayMs);
       }
     }
@@ -55,7 +55,7 @@ async function fetchWithRetry(api, endpoint, params, maxRetries = 3, delayMs = 5
   throw lastError;
 }
 
-// Fungsi utama
+// Main function
 async function handle(sock, messageInfo) {
   const { remoteJid, message, content, prefix, command } = messageInfo;
 
@@ -68,13 +68,13 @@ async function handle(sock, messageInfo) {
         message,
         `_⚠️ Usage format:_ \n\n_💬 Example:_ _*${
           prefix + command
-        } matahariku*_`
+        } sunflower*_`
       );
     }
 
     await sendReaction(sock, message, "⏰");
 
-    // Pencarian YouTube
+    // YouTube search
     const video = await searchYouTube(query);
 
     if (!video || !video.url) {
@@ -82,7 +82,7 @@ async function handle(sock, messageInfo) {
         sock,
         remoteJid,
         message,
-        "⛔ _Tidak dapat menemukan video yang sesuai_"
+        "⛔ _Could not find a matching video_"
       );
     }
 
@@ -91,13 +91,13 @@ async function handle(sock, messageInfo) {
         sock,
         remoteJid,
         message,
-        "_Maaf, video terlalu besar untuk dikirim melalui WhatsApp._"
+        "_Sorry, the video is too large to send via WhatsApp._"
       );
     }
 
     const caption = `*YOUTUBE DOWNLOADER*\n\n◧ Title: ${video.title}\n◧ Duration: ${video.timestamp}\n◧ Uploaded: ${video.ago}\n◧ Views: ${video.views}\n◧ Description: ${video.description}`;
 
-    // Inisialisasi API dan gunakan fetchWithRetry
+    // Initialize API and use fetchWithRetry
     const api = new ApiAutoresbot(config.APIKEY);
     const response = await fetchWithRetry(
       api,
@@ -110,14 +110,14 @@ async function handle(sock, messageInfo) {
     if (response && response.status) {
       const url_media = response.data.url;
 
-      // Kirim image dengan caption
+      // Send image with caption
       await sock.sendMessage(
         remoteJid,
         { image: { url: video.thumbnail }, caption },
         { quoted: message }
       );
 
-      // Download file audio ke buffer
+      // Download audio file to buffer
       const audioBuffer = await downloadToBuffer(url_media, "mp3");
 
       await sock.sendMessage(
@@ -136,7 +136,7 @@ async function handle(sock, messageInfo) {
     console.error("Error while handling command:", error);
     logCustom("info", content, `ERROR-COMMAND-${command}.txt`);
 
-    const errorMessage = `⚠️ Maaf, an error occurred while processing your request. Please try again later.\n\n💡 Details: ${
+    const errorMessage = `⚠️ Sorry, an error occurred while processing your request. Please try again later.\n\n💡 Details: ${
       error.message || error
     }`;
     await sendMessageWithQuote(sock, remoteJid, message, errorMessage);

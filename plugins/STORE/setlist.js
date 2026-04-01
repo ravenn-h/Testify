@@ -6,14 +6,14 @@ async function handle(sock, messageInfo) {
   const { remoteJid, isGroup, message, content, sender, command, prefix } =
     messageInfo;
 
-  // Periksa apakah pesan berasal dari grup
+  // Check if message comes from a group
   if (!isGroup) return;
 
-  // Mendapatkan metadata grup
+  // Get group metadata
   const groupMetadata = await getGroupMetadata(sock, remoteJid);
   const participants = groupMetadata.participants;
 
-  // Periksa apakah pengirim adalah admin
+  // Check if sender is an admin
   const isAdmin = participants.some(
     (p) => (p.phoneNumber === sender || p.id === sender) && p.admin
   );
@@ -26,18 +26,18 @@ async function handle(sock, messageInfo) {
     return;
   }
 
-  // Validasi input kosong
+  // Validate empty input
   if (!content || !content.trim()) {
     const usageMessage = `⚠️ *Usage format:*
 
 💬 *Example:* 
 _${prefix}${command} LIST STORE_
 
-_Berikut Daftar list_
+_Here is the list_
 ⌬ @x
 
 ════════════
-_Parameter yang bisa di pakai_
+_Available parameters_
 
 ☍ @x${global.group.variable}
 `;
@@ -50,22 +50,22 @@ _Parameter yang bisa di pakai_
     return;
   }
 
-  // Atur template list
+  // Set list template
   await setList(remoteJid, content);
 
   if (content.toLowerCase() == "reset") {
     await deleteMessage(remoteJid, "setlist");
     await sock.sendMessage(
       remoteJid,
-      { text: "_✅ Successful reset Setlist_" },
+      { text: "_✅ Setlist successfully reset_" },
       { quoted: message }
     );
     return;
   }
-  // Kirim pesan sukses
-  const successMessage = `✅ _Set List Successful Diatur_
+  // Send success message
+  const successMessage = `✅ _List Template Successfully Set_
 
-_Type *.list* to view the list_ atau ketik .setlist reset untuk mengembalikan ke semula`;
+_Type *.list* to view the list or type .setlist reset to revert to default_`;
 
   await sock.sendMessage(
     remoteJid,

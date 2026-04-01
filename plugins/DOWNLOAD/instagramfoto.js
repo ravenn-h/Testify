@@ -5,35 +5,35 @@ import mess from "../../strings.js";
 import { logCustom } from "../../lib/logger.js";
 import { downloadToBuffer } from "../../lib/utils.js";
 /**
- * Mengirim pesan dengan kutipan
- * @param {object} sock - Objek koneksi WebSocket
- * @param {string} remoteJid - ID user tujuan
- * @param {object} message - Pesan asli yang dikutip
- * @param {string} text - Pesan teks yang dikirim
+ * Send message with quote
+ * @param {object} sock - WebSocket connection object
+ * @param {string} remoteJid - Target user ID
+ * @param {object} message - Original quoted message
+ * @param {string} text - Text message to send
  */
 async function sendMessageWithQuote(sock, remoteJid, message, text) {
   await sock.sendMessage(remoteJid, { text }, { quoted: message });
 }
 
 /**
- * Memvalidasi apakah URL yang diberikan adalah URL Instagram yang valid
- * @param {string} url - URL yang akan divalidasi
- * @returns {boolean} True jika valid, false jika tidak
+ * Validate whether the given URL is a valid Instagram URL
+ * @param {string} url - URL to validate
+ * @returns {boolean} True if valid, false otherwise
  */
 function isIGUrl(url) {
   return /instagram\.com/i.test(url);
 }
 
 /**
- * Fungsi utama untuk menangani permintaan unduhan media Instagram
- * @param {object} sock - Objek koneksi WebSocket
- * @param {object} messageInfo - Informasi pesan termasuk konten dan pengirim
+ * Main function to handle Instagram media download requests
+ * @param {object} sock - WebSocket connection object
+ * @param {object} messageInfo - Message info including content and sender
  */
 async function handle(sock, messageInfo) {
   const { remoteJid, message, content, prefix, command } = messageInfo;
 
   try {
-    // Validasi input: make sure konten ada dan URL valid
+    // Validate input: ensure content exists and URL is valid
     if (!content?.trim() || !isIGUrl(content)) {
       return sendMessageWithQuote(
         sock,
@@ -45,22 +45,22 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Tampilkan reaksi "Loading"
+    // Show loading reaction
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
-    // Panggil API igdl untuk getting media
+    // Call igdl API to get media
     const response = await igdl(content);
 
     if (!response || response.length === 0) {
       throw new Error("No media found at that URL.");
     }
 
-    // Buat Set untuk filter URL unik
+    // Create Set to filter unique URLs
     const seen = new Set();
 
-    // Ambil hanya gambar unik, maksimal 4
+    // Get only unique images, max 4
     const uniqueImages = response
       .filter((media) => {
         if (!media.url || seen.has(media.url)) return false;
@@ -69,10 +69,10 @@ async function handle(sock, messageInfo) {
       })
       .slice(0, 4);
 
-    // Loop kirim hanya 4 gambar unik
+    // Loop and send only 4 unique images
     for (const media of uniqueImages) {
       const urlMedia = media.url;
-      const buffer = await downloadToBuffer(urlMedia, "jpg"); // anggap image
+      const buffer = await downloadToBuffer(urlMedia, "jpg");
 
       await sock.sendMessage(remoteJid, {
         image: buffer,
@@ -83,8 +83,8 @@ async function handle(sock, messageInfo) {
     console.error("Error processing Instagram:", error);
     logCustom("info", content, `ERROR-COMMAND-${command}.txt`);
 
-    // Kirim pesan kesalahan yang lebih deskriptif
-    const errorMessage = `Maaf, an error occurred while processing your request. Please try again later.\n\n*Error Details:* ${
+    // Send a more descriptive error message
+    const errorMessage = `Sorry, an error occurred while processing your request. Please try again later.\n\n*Error Details:* ${
       error.message || "Unknown error"
     }`;
     await sendMessageWithQuote(sock, remoteJid, message, errorMessage);
@@ -93,7 +93,7 @@ async function handle(sock, messageInfo) {
 
 export default {
   handle,
-  Commands: ["igfoto", "instagramfoto"], // Perintah yang didukung oleh handler ini
+  Commands: ["igfoto", "instagramfoto"], // Commands supported by this handler
   OnlyPremium: false,
   OnlyOwner: false,
 };

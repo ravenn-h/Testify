@@ -13,7 +13,7 @@ async function handle(sock, messageInfo) {
   const { remoteJid, message, content, prefix, command } = messageInfo;
 
   try {
-    // Validasi input
+    // Validate input
     const query = content.trim();
     if (!query) {
       return sendMessageWithQuote(
@@ -22,32 +22,32 @@ async function handle(sock, messageInfo) {
         message,
         `_⚠️ Usage format:_\n\n_💬 Example:_ _*${
           prefix + command
-        } matahariku*_`
+        } sunflower*_`
       );
     }
 
-    // Tampilkan reaksi "Loading"
+    // Show loading reaction
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
-    // Inisialisasi API
+    // Initialize API
     const api = new ApiAutoresbot(config.APIKEY);
 
-    // Memanggil API dengan parameter
+    // Call API with parameters
     const response = await api.get("/api/search/spotify", { text: query });
 
-    // Menangani respons API
+    // Handle API response
     const results = response?.data;
     if (Array.isArray(results) && results.length > 0) {
-      let reply = `🔍 *Hasil Pencarian Spotify untuk "${query}":*\n\n`;
+      let reply = `🔍 *Spotify Search Results for "${query}":*\n\n`;
       results.forEach((item, index) => {
         const { title, artist, url, duration, popularity, preview } = item;
 
         reply += `*${index + 1}. ${title}*\n`;
         reply += `   🎤 *Artist:* ${artist}\n`;
-        reply += `   ⏱️ *Durasi:* ${(duration / 1000).toFixed(0)} detik\n`;
-        reply += `   🌟 *Popularitas:* ${popularity}\n`;
+        reply += `   ⏱️ *Duration:* ${(duration / 1000).toFixed(0)} sec\n`;
+        reply += `   🌟 *Popularity:* ${popularity}\n`;
         reply += `   🔗 ${url}\n`;
         if (preview) {
           reply += `   🎵 ${preview}\n`;
@@ -55,10 +55,10 @@ async function handle(sock, messageInfo) {
         reply += `\n`;
       });
 
-      // Kirim hasil pencarian
+      // Send search results
       await sendMessageWithQuote(sock, remoteJid, message, reply.trim());
     } else {
-      // Pesan jika data kosong
+      // Message if data is empty
       await sendMessageWithQuote(
         sock,
         remoteJid,
@@ -69,7 +69,7 @@ async function handle(sock, messageInfo) {
   } catch (error) {
     logCustom("info", content, `ERROR-COMMAND-${command}.txt`);
 
-    // Menangani error
+    // Handle error
     await sock.sendMessage(
       remoteJid,
       {
@@ -85,5 +85,5 @@ export default {
   Commands: ["spotify"],
   OnlyPremium: false,
   OnlyOwner: false,
-  limitDeduction: 1, // Jumlah limit yang akan dikurangi
+  limitDeduction: 1, // Number of limits to deduct
 };
