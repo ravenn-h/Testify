@@ -38,24 +38,23 @@ END:VCARD`;
     );
   }
 
-  // Mengirim pesan kontak
-const chatId = await sock.sendMessage(
-  remoteJid,
-  {
-    contacts: {
-      displayName: `Daftar Owner (${data.length})`,
-      contacts: list,
+  // Send contact message
+  const chatId = await sock.sendMessage(
+    remoteJid,
+    {
+      contacts: {
+        displayName: `Owner List (${data.length})`,
+        contacts: list,
+      },
     },
-  },
-  { quoted: message }
-);
+    { quoted: message }
+  );
 
-
-  // Kirim pesan dengan mention
+  // Send message with mention
   await sendMessageWithMention(
     sock,
     remoteJid,
-    `Hai Kak @${sender.split("@")[0]}, berikut adalah daftar owner bot ini`,
+    `Hi @${sender.split("@")[0]}, here is the list of this bot's owners`,
     chatId,
     senderType
   );
@@ -67,4 +66,3 @@ export default {
   OnlyOwner: false,
   handle,
 };
-

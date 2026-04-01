@@ -3,20 +3,20 @@ import moment from "moment-timezone";
 async function handle(sock, messageInfo) {
   const { remoteJid, message } = messageInfo;
 
-  // Format waktu dan tanggal
+  // Date and time format
   const format = "DD-MM-YYYY HH:mm";
 
-  // Waktu Internasional (UTC)
+  // International time (UTC)
   const utcTime = moment().tz("UTC").format(format);
 
-  // Waktu Server (menggunakan waktu lokal dari sistem server)
+  // Server time (using the server's local system time)
   const serverTime = moment().format(format);
 
-  // Waktu WIB (Asia/Jakarta)
-  const jakartaTime = moment().tz("Asia/Jakarta").format(format);
+  // WIB time (Africa/Abijan)
+  const abijanTime = moment().tz("Africa/Abidjan").format(format);
 
-  // Mengirim pesan dengan tiga zona waktu
-  const response = `⏰ Waktu Saat Ini:
+  // Send message with three time zones
+  const response = `⏰ Current Time:
     
 🌍 UTC: 
 ${utcTime}
@@ -25,7 +25,7 @@ ${utcTime}
 ${serverTime}
 
 🇮🇩 WIB: 
-${jakartaTime}`;
+${abijanTime}`;
 
   return await sock.sendMessage(
     remoteJid,

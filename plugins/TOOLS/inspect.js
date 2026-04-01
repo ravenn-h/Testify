@@ -11,7 +11,7 @@ async function handle(sock, messageInfo) {
   const { m, remoteJid, message, content, prefix, command } = messageInfo;
 
   try {
-    // Validasi jika none konten
+    // Validate if no content
     if (!content) {
       return await reply(
         m,
@@ -21,18 +21,18 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Mendapatkan kode undangan dari link
+    // Extract invite code from link
     const inviteCode = content.split("https://chat.whatsapp.com/")[1];
     if (!inviteCode) {
-      return await reply(m, "⚠️ _Link Invalid_");
+      return await reply(m, "⚠️ _Invalid Link_");
     }
 
-    // Kirim reaksi "⏳" sebagai indikasi sedang processing
+    // Send "⏳" reaction as processing indicator
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
-    // Melakukan query untuk getting informasi grup
+    // Query to get group information
     const response = await sock.query({
       tag: "iq",
       attrs: {
@@ -44,7 +44,7 @@ async function handle(sock, messageInfo) {
     });
 
     const groupInfo = response.content[0]?.attrs || {};
-    const groupDetails = `「 _*Group Link Yang Di Inspect*_ 」\n\n◧ Name : ${
+    const groupDetails = `「 _*Inspected Group Link*_ 」\n\n◧ Name : ${
       groupInfo.subject || "undefined"
     }\n◧ Desc : ${
       groupInfo.s_t
@@ -63,7 +63,8 @@ async function handle(sock, messageInfo) {
     }\n◧ Size : ${groupInfo.size || "undefined"} Member\n◧ ID : ${
       groupInfo.id || "undefined"
     }`;
-    // Mendapatkan foto profil grup
+
+    // Get group profile picture
     let ppUrl = null;
     try {
       ppUrl = await sock.profilePictureUrl(`${groupInfo.id}@g.us`, "image");
@@ -79,7 +80,7 @@ async function handle(sock, messageInfo) {
       ppUrl = apiResponse.data.imageLink;
     }
 
-    // Kirim pesan dengan atau tanpa gambar
+    // Send message with or without image
     if (ppUrl) {
       await sock.sendMessage(
         remoteJid,
@@ -93,19 +94,20 @@ async function handle(sock, messageInfo) {
       await reply(m, groupDetails);
     }
   } catch (error) {
-    console.error("Error saat processing grup:", error);
+    console.error("Error while processing group:", error);
     logCustom("info", content, `ERROR-COMMAND-${command}.txt`);
 
-    // Kirim pesan kesalahan
+    // Send error message
     await sock.sendMessage(
       remoteJid,
       {
-        text: "⚠️ An error occurred while getting info grup. Make sure format benar dan bot has permission.",
+        text: "⚠️ An error occurred while retrieving group info. Make sure the format is correct and the bot has permission.",
       },
       { quoted: message }
     );
   }
 }
+
 export default {
   handle,
   Commands: ["inspect"],

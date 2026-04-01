@@ -21,7 +21,7 @@ async function handle(sock, messageInfo) {
   const { remoteJid, message, content, prefix, command } = messageInfo;
 
   try {
-    // Validasi input
+    // Input validation
     if (!content.trim() || content.trim() == "") {
       return sendMessageWithQuote(
         sock,
@@ -29,7 +29,7 @@ async function handle(sock, messageInfo) {
         message,
         `_⚠️ Usage format:_ \n\n_💬 Example:_ _*${
           prefix + command
-        } kucing*_`
+        } cat*_`
       );
     }
 
@@ -52,12 +52,12 @@ async function handle(sock, messageInfo) {
       logCustom("info", content, `ERROR-COMMAND-${command}.txt`);
       const errorMessage =
         response?.message ||
-        "Sorry, no response from the server. Please try again nanti.";
+        "Sorry, no response from the server. Please try again later.";
       return await sendMessageWithQuote(sock, remoteJid, message, errorMessage);
     }
   } catch (error) {
     logCustom("info", content, `ERROR-COMMAND-${command}.txt`);
-    const errorMessage = `Maaf, an error occurred while processing your request. Please try again later.\n\nError Details: ${
+    const errorMessage = `Sorry, an error occurred while processing your request. Please try again later.\n\nError Details: ${
       error.message || error
     }`;
     await sendMessageWithQuote(sock, remoteJid, message, errorMessage);

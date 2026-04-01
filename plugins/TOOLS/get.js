@@ -6,7 +6,7 @@ async function handle(sock, messageInfo) {
   const startTime = performance.now();
 
   try {
-    // Validasi input
+    // Input validation
     if (!content || !isURL(content)) {
       return await reply(
         m,
@@ -16,20 +16,20 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Mengirim reaksi loading
+    // Send loading reaction
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
-    // Memproses permintaan GET
+    // Perform GET request
     const response = await axios.get(content);
     const endTime = performance.now();
     const responseTime = (endTime - startTime).toFixed(2);
 
-    // Cek tipe konten dari header respons
+    // Check content type from response headers
     const contentType = response.headers["content-type"] || "";
     if (contentType.includes("application/json")) {
-      // Jika JSON, tampilkan isi JSON
+      // If JSON, display JSON content
       const jsonData = JSON.stringify(response.data, null, 2);
       const jsonResponse = `Website Info:
 - Status: ${response.status}
@@ -40,7 +40,7 @@ ${jsonData}`;
       return await reply(m, jsonResponse);
     }
 
-    // Jika bukan JSON, parsing HTML untuk mengambil title dan meta description
+    // If not JSON, parse HTML to extract title and meta description
     const html = response.data;
     const titleMatch = html.match(/<title>(.*?)<\/title>/i);
     const metaMatch = html.match(
@@ -58,8 +58,8 @@ ${jsonData}`;
 
     await reply(m, infoGet);
   } catch (error) {
-    // Menangani kesalahan
-    const errorMessage = `Maaf, an error occurred while processing permintaan Anda. Try again later.\n\nDetail Kesalahan: ${error.message}`;
+    // Error handling
+    const errorMessage = `Sorry, an error occurred while processing your request. Try again later.\n\nError Details: ${error.message}`;
     await sock.sendMessage(
       remoteJid,
       { text: errorMessage },

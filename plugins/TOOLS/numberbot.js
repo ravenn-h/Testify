@@ -6,7 +6,7 @@ async function handle(sock, messageInfo) {
   try {
     return reply(m, `_NUMBER BOT :_ *${global.phone_number_bot}*`);
   } catch (error) {
-    console.error("Error saat processing grup:", error);
+    console.error("Error saat processing group:", error);
 
     // Kirim pesan kesalahan
     await sock.sendMessage(

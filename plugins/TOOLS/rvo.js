@@ -10,14 +10,15 @@ async function handle(sock, messageInfo) {
 
   try {
     const mediaType = isQuoted ? isQuoted.type : type;
+
     if (mediaType !== "viewonce" || !isQuoted) {
       return await reply(
         m,
-        `⚠️ _Balas media sekali lihat dengan caption *${prefix + command}*_`
+        `⚠️ _Reply to a view-once media with caption *${prefix + command}*_`
       );
     }
 
-    // Tampilkan reaksi "Loading"
+    // Show "Loading" reaction
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
@@ -27,10 +28,10 @@ async function handle(sock, messageInfo) {
     const mediaPath = path.join("tmp", media);
 
     if (!fs.existsSync(mediaPath)) {
-      throw new Error("File media not found setelah diunduh.");
+      throw new Error("Media file not found after download.");
     }
 
-    // Membaca file menjadi Buffer
+    // Read file into Buffer
     const mediaBuffer = fs.readFileSync(mediaPath);
 
     if (isQuoted?.rawMessageType === "audioMessage") {
@@ -67,10 +68,10 @@ async function handle(sock, messageInfo) {
       return;
     }
   } catch (error) {
-    console.error("Kesalahan saat processing perintah Hd:", error);
+    console.error("Error while processing Hd command:", error);
 
-    // Kirim pesan kesalahan yang lebih informatif
-    const errorMessage = `_An error occurred while processing gambar._`;
+    // Send more informative error message
+    const errorMessage = `_An error occurred while processing the image._`;
     await reply(m, errorMessage);
   }
 }

@@ -14,7 +14,7 @@ import util from "util";
 const exec = util.promisify(exec2);
 
 /**
- * Mengubah pitch audio menggunakan ffmpeg
+ * Change audio pitch using ffmpeg
  * @param {string} inputPath
  * @param {string} outputPath
  * @param {number} sampleRate
@@ -22,7 +22,7 @@ const exec = util.promisify(exec2);
  */
 async function changePitch(inputPath, outputPath, sampleRate = 44100) {
   try {
-    // Gunakan input ≠ output agar ffmpeg tidak error
+    // Use different input ≠ output to avoid ffmpeg error
     const command = `ffmpeg -i "${inputPath}" -af "asetrate=${sampleRate},aresample=${sampleRate}" "${outputPath}" -y`;
     await exec(command);
     return await fsp.readFile(outputPath);
@@ -37,31 +37,31 @@ async function handle(sock, messageInfo) {
     messageInfo;
 
   try {
-    // Validasi media
+    // Media validation
     const mediaType = isQuoted?.type;
     if (mediaType !== "audio") {
       return await reply(
         m,
-        `⚠️ _Balas audio/vn dengan caption *${prefix + command}*_`
+        `⚠️ _Reply to an audio/vn with caption *${prefix + command}*_`
       );
     }
 
-    // Validasi karakter
+    // Character validation
     if (!content) {
       return await reply(
         m,
-        `⚠️ _Balas audio/vn dengan caption *${prefix + command}*_\n\n` +
-          `_*Masukkan Karakter*_\n> tupai\n> raksasa\n> monster\n> robot\n> bayi\n> kakek\n> alien\n\n` +
-          `Example: _*${prefix + command} tupai*_`
+        `⚠️ _Reply to an audio/vn with caption *${prefix + command}*_\n\n` +
+          `_*Enter a character*_\n> squirrel\n> giant\n> monster\n> robot\n> baby\n> oldman\n> alien\n\n` +
+          `Example: _*${prefix + command} squirrel*_`
       );
     }
 
-    // Reaksi loading
+    // Loading reaction
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
-    // Make sure folder tmp ada
+    // Make sure tmp folder exists
     const tmpFolder = path.join(process.cwd(), "tmp");
     if (!fs.existsSync(tmpFolder)) fs.mkdirSync(tmpFolder, { recursive: true });
 
@@ -72,44 +72,44 @@ async function handle(sock, messageInfo) {
 
     const mediaPath = path.join(tmpFolder, media);
 
-    // Daftar karakter dan pitch
-    const karakterPitchPairs = [
-      { karakter: "tupai", pitch: 48000 },
-      { karakter: "raksasa", pitch: 22050 },
-      { karakter: "monster", pitch: 40000 },
-      { karakter: "robot", pitch: 32000 },
-      { karakter: "bayi", pitch: 16000 },
-      { karakter: "kakek", pitch: 20000 },
-      { karakter: "alien", pitch: 55000 },
+    // Character list and pitch values
+    const characterPitchPairs = [
+      { character: "squirrel", pitch: 48000 },
+      { character: "giant", pitch: 22050 },
+      { character: "monster", pitch: 40000 },
+      { character: "robot", pitch: 32000 },
+      { character: "baby", pitch: 16000 },
+      { character: "oldman", pitch: 20000 },
+      { character: "alien", pitch: 55000 },
     ];
 
-    const selectedPair = karakterPitchPairs.find(
-      (pair) => pair.karakter === content.toLowerCase()
+    const selectedPair = characterPitchPairs.find(
+      (pair) => pair.character === content.toLowerCase()
     );
 
     if (!selectedPair) {
       return await reply(
         m,
-        `_*Masukkan Karakter*_\n> tupai\n> raksasa\n> monster\n> robot\n> bayi\n> kakek\n> alien\n\n` +
-          `Example: _*${prefix + command} tupai*_`
+        `_*Enter a character*_\n> squirrel\n> giant\n> monster\n> robot\n> baby\n> oldman\n> alien\n\n` +
+          `Example: _*${prefix + command} squirrel*_`
       );
     }
 
-    // File output unik untuk ffmpeg
+    // Unique output file for ffmpeg
     const outputPath = path.join(tmpFolder, `voicechanger_${Date.now()}.mp3`);
 
-    // Konversi pitch
+    // Convert pitch
     const audioBuffer = await changePitch(
       mediaPath,
       outputPath,
       selectedPair.pitch
     );
 
-    // Simpan ke file unik untuk kompatibilitas WA
+    // Save to unique file for WA compatibility
     const inputPath = path.join(tmpFolder, `voicechanger2_${Date.now()}.mp3`);
     await fsp.writeFile(inputPath, audioBuffer);
 
-    // Konversi ke format WA kompatibel & kirim
+    // Convert to WA-compatible format & send
     let bufferToSend = audioBuffer;
     try {
       bufferToSend = await convertAudioToCompatibleFormat(inputPath);
@@ -127,14 +127,14 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Hapus file sementara
+    // Delete temporary files
     await Promise.all([
       fsp.unlink(inputPath),
       fsp.unlink(outputPath),
       fsp.unlink(mediaPath),
     ]);
   } catch (error) {
-    console.error("Kesalahan di fungsi handle:", error);
+    console.error("Error in handle function:", error);
     await sock.sendMessage(
       remoteJid,
       { text: `_Error: ${error.message}_` },

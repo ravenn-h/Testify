@@ -6,23 +6,23 @@ async function handle(sock, messageInfo) {
   const domain = "https://www.google.com";
 
   try {
-    // Kondisi pertama: Jika none content, hanya mengembalikan response time lokal
+    // First condition: If no content, return local response time only
     if (!content) {
       const startTime = process.hrtime();
       const endTime = process.hrtime(startTime);
-      const kecepatanResponS = endTime[0] + endTime[1] / 1e9;
+      const responseTimeS = endTime[0] + endTime[1] / 1e9;
 
       await sock.sendMessage(
         remoteJid,
         {
-          text: `⌬ _Response Time :_ ${kecepatanResponS.toFixed(6)} s`,
+          text: `⌬ _Response Time :_ ${responseTimeS.toFixed(6)} s`,
         },
         { quoted: message }
       );
       return;
     }
 
-    // Kondisi kedua: Jika ada content, melakukan ping ke domain
+    // Second condition: If content exists, perform a ping to the domain
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
@@ -30,12 +30,12 @@ async function handle(sock, messageInfo) {
     const startTime = process.hrtime();
     await axios.get(domain);
     const endTime = process.hrtime(startTime);
-    const kecepatanResponS = endTime[0] + endTime[1] / 1e9;
+    const responseTimeS = endTime[0] + endTime[1] / 1e9;
 
     await sock.sendMessage(
       remoteJid,
       {
-        text: `⌬ _Response Time :_ ${kecepatanResponS.toFixed(
+        text: `⌬ _Response Time :_ ${responseTimeS.toFixed(
           6
         )} s\n⌬ _Ping :_ ${domain}`,
       },
@@ -46,11 +46,12 @@ async function handle(sock, messageInfo) {
 
     await sock.sendMessage(
       remoteJid,
-      { text: "Maaf, an error occurred while melakukan ping. Try again later!" },
+      { text: "Sorry, an error occurred while pinging. Try again later!" },
       { quoted: message }
     );
   }
 }
+
 export default {
   handle,
   Commands: ["ping"],

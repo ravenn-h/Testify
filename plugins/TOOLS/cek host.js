@@ -11,7 +11,7 @@ async function handle(sock, messageInfo) {
   const { m, remoteJid, message, prefix, command, content } = messageInfo;
 
   try {
-    // Validasi input
+    // Input validation
     if (!content || !isURL(content)) {
       return await reply(
         m,
@@ -25,7 +25,7 @@ async function handle(sock, messageInfo) {
       react: { text: "⏰", key: message.key },
     });
 
-    // Memeriksa host menggunakan API
+    // Check host using API
     const response = await axios.get("https://check-host.net/check-http", {
       params: {
         host: content,
@@ -38,19 +38,19 @@ async function handle(sock, messageInfo) {
 
     const responseData = response.data;
     if (!responseData.ok) {
-      return await reply(m, "Gagal memeriksa host.");
+      return await reply(m, "Failed to check host.");
     }
 
     const permanentLink = responseData.permanent_link;
 
-    // Inisialisasi dan panggil API Autoresbot
+    // Initialize and call Autoresbot API
     const api = new ApiAutoresbot(config.APIKEY);
     const buffer = await api.getBuffer("/api/ssweb", {
       url: permanentLink,
-      delay: 6000, // 6 detik
+      delay: 6000, // 6 seconds
     });
 
-    // Kirim pesan dengan tangkapan layar
+    // Send message with screenshot
     await sock.sendMessage(
       remoteJid,
       {
@@ -60,9 +60,9 @@ async function handle(sock, messageInfo) {
       { quoted: message }
     );
   } catch (error) {
-    console.error("Kesalahan dalam fungsi handle:", error);
+    console.error("Error in handle function:", error);
 
-    const errorMessage = error.message || "An error occurred tak dikenal.";
+    const errorMessage = error.message || "An unknown error occurred.";
     return await sock.sendMessage(
       remoteJid,
       { text: `_Error: ${errorMessage}_` },
@@ -70,9 +70,10 @@ async function handle(sock, messageInfo) {
     );
   }
 }
+
 export default {
   handle,
-  Commands: ["cekhost"],
+  Commands: ["checkhost"],
   OnlyPremium: false,
   OnlyOwner: false,
 };

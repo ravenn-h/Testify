@@ -4,7 +4,7 @@ async function handle(sock, messageInfo) {
   const { m, remoteJid, message, prefix, command, content } = messageInfo;
 
   try {
-    // Validasi input
+    // Input validation
     if (!content) {
       return await reply(
         m,
@@ -14,32 +14,32 @@ async function handle(sock, messageInfo) {
       );
     }
 
-    // Validasi link grup WhatsApp
+    // Validate WhatsApp group link
     const regex = /https:\/\/chat\.whatsapp\.com\/([\w\d]+)/;
     const match = content.match(regex);
     if (!match || !match[1]) {
       return await reply(
         m,
-        `_❌ Link grup not valid. Make sure link seperti ini:_\nhttps://chat.whatsapp.com/xxxxxxxxxxxxxxxx`
+        `_❌ Invalid group link. Make sure the link looks like this:_\nhttps://chat.whatsapp.com/xxxxxxxxxxxxxxxx`
       );
     }
 
     const inviteCode = match[1];
 
-    // Ambil informasi grup tanpa join
+    // Get group information without joining
     const groupInfo = await sock.groupGetInviteInfo(inviteCode);
 
     const info = [
-      `🆔 ID Grup: ${groupInfo.id}`,
-      `📛 Nama: ${groupInfo.subject}`,
-      `👥 Jumlah Member: ${groupInfo.size}`,
+      `🆔 Group ID: ${groupInfo.id}`,
+      `📛 Name: ${groupInfo.subject}`,
+      `👥 Members Count: ${groupInfo.size}`,
     ].join("\n");
 
-    return await reply(m, `_✅ Informasi Grup:_\n${info}`);
+    return await reply(m, `_✅ Group Information:_\n${info}`);
   } catch (error) {
-    console.error("Kesalahan di fungsi handle:", error);
+    console.error("Error in handle function:", error);
 
-    const errorMessage = error.message || "An error occurred tak dikenal.";
+    const errorMessage = error.message || "An unknown error occurred.";
     return await sock.sendMessage(
       remoteJid,
       { text: `_❌ Error: ${errorMessage}_` },
@@ -50,7 +50,7 @@ async function handle(sock, messageInfo) {
 
 export default {
   handle,
-  Commands: ["cekidgc"],
+  Commands: ["checkgroupid"],
   OnlyPremium: false,
   OnlyOwner: false,
   limitDeduction: 1,

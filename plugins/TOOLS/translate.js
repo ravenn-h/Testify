@@ -13,38 +13,39 @@ async function handle(sock, messageInfo) {
       m,
       `_⚠️ Usage format:_ \n\n_💬 Example:_ _*${
         prefix + command
-      } aku dari indonesia*_`
+      } i am from indonesia*_`
     );
     return;
   }
 
   try {
-    // Tampilkan reaksi saat proses berlangsung
+    // Show reaction while processing
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
-    // Inisialisasi API
+    // Initialize API
     const api = new ApiAutoresbot(config.APIKEY);
 
-    // Jalankan dua permintaan API secara paralel
+    // Run two API requests in parallel
     const [data1, data2] = await Promise.all([
       api.get("/api/translate/en-id", { text: content }),
       api.get("/api/translate/id-en", { text: content }),
     ]);
 
-    // Kirim hasil terjemahan
+    // Send translation results
     await reply(m, `◧ Indonesia: ${data1.data}\n\n◧ English: ${data2.data}`);
   } catch (error) {
     console.error("Error in translation handler:", error);
     logCustom("info", content, `ERROR-COMMAND-${command}.txt`);
     await sock.sendMessage(
       remoteJid,
-      { text: "Maaf, an error occurred. Try again later!" },
+      { text: "Sorry, an error occurred. Try again later!" },
       { quoted: message }
     );
   }
 }
+
 export default {
   handle,
   Commands: ["ts", "translate"],

@@ -7,25 +7,25 @@ import { isOwner, isPremiumUser } from "../lib/users.js";
 import fs from "fs/promises";
 import path from "path";
 
-// konstanta
+// constants
 const linkGroup = "https://chat.whatsapp.com/JeijvuGffXh8rjicZkCSzy?mode=hqrt2";
 const AUDIO_MENU = true;
-const soundPagi = "pagi.opus";
-const soundSiang = "siang.opus";
-const soundSore = "sore.opus";
-const soundPetang = "petang.opus";
-const soundMalam = "malam.opus"; // ./database/audio
+const soundMorning = "pagi.opus";
+const soundNoon = "siang.opus";
+const soundAfternoon = "sore.opus";
+const soundEvening = "petang.opus";
+const soundNight = "malam.opus"; // ./database/audio
 
 async function getGreeting() {
   const now = new Date();
   const wibHours = (now.getUTCHours() + 7) % 24;
 
   let fileName;
-  if (wibHours >= 5 && wibHours <= 10) fileName = soundPagi;
-  else if (wibHours >= 11 && wibHours < 15) fileName = soundSiang;
-  else if (wibHours >= 15 && wibHours <= 18) fileName = soundSore;
-  else if (wibHours > 18 && wibHours <= 19) fileName = soundPetang;
-  else fileName = soundMalam;
+  if (wibHours >= 5 && wibHours <= 10) fileName = soundMorning;
+  else if (wibHours >= 11 && wibHours < 15) fileName = soundNoon;
+  else if (wibHours >= 15 && wibHours <= 18) fileName = soundAfternoon;
+  else if (wibHours > 18 && wibHours <= 19) fileName = soundEvening;
+  else fileName = soundNight;
 
   try {
     return await fs.readFile(
@@ -58,12 +58,11 @@ async function handle(sock, messageInfo) {
     ? "Owner"
     : isPremiumUser(sender)
     ? "Premium"
-    : "user";
+    : "User";
 
   const date = getCurrentDate();
   const category = (content || "").toLowerCase();
 
-  // --- make sure menu sudah ter-load ---
   const menuData = await loadMenuOnce();
 
   let response;
@@ -73,21 +72,21 @@ async function handle(sock, messageInfo) {
     response = formatMenu(category.toUpperCase(), menuData[category]);
     result = await reply(m, style(response) || "Failed to apply style.");
   } else if (command === "menu") {
-    response = `╭──『 *MENU UTAMA* 』
-${Object.keys(menu)
+    response = `╭──『 *MAIN MENU* 』
+${Object.keys(menuData)
   .map((key) => `├ ${key}`)
   .join("\n")}
 ╰───────────❒`;
     result = await reply(m, style(response) || "Failed to apply style.");
   } else if (command === "allmenu") {
     response = `Hello, ${pushName || "Unknown"}
-Vellyn multidevice adalah sistem cerdas yang mampu melakukan tugas, pencarian, serta pengambilan data atau informasi secara langsung melalui WhatsApp.
+Vellyn multidevice is an intelligent system capable of performing tasks, searching, and retrieving data or information directly via WhatsApp.
 
 > 𖥔 ︳ᴄʀᴇᴀᴛᴏʀ : ᴋᴀʀᴛʟᴢʏ ᴅɪɢɪᴛᴀʟ
-> 𖥔 ︳ɴᴀᴍᴀ ʙᴏᴛ : ᴠᴇʟʟʏɴ-ᴍᴜʟᴛɪᴅᴇᴠɪᴄᴇ
-> 𖥔 ︳ᴛᴀɴɢɢᴀʟ : ${date}
-> 𖥔 ︳ʀᴏʟᴇ ᴜꜱᴇʀ : ${roleUser}
-> 𖥔 ︳ᴠᴇʀsɪ : 0.1
+> 𖥔 ︳ʙᴏᴛ ɴᴀᴍᴇ : ᴠᴇʟʟʏɴ-ᴍᴜʟᴛɪᴅᴇᴠɪᴄᴇ
+> 𖥔 ︳ᴅᴀᴛᴇ : ${date}
+> 𖥔 ︳ᴜꜱᴇʀ ʀᴏʟᴇ : ${roleUser}
+> 𖥔 ︳ᴠᴇʀꜱɪᴏɴ : 0.1
 
 ${Object.keys(menuData)
   .map((key) => formatMenu(key.toUpperCase(), menuData[key]))
@@ -117,14 +116,13 @@ ${Object.keys(menuData)
     );
   }
 
-  // Kirim audio jika allmenu atau menu tanpa kategori
   if (command === "allmenu" || (command === "menu" && !category)) {
     if (AUDIO_MENU) {
       const audioBuffer = await getGreeting();
       if (audioBuffer) {
         await sock.sendMessage(
           remoteJid,
-          { audio: audioBuffer, mimetype: "audio/mp4", ptt: true, },
+          { audio: audioBuffer, mimetype: "audio/mp4", ptt: true },
           { quoted: result }
         );
       }

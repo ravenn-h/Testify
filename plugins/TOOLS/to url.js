@@ -31,16 +31,18 @@ async function upload(filePath) {
 async function handle(sock, messageInfo) {
   const { m, remoteJid, message, isQuoted, type, content, prefix, command } =
     messageInfo;
+
   try {
     const mediaType = isQuoted ? isQuoted.type : type;
+
     if (mediaType !== "image" && mediaType !== "sticker") {
       return await reply(
         m,
-        `⚠️ _Kirim/Balas gambar/sticker dengan caption *${prefix + command}*_`
+        `⚠️ _Send/Reply to an image/sticker with caption *${prefix + command}*_`
       );
     }
 
-    // Tampilkan reaksi "Loading"
+    // Show "Loading" reaction
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
@@ -49,30 +51,32 @@ async function handle(sock, messageInfo) {
     const media = isQuoted
       ? await downloadQuotedMedia(message)
       : await downloadMedia(message);
+
     const mediaPath = path.join("tmp", media);
 
     if (!fs.existsSync(mediaPath)) {
-      throw new Error("File media not found setelah diunduh.");
+      throw new Error("Media file not found after download.");
     }
 
     const result = await upload(mediaPath);
 
     await reply(
       m,
-      `_✅ Upload sukses!_
+      `_✅ Upload successful!_
 📎 *Link*: ${result.data.url}
             
-_File ini akan otomatis kadaluarsa 1 minggu setelah diunggah. Namun, jika file diakses lagi sebelum kadaluarsa, masa aktifnya akan otomatis diperpanjang 1 minggu ke depan._`
+_This file will automatically expire 1 week after upload. However, if the file is accessed again before expiration, its active period will be extended by 1 more week._`
     );
   } catch (error) {
     console.error("Error in translation handler:", error);
     await sock.sendMessage(
       remoteJid,
-      { text: "Maaf, an error occurred. Try again later!" },
+      { text: "Sorry, an error occurred. Try again later!" },
       { quoted: message }
     );
   }
 }
+
 export default {
   handle,
   Commands: ["tourl"],

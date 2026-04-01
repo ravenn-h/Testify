@@ -4,28 +4,28 @@ async function handle(sock, messageInfo) {
   const { m, remoteJid, message, prefix, command, content } = messageInfo;
 
   try {
-    // Cek jika none input
+    // Check if input is empty
     if (!content || !content.trim()) {
       return await reply(
         m,
         `_⚠️ Usage format:_\n\n📌 *${
           prefix + command
-        } <nomor>*\n\n💬 *Example:* ${prefix + command} 6281234567890`
+        } <number>*\n\n💬 *Example:* ${prefix + command} 6281234567890`
       );
     }
 
-    // Ambil dan bersihkan input
+    // Get and clean input
     let phoneNumber = content.trim().replace(/[^0-9]/g, "");
 
-    // Validasi nomor HP internasional
+    // Validate international phone number
     if (!/^\d{10,15}$/.test(phoneNumber)) {
       return await reply(
         m,
-        `_❌ Nomor not valid._\nMake sure menggunakan format internasional tanpa + atau karakter lain. Example: 6281234567890`
+        `_❌ Invalid number._\nMake sure to use international format without + or other characters. Example: 6281234567890`
       );
     }
 
-    // Make sure JID WhatsApp valid
+    // Ensure valid WhatsApp JID
     const userJid = phoneNumber.includes("@s.whatsapp.net")
       ? phoneNumber
       : `${phoneNumber}@s.whatsapp.net`;
@@ -35,17 +35,17 @@ async function handle(sock, messageInfo) {
     if (result?.[0]?.exists) {
       return await reply(
         m,
-        `✅ _Nomor *${phoneNumber}* terdaftar di WhatsApp._`
+        `✅ _Number *${phoneNumber}* is registered on WhatsApp._`
       );
     } else {
       return await reply(
         m,
-        `❌ _Nomor *${phoneNumber}* not found di WhatsApp._`
+        `❌ _Number *${phoneNumber}* not found on WhatsApp._`
       );
     }
   } catch (error) {
-    console.error("Kesalahan di fungsi handle:", error);
-    const errorMessage = error?.message || "An error occurred tak dikenal.";
+    console.error("Error in handle function:", error);
+    const errorMessage = error?.message || "An unknown error occurred.";
     return await sock.sendMessage(
       remoteJid,
       { text: `_⚠️ Error: ${errorMessage}_` },

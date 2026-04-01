@@ -17,7 +17,7 @@ async function handle(sock, messageInfo) {
   const { remoteJid, message, prefix, command, content } = messageInfo;
 
   try {
-    // Validasi input
+    // Input validation
     if (!content.trim() || content.trim() == "") {
       return sendMessageWithQuote(
         sock,
@@ -35,31 +35,31 @@ async function handle(sock, messageInfo) {
 
     const api = new ApiAutoresbot(config.APIKEY);
 
-    // Memanggil API dengan parameter
+    // Call API with parameters
     const response = await api.get("/api/stalker/ip", {
       ip: content,
     });
 
     if (response && response.data) {
-      // Mengubah data menjadi string
-      const responseDataString = JSON.stringify(response.data, null, 2); // null dan 2 untuk format yang lebih rapi
+      // Convert data to string (formatted)
+      const responseDataString = JSON.stringify(response.data, null, 2);
       return await sock.sendMessage(
         remoteJid,
         { text: `${responseDataString}` },
         { quoted: message }
       );
     } else {
-      // Jika none data
+      // If no data found
       return await sock.sendMessage(
         remoteJid,
-        { text: "No data yang ditemukan dari API." },
+        { text: "No data found from the API." },
         { quoted: message }
       );
     }
   } catch (error) {
-    console.error("Kesalahan di fungsi handle:", error);
+    console.error("Error in handle function:", error);
 
-    const errorMessage = error.message || "An error occurred tak dikenal.";
+    const errorMessage = error.message || "An unknown error occurred.";
     return await sock.sendMessage(
       remoteJid,
       { text: `_Error: ${errorMessage}_` },

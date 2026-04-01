@@ -5,7 +5,7 @@ async function handle(sock, messageInfo) {
   const { m, remoteJid, message, prefix, command, content } = messageInfo;
 
   try {
-    // Validasi input
+    // Input validation
     if (!content || !content.includes("github.com")) {
       return await reply(
         m,
@@ -16,33 +16,33 @@ async function handle(sock, messageInfo) {
     }
 
     if (!isURL(content)) {
-      return await reply(m, `_Link not valid_`);
+      return await reply(m, `_Invalid link_`);
     }
 
-    // Berikan reaksi saat proses berlangsung
+    // React while processing
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
 
-    // Ekstrak informasi user dan repositori dari URL
+    // Extract user and repository info from URL
     const regex =
       /(?:https|git)(?::\/\/|@)github\.com[/:]([^\/]+)\/([^\/]+)(?:\.git)?$/i;
     const match = content.match(regex);
 
     if (!match) {
-      return await reply(m, `_URL not valid untuk repositori GitHub_`);
+      return await reply(m, `_Invalid URL_`);
     }
 
     let [, user, repo] = match;
     repo = repo.replace(/.git$/, "");
     const url = `https://api.github.com/repos/${user}/${repo}/zipball`;
 
-    // Ambil nama file dari header respons
+    // Get filename from response headers
     const response = await fetch(url, { method: "HEAD" });
     if (!response.ok) {
       return await reply(
         m,
-        `_Gagal mengambil repositori GitHub. Periksa URL atau try again later._`
+        `_Failed to fetch GitHub repository. Check the URL or try again later._`
       );
     }
 
@@ -52,7 +52,7 @@ async function handle(sock, messageInfo) {
     );
     const filename = filenameMatch ? filenameMatch[1] : `${repo}.zip`;
 
-    // Kirim file sebagai dokumen
+    // Send file as document
     await sock.sendMessage(
       remoteJid,
       {
@@ -63,8 +63,8 @@ async function handle(sock, messageInfo) {
       { quoted: message }
     );
   } catch (error) {
-    console.error("Kesalahan di fungsi handle:", error);
-    const errorMessage = error.message || "An error occurred tak dikenal.";
+    console.error("Error in handle function:", error);
+    const errorMessage = error.message || "An unknown error occurred.";
     return await reply(m, `_Error: ${errorMessage}_`);
   }
 }

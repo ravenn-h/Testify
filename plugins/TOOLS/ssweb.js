@@ -20,7 +20,7 @@ async function handle(sock, messageInfo) {
   const { remoteJid, message, prefix, command, content } = messageInfo;
 
   try {
-    // Validasi input
+    // Input validation
     if (!content.trim() || content.trim() == "" || !isURL(content)) {
       return sendMessageWithQuote(
         sock,
@@ -36,13 +36,13 @@ async function handle(sock, messageInfo) {
       react: { text: "⏰", key: message.key },
     });
 
-    // Inisialisasi API
+    // Initialize API
     const api = new ApiAutoresbot(config.APIKEY);
 
-    // Memanggil API dengan parameter
+    // Call API with parameters
     const buffer = await api.getBuffer("/api/ssweb", {
       url: content,
-      delay: 6000, // 6 detik
+      delay: 6000, // 6 seconds
     });
 
     await sock.sendMessage(
@@ -54,10 +54,10 @@ async function handle(sock, messageInfo) {
       { quoted: message }
     );
   } catch (error) {
-    console.error("Kesalahan di fungsi handle:", error);
+    console.error("Error in handle function:", error);
     logCustom("info", content, `ERROR-COMMAND-${command}.txt`);
 
-    const errorMessage = error.message || "An error occurred tak dikenal.";
+    const errorMessage = error.message || "An unknown error occurred.";
     return await sock.sendMessage(
       remoteJid,
       { text: `_Error: ${errorMessage}_` },

@@ -15,8 +15,9 @@ async function handle(sock, messageInfo) {
 
   try {
     const mediaType = isQuoted ? isQuoted.type : type;
+
     if (mediaType === "image") {
-      // Tampilkan reaksi "Loading"
+      // Show "Loading" reaction
       await sock.sendMessage(remoteJid, {
         react: { text: "⏰", key: message.key },
       });
@@ -26,8 +27,9 @@ async function handle(sock, messageInfo) {
         : await downloadMedia(message);
 
       const mediaPath = path.join("tmp", media);
+
       if (!fs.existsSync(mediaPath)) {
-        throw new Error("File media not found setelah diunduh.");
+        throw new Error("Media file not found after download.");
       }
 
       const api = new ApiAutoresbot(config.APIKEY);
@@ -36,6 +38,7 @@ async function handle(sock, messageInfo) {
       if (!response || response.code !== 200) {
         throw new Error("File upload failed or no URL available.");
       }
+
       const url = response.data.url;
 
       const buffer = await api.getBuffer("/api/tools/removebg", { url });
@@ -52,7 +55,7 @@ async function handle(sock, messageInfo) {
       return await sock.sendMessage(
         remoteJid,
         {
-          text: `⚠️ _Kirim/Balas gambar dengan caption *${prefix + command}*_`,
+          text: `⚠️ _Send/Reply to an image with caption *${prefix + command}*_`,
         },
         { quoted: message }
       );
@@ -60,7 +63,7 @@ async function handle(sock, messageInfo) {
   } catch (error) {
     await sock.sendMessage(
       remoteJid,
-      { text: "Maaf, an error occurred. Try again later!" },
+      { text: "Sorry, an error occurred. Try again later!" },
       { quoted: message }
     );
   }

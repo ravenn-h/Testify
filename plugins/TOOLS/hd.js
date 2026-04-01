@@ -13,14 +13,15 @@ async function handle(sock, messageInfo) {
 
   try {
     const mediaType = isQuoted ? isQuoted.type : type;
+
     if (mediaType !== "image") {
       return await reply(
         m,
-        `⚠️ _Kirim/Balas gambar dengan caption *${prefix + command}*_`
+        `⚠️ _Send/Reply to an image with caption *${prefix + command}*_`
       );
     }
 
-    // Tampilkan reaksi "Loading"
+    // Show "Loading" reaction
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
@@ -29,10 +30,11 @@ async function handle(sock, messageInfo) {
     const media = isQuoted
       ? await downloadQuotedMedia(message)
       : await downloadMedia(message);
+
     const mediaPath = path.join("tmp", media);
 
     if (!fs.existsSync(mediaPath)) {
-      throw new Error("File media not found setelah diunduh.");
+      throw new Error("Media file not found after download.");
     }
 
     const api = new ApiAutoresbot(config.APIKEY);
@@ -41,6 +43,7 @@ async function handle(sock, messageInfo) {
     if (!response || response.code !== 200) {
       throw new Error("File upload failed or no URL available.");
     }
+
     const url = response.data.url;
     const MediaBuffer = await api.getBuffer("/api/tools/remini", { url });
 
@@ -58,19 +61,19 @@ async function handle(sock, messageInfo) {
         { quoted: message }
       );
     } else {
-      const errorMessage = `_An error occurred while upload ke gambar._ \n\nERROR : ${error}`;
+      const errorMessage = `_An error occurred while uploading the image._ \n\nERROR : ${error}`;
       await reply(m, errorMessage);
     }
   } catch (error) {
-    // Kirim pesan kesalahan yang lebih informatif
-    const errorMessage = `_An error occurred while processing gambar._ \n_Periksa apikey anda ketik .apikey_\n\nERROR : ${error}`;
+    // Send more informative error message
+    const errorMessage = `_An error occurred while processing the image._ \n_Check your API key by typing .apikey_\n\nERROR : ${error}`;
     await reply(m, errorMessage);
   }
 }
 
 export default {
   handle,
-  Commands: ["hd", "remini"], // Perintah yang diproses oleh handler ini
+  Commands: ["hd", "remini"], // Commands handled by this handler
   OnlyPremium: false,
   OnlyOwner: false,
 };

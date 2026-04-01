@@ -14,7 +14,7 @@ async function handle(sock, messageInfo) {
   if (mediaType !== "audio") {
     return await reply(
       m,
-      `⚠️ _Balas Audio dengan caption *${prefix + command}*_`
+      `⚠️ _Reply to an audio with caption *${prefix + command}*_`
     );
   }
 
@@ -29,14 +29,14 @@ async function handle(sock, messageInfo) {
 
   const mediaPath = path.join("tmp", media);
   if (!fs.existsSync(mediaPath)) {
-    throw new Error("File media not found setelah diunduh.");
+    throw new Error("Media file not found after download.");
   }
 
-  const baseDir = process.cwd(); // Menggunakan direktori kerja at this time
-  const inputPath = path.join(baseDir, mediaPath); // File asli
+  const baseDir = process.cwd(); // Using current working directory
+  const inputPath = path.join(baseDir, mediaPath); // Original file
 
   try {
-    // Make sure folder tmp ada
+    // Make sure tmp folder exists
     if (!fs.existsSync(path.join(baseDir, "tmp"))) {
       fs.mkdirSync(path.join(baseDir, "tmp"), { recursive: true });
     }
@@ -47,14 +47,14 @@ async function handle(sock, messageInfo) {
       remoteJid,
       {
         audio: { url: output },
-        mimetype: "audio/mp4", // Tetap gunakan audio/mp4 untuk M4A
+        mimetype: "audio/mp4", // Keep using audio/mp4 for M4A
       },
       { quoted: message }
     );
   } catch (error) {
-    console.error("Error saat sending audio:", error);
+    console.error("Error while sending audio:", error);
 
-    const errorMessage = `Maaf, an error occurred while processing your request. Please try again later.\n\nError Details: ${
+    const errorMessage = `Sorry, an error occurred while processing your request. Please try again later.\n\nError Details: ${
       error.message || error
     }`;
     await sendMessageWithQuote(sock, remoteJid, message, errorMessage);

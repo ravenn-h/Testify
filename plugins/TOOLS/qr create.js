@@ -6,7 +6,7 @@ import { reply } from "../../lib/utils.js";
 async function handle(sock, messageInfo) {
   const { m, remoteJid, message, prefix, command, content } = messageInfo;
 
-  // Validasi input
+  // Input validation
   if (!content) {
     return await reply(
       m,
@@ -20,12 +20,12 @@ async function handle(sock, messageInfo) {
     });
 
     const resultQr = await qrcode.toDataURL(content, { scale: 8 });
-    const buffer = new Buffer.from(
+    const buffer = Buffer.from(
       resultQr.replace("data:image/png;base64,", ""),
       "base64"
     );
 
-    // Kirim pesan dengan tangkapan layar
+    // Send QR image
     await sock.sendMessage(
       remoteJid,
       {
@@ -35,9 +35,9 @@ async function handle(sock, messageInfo) {
       { quoted: message }
     );
   } catch (error) {
-    console.error("Kesalahan dalam fungsi handle:", error);
+    console.error("Error in handle function:", error);
 
-    const errorMessage = error.message || "An error occurred tak dikenal.";
+    const errorMessage = error.message || "An unknown error occurred.";
     return await sock.sendMessage(
       remoteJid,
       { text: `_Error: ${errorMessage}_` },
@@ -45,6 +45,7 @@ async function handle(sock, messageInfo) {
     );
   }
 }
+
 export default {
   handle,
   Commands: ["createqr"],

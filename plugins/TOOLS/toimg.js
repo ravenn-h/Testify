@@ -25,14 +25,16 @@ async function handle(sock, messageInfo) {
 
       const mediaPath = path.join("tmp", media);
       if (!fs.existsSync(mediaPath)) {
-        throw new Error("File media not found setelah diunduh.");
+        throw new Error("Media file not found after download.");
       }
+
       const api = new ApiAutoresbot(config.APIKEY);
       const response = await api.tmpUpload(mediaPath);
 
       if (!response || response.code !== 200) {
         throw new Error("File upload failed or no URL available.");
       }
+
       const url = response.data.url;
       const buffer = await api.getBuffer("/api/convert/giftoimage", { url });
 
@@ -48,7 +50,7 @@ async function handle(sock, messageInfo) {
       return await sock.sendMessage(
         remoteJid,
         {
-          text: `⚠️ _Kirim/Balas sticker dengan caption *${prefix + command}*_`,
+          text: `⚠️ _Send/Reply to a sticker with caption *${prefix + command}*_`,
         },
         { quoted: message }
       );
@@ -57,11 +59,12 @@ async function handle(sock, messageInfo) {
     console.log(error);
     await sock.sendMessage(
       remoteJid,
-      { text: "Maaf, an error occurred. Try again later!" },
+      { text: "Sorry, an error occurred. Try again later!" },
       { quoted: message }
     );
   }
 }
+
 export default {
   handle,
   Commands: ["toimg"],

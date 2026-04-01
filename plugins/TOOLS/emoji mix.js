@@ -6,52 +6,53 @@ import config from "../../config.js";
 
 async function handle(sock, messageInfo) {
   const { m, remoteJid, message, prefix, command, content } = messageInfo;
-
+  
   try {
-    // Validasi input
+    // Input validation
     if (!content || !content.includes("+")) {
       return await reply(m, `_*Example:*_ ${prefix + command} 😅+🤔`);
     }
-
+    
     let [emoji1, emoji2] = content.split("+").map((e) => e.trim());
     if (!emoji1 || !emoji2) {
       return await reply(m, `_*Example:*_ ${prefix + command} 😅+🤔`);
     }
-
+    
     await sock.sendMessage(remoteJid, {
       react: { text: "⏰", key: message.key },
     });
-
-    // Ambil data dari API Emoji Kitchen
-
+    
+    // Fetch data from Emoji Kitchen API
     const apiResponse = await fetchJson(
       `https://tenor.googleapis.com/v2/featured?key=AIzaSyAyimkuYQYF_FXVALexPuGQctUWRURdCYQ&contentfilter=high&media_filter=png_transparent&component=proactive&collection=emoji_kitchen_v5&q=${encodeURIComponent(
         emoji1.trim()
       )}_${encodeURIComponent(emoji2.trim())}`
     );
-
+    
     if (
       !apiResponse ||
       !apiResponse.results ||
       apiResponse.results.length === 0
     ) {
       throw new Error(
-        `Not found hasil untuk kombinasi emoji ${emoji1} dan ${emoji2}.`
+        `No results found for emoji combination ${emoji1} and ${emoji2}.`
       );
     }
+    
     const imageUrl = apiResponse.results[0].url;
     const imageBuffer = await getBuffer(imageUrl);
     const webpBuffer = await sharp(imageBuffer).webp().toBuffer();
-
-    // Kirim stiker
+    
+    // Send sticker
     const options = {
       packname: config.sticker_packname,
       author: config.sticker_author,
     };
+    
     await sendImageAsSticker(sock, remoteJid, webpBuffer, options, message);
   } catch (error) {
-    console.error("Kesalahan di fungsi handle:", error);
-    const errorMessage = error.message || "An error occurred tak dikenal.";
+    console.error("Error in handle function:", error);
+    const errorMessage = error.message || "An unknown error occurred.";
     return await reply(m, `_Error: ${errorMessage}_`);
   }
 }
